@@ -2,7 +2,7 @@ use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
 use std::sync::OnceLock;
 
-const CATALOG_JSON: &str = include_str!("../../../../src/assets/workouts/catalog.json");
+const CATALOG_JSON: &str = include_str!("../assets/workouts/catalog.json");
 
 #[derive(Debug, Deserialize)]
 struct CatalogDocument {
