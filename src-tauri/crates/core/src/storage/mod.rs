@@ -167,7 +167,6 @@ pub use meta::OfficialSyncAttempt;
 pub mod metric_prefs;
 mod metric_spec;
 mod metrics;
-pub mod my_records;
 mod official;
 mod open;
 mod owner;

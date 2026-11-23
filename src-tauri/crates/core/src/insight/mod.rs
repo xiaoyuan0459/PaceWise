@@ -7,7 +7,6 @@ use chrono::{DateTime, Duration, Local, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 
 pub mod anomaly;
-pub mod letters;
 mod weekly_report;
 mod workout_insight;
 

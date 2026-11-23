@@ -385,10 +385,6 @@ fn a_local_import_survives_two_corrections_and_undo() {
             .unwrap();
     }
     assert!(db.get_workout_series(&id).unwrap().route.is_empty());
-    let records = db.export_my_records(start).unwrap();
-    assert!(records["tables"]["workout_fit_overrides"][0]
-        .get("original_series_json")
-        .is_none());
     assert!(db.remove_workout_fit(&id).unwrap());
     assert_eq!(
         serde_json::to_value(db.get_workout_series(&id).unwrap()).unwrap(),

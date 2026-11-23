@@ -2,7 +2,7 @@
 
 [English](device-catalog.md)
 
-`src/assets/devices/catalog.json` 由
+`src-tauri/crates/core/assets/devices/catalog.json` 由
 [`scripts/assets/build-device-catalog.py`](../../scripts/assets/build-device-catalog.py)
 生成并编进应用。共 66 条：65 条是 `active`/`supported`，覆盖 63 个标准型号键；
 Helio Armband 只为留存来源列出，标为 `status=accessory`、`supported=false`。里面的日期各指一件事：
@@ -37,7 +37,7 @@ Helio Armband 只为留存来源列出，标为 `status=accessory`、`supported=
 3.1.1 之前，编号来自用户在应用里手动指认、并选择分享出来的型号。这条上报已经删掉；
 当时收下、官方表里没有的那一小批（Helio Strap / Strap Pro / Ring、Balance 2 XT、
 Balance 2 的 `10486017` 等）**冻结保留**，不再增加。现在反馈报告只带「目录认不出的
-`deviceSource` 编号」，用来发现官方表更新了什么，工具见[反馈分拣](../../scripts/feedback/README.md)。
+`deviceSource` 编号」，用来发现官方表更新了什么。
 
 规则由
 [`scripts/assets/build-device-catalog.py`](../../scripts/assets/build-device-catalog.py)
@@ -58,7 +58,7 @@ Balance 2 的 `10486017` 等）**冻结保留**，不再增加。现在反馈报
 
 ## 本地图片与授权
 
-有图的条目都对应 [`src/assets/devices/`](../../src/assets/devices/) 下的一张 RGBA WebP 和一张
+有图的条目都对应 [`src-tauri/crates/core/assets/devices/`](../../src-tauri/crates/core/assets/devices/) 下的一张 RGBA WebP 和一张
 `-thumb.webp`；没图的用占位图。`catalog.json` 里的 `asset_hash` 是随包 WebP 的 SHA-256。
 `src/lib/deviceCatalog.ts` 用 `import.meta.glob` 找文件。运行时不外链任何图片。
 
