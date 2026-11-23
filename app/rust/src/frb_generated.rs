@@ -39,7 +39,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.13.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -91253297;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 529569973;
 
 // Section: executor
 
@@ -431,6 +431,41 @@ fn wire__crate__api__app__recovery_days_impl(
         },
     )
 }
+fn wire__crate__api__app__sync_official_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "sync_official",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_days = <i64>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok = crate::api::app::sync_official(api_days)?;
+                        std::result::Result::Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
 
 // Section: dart2rust
 
@@ -569,6 +604,20 @@ impl SseDecode for Vec<crate::api::app::RecoveryDayDto> {
     }
 }
 
+impl SseDecode for Vec<crate::api::app::SyncStreamSummaryDto> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut len_ = <i32>::sse_decode(deserializer);
+        let mut ans_ = Vec::with_capacity(len_ as usize);
+        for idx_ in 0..len_ {
+            ans_.push(<crate::api::app::SyncStreamSummaryDto>::sse_decode(
+                deserializer,
+            ));
+        }
+        return ans_;
+    }
+}
+
 impl SseDecode for Vec<crate::api::app::TrendPointDto> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -702,6 +751,43 @@ impl SseDecode for crate::api::app::RecoveryDayDto {
     }
 }
 
+impl SseDecode for crate::api::app::SyncReportSummaryDto {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_success = <bool>::sse_decode(deserializer);
+        let mut var_coreOk = <bool>::sse_decode(deserializer);
+        let mut var_recordsWritten = <i64>::sse_decode(deserializer);
+        let mut var_message = <Option<String>>::sse_decode(deserializer);
+        let mut var_cleanupFailed = <bool>::sse_decode(deserializer);
+        let mut var_streams =
+            <Vec<crate::api::app::SyncStreamSummaryDto>>::sse_decode(deserializer);
+        return crate::api::app::SyncReportSummaryDto {
+            success: var_success,
+            core_ok: var_coreOk,
+            records_written: var_recordsWritten,
+            message: var_message,
+            cleanup_failed: var_cleanupFailed,
+            streams: var_streams,
+        };
+    }
+}
+
+impl SseDecode for crate::api::app::SyncStreamSummaryDto {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_stream = <String>::sse_decode(deserializer);
+        let mut var_status = <String>::sse_decode(deserializer);
+        let mut var_recordsWritten = <i64>::sse_decode(deserializer);
+        let mut var_message = <Option<String>>::sse_decode(deserializer);
+        return crate::api::app::SyncStreamSummaryDto {
+            stream: var_stream,
+            status: var_status,
+            records_written: var_recordsWritten,
+            message: var_message,
+        };
+    }
+}
+
 impl SseDecode for crate::api::app::TrendPointDto {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -757,6 +843,7 @@ fn pde_ffi_dispatcher_primary_impl(
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
         6 => wire__crate__api__app__init_app_impl(port, ptr, rust_vec_len, data_len),
+        13 => wire__crate__api__app__sync_official_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -946,6 +1033,54 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::app::RecoveryDayDto>
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::app::SyncReportSummaryDto {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.success.into_into_dart().into_dart(),
+            self.core_ok.into_into_dart().into_dart(),
+            self.records_written.into_into_dart().into_dart(),
+            self.message.into_into_dart().into_dart(),
+            self.cleanup_failed.into_into_dart().into_dart(),
+            self.streams.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::app::SyncReportSummaryDto
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::app::SyncReportSummaryDto>
+    for crate::api::app::SyncReportSummaryDto
+{
+    fn into_into_dart(self) -> crate::api::app::SyncReportSummaryDto {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::app::SyncStreamSummaryDto {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.stream.into_into_dart().into_dart(),
+            self.status.into_into_dart().into_dart(),
+            self.records_written.into_into_dart().into_dart(),
+            self.message.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::app::SyncStreamSummaryDto
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::app::SyncStreamSummaryDto>
+    for crate::api::app::SyncStreamSummaryDto
+{
+    fn into_into_dart(self) -> crate::api::app::SyncStreamSummaryDto {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::api::app::TrendPointDto {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
@@ -1071,6 +1206,16 @@ impl SseEncode for Vec<crate::api::app::RecoveryDayDto> {
     }
 }
 
+impl SseEncode for Vec<crate::api::app::SyncStreamSummaryDto> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(self.len() as _, serializer);
+        for item in self {
+            <crate::api::app::SyncStreamSummaryDto>::sse_encode(item, serializer);
+        }
+    }
+}
+
 impl SseEncode for Vec<crate::api::app::TrendPointDto> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -1167,6 +1312,28 @@ impl SseEncode for crate::api::app::RecoveryDayDto {
         <String>::sse_encode(self.date, serializer);
         <Option<i64>>::sse_encode(self.recovery_score, serializer);
         <Option<bool>>::sse_encode(self.fully_recovered, serializer);
+    }
+}
+
+impl SseEncode for crate::api::app::SyncReportSummaryDto {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.success, serializer);
+        <bool>::sse_encode(self.core_ok, serializer);
+        <i64>::sse_encode(self.records_written, serializer);
+        <Option<String>>::sse_encode(self.message, serializer);
+        <bool>::sse_encode(self.cleanup_failed, serializer);
+        <Vec<crate::api::app::SyncStreamSummaryDto>>::sse_encode(self.streams, serializer);
+    }
+}
+
+impl SseEncode for crate::api::app::SyncStreamSummaryDto {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.stream, serializer);
+        <String>::sse_encode(self.status, serializer);
+        <i64>::sse_encode(self.records_written, serializer);
+        <Option<String>>::sse_encode(self.message, serializer);
     }
 }
 

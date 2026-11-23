@@ -70,6 +70,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAccount => 'Account';
 
   @override
+  String get syncNow => 'Sync now';
+
+  @override
+  String get syncing => 'Syncing…';
+
+  @override
+  String get syncDone => 'Sync complete';
+
+  @override
+  String get syncFailed => 'Sync failed';
+
+  @override
+  String get syncWindow90 => 'Last 90 days';
+
+  @override
   String get settingsNotConnected => 'Not connected';
 
   @override

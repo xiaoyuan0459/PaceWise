@@ -8,7 +8,7 @@ import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 // These functions are ignored because they are not marked as `pub`: `core`, `status`, `to_anyhow`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`
 
 AppInfo open({required String dataDir}) =>
     RustLib.instance.api.crateApiAppOpen(dataDir: dataDir);
@@ -26,6 +26,13 @@ AuthPollDto authPoll({required String state, required String claimSecret}) =>
 AuthStatusDto authStatus() => RustLib.instance.api.crateApiAppAuthStatus();
 
 void authDisconnect() => RustLib.instance.api.crateApiAppAuthDisconnect();
+
+/// 从官方接口同步最近 `days` 天；完成后内核会回填分析结果。
+///
+/// 不标记 `frb(sync)`：同步会阻塞数秒，必须由 FRB 放到后台 worker 上，
+/// 不能卡住 Dart 的 UI 线程。
+Future<SyncReportSummaryDto> syncOfficial({required PlatformInt64 days}) =>
+    RustLib.instance.api.crateApiAppSyncOfficial(days: days);
 
 /// 同步完成后或算法版本变化后调用。第一次会回填两年。
 PlatformInt64 recomputeAnalytics({required PlatformInt64 windowDays}) =>
@@ -277,6 +284,76 @@ class RecoveryDayDto {
           date == other.date &&
           recoveryScore == other.recoveryScore &&
           fullyRecovered == other.fullyRecovered;
+}
+
+class SyncReportSummaryDto {
+  final bool success;
+  final bool coreOk;
+  final PlatformInt64 recordsWritten;
+  final String? message;
+  final bool cleanupFailed;
+  final List<SyncStreamSummaryDto> streams;
+
+  const SyncReportSummaryDto({
+    required this.success,
+    required this.coreOk,
+    required this.recordsWritten,
+    this.message,
+    required this.cleanupFailed,
+    required this.streams,
+  });
+
+  @override
+  int get hashCode =>
+      success.hashCode ^
+      coreOk.hashCode ^
+      recordsWritten.hashCode ^
+      message.hashCode ^
+      cleanupFailed.hashCode ^
+      streams.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SyncReportSummaryDto &&
+          runtimeType == other.runtimeType &&
+          success == other.success &&
+          coreOk == other.coreOk &&
+          recordsWritten == other.recordsWritten &&
+          message == other.message &&
+          cleanupFailed == other.cleanupFailed &&
+          streams == other.streams;
+}
+
+class SyncStreamSummaryDto {
+  final String stream;
+  final String status;
+  final PlatformInt64 recordsWritten;
+  final String? message;
+
+  const SyncStreamSummaryDto({
+    required this.stream,
+    required this.status,
+    required this.recordsWritten,
+    this.message,
+  });
+
+  @override
+  int get hashCode =>
+      stream.hashCode ^
+      status.hashCode ^
+      recordsWritten.hashCode ^
+      message.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SyncStreamSummaryDto &&
+          runtimeType == other.runtimeType &&
+          stream == other.stream &&
+          status == other.status &&
+          recordsWritten == other.recordsWritten &&
+          message == other.message;
 }
 
 class TrendPointDto {

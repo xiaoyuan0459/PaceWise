@@ -7,7 +7,8 @@ use std::sync::OnceLock;
 
 use anyhow::{anyhow, Result};
 use zeppbridge_app::{
-    AppCore, AuthPoll, AuthStart, AuthStatus, LoadDay, MetricSummary, RecoveryDay, TrendPoint,
+    AppCore, AuthPoll, AuthStart, AuthStatus, LoadDay, MetricSummary, RecoveryDay,
+    SyncReportSummary, TrendPoint,
 };
 
 static CORE: OnceLock<AppCore> = OnceLock::new();
@@ -63,6 +64,14 @@ pub fn auth_status() -> Result<AuthStatusDto> {
 #[flutter_rust_bridge::frb(sync)]
 pub fn auth_disconnect() -> Result<()> {
     core()?.auth_disconnect().map_err(to_anyhow)
+}
+
+/// 从官方接口同步最近 `days` 天；完成后内核会回填分析结果。
+///
+/// 不标记 `frb(sync)`：同步会阻塞数秒，必须由 FRB 放到后台 worker 上，
+/// 不能卡住 Dart 的 UI 线程。
+pub fn sync_official(days: i64) -> Result<SyncReportSummaryDto> {
+    Ok(core()?.sync_official(days).map_err(to_anyhow)?.into())
 }
 
 /// 同步完成后或算法版本变化后调用。第一次会回填两年。
@@ -195,6 +204,46 @@ impl From<AuthStatus> for AuthStatusDto {
 }
 
 #[derive(Debug, Clone)]
+pub struct SyncStreamSummaryDto {
+    pub stream: String,
+    pub status: String,
+    pub records_written: i64,
+    pub message: Option<String>,
+}
+
+#[derive(Debug, Clone)]
+pub struct SyncReportSummaryDto {
+    pub success: bool,
+    pub core_ok: bool,
+    pub records_written: i64,
+    pub message: Option<String>,
+    pub cleanup_failed: bool,
+    pub streams: Vec<SyncStreamSummaryDto>,
+}
+
+impl From<SyncReportSummary> for SyncReportSummaryDto {
+    fn from(value: SyncReportSummary) -> Self {
+        Self {
+            success: value.success,
+            core_ok: value.core_ok,
+            records_written: value.records_written,
+            message: value.message,
+            cleanup_failed: value.cleanup_failed,
+            streams: value
+                .streams
+                .into_iter()
+                .map(|stream| SyncStreamSummaryDto {
+                    stream: stream.stream,
+                    status: stream.status,
+                    records_written: stream.records_written,
+                    message: stream.message,
+                })
+                .collect(),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct MetricSummaryDto {
     pub window_days: i64,
     pub current_power: Option<f64>,
@@ -306,6 +355,11 @@ mod tests {
         let summary = metric_summary(30).unwrap();
         assert_eq!(summary.workouts, 0);
         assert_eq!(summary.distance_meters, 0.0);
+
+        assert!(
+            sync_official(30).is_err(),
+            "a fresh library has no official authorization"
+        );
 
         assert_eq!(recompute_analytics(30).unwrap(), 0);
         assert!(info().unwrap().analytics_ready);

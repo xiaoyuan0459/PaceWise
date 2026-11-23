@@ -70,6 +70,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<RecoveryDayDto> dco_decode_list_recovery_day_dto(dynamic raw);
 
   @protected
+  List<SyncStreamSummaryDto> dco_decode_list_sync_stream_summary_dto(
+    dynamic raw,
+  );
+
+  @protected
   List<TrendPointDto> dco_decode_list_trend_point_dto(dynamic raw);
 
   @protected
@@ -95,6 +100,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   RecoveryDayDto dco_decode_recovery_day_dto(dynamic raw);
+
+  @protected
+  SyncReportSummaryDto dco_decode_sync_report_summary_dto(dynamic raw);
+
+  @protected
+  SyncStreamSummaryDto dco_decode_sync_stream_summary_dto(dynamic raw);
 
   @protected
   TrendPointDto dco_decode_trend_point_dto(dynamic raw);
@@ -162,6 +173,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  List<SyncStreamSummaryDto> sse_decode_list_sync_stream_summary_dto(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   List<TrendPointDto> sse_decode_list_trend_point_dto(
     SseDeserializer deserializer,
   );
@@ -189,6 +205,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   RecoveryDayDto sse_decode_recovery_day_dto(SseDeserializer deserializer);
+
+  @protected
+  SyncReportSummaryDto sse_decode_sync_report_summary_dto(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  SyncStreamSummaryDto sse_decode_sync_stream_summary_dto(
+    SseDeserializer deserializer,
+  );
 
   @protected
   TrendPointDto sse_decode_trend_point_dto(SseDeserializer deserializer);
@@ -272,6 +298,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_list_sync_stream_summary_dto(
+    List<SyncStreamSummaryDto> self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_list_trend_point_dto(
     List<TrendPointDto> self,
     SseSerializer serializer,
@@ -307,6 +339,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_recovery_day_dto(
     RecoveryDayDto self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_sync_report_summary_dto(
+    SyncReportSummaryDto self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_sync_stream_summary_dto(
+    SyncStreamSummaryDto self,
     SseSerializer serializer,
   );
 

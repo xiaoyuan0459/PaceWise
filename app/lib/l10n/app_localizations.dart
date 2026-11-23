@@ -218,6 +218,36 @@ abstract class AppLocalizations {
   /// **'Account'**
   String get settingsAccount;
 
+  /// No description provided for @syncNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync now'**
+  String get syncNow;
+
+  /// No description provided for @syncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get syncing;
+
+  /// No description provided for @syncDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync complete'**
+  String get syncDone;
+
+  /// No description provided for @syncFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync failed'**
+  String get syncFailed;
+
+  /// No description provided for @syncWindow90.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 90 days'**
+  String get syncWindow90;
+
   /// No description provided for @settingsNotConnected.
   ///
   /// In en, this message translates to:

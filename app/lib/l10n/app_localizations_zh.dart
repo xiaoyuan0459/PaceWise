@@ -70,6 +70,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsAccount => '账号';
 
   @override
+  String get syncNow => '立即同步';
+
+  @override
+  String get syncing => '正在同步…';
+
+  @override
+  String get syncDone => '同步完成';
+
+  @override
+  String get syncFailed => '同步失败';
+
+  @override
+  String get syncWindow90 => '最近 90 天';
+
+  @override
   String get settingsNotConnected => '未连接';
 
   @override

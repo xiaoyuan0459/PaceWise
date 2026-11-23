@@ -775,7 +775,7 @@ danger:      #EF4444
 ### M0 技术验证
 
 - Flutter 空白工程在 Android 真机与 Windows 跑通；
-- `app/rust` 通过 FRB 调通 `open`、`auth_start`、`auth_poll`、`metric_summary`；`sync_now` 随后补；
+- `app/rust` 通过 FRB 调通 `open`、`auth_start`、`auth_poll`、`sync_official`、`metric_summary`；
 - Windows 用现有 Credential Manager，Android 用 `flutter_secure_storage`；
 - 90 天同步在两端各跑一次，记录耗时、内存、包体。
 
@@ -912,7 +912,7 @@ auth_status() -> AuthStatus
 auth_disconnect()
 
 // 同步
-sync_now(days: i32, progress: StreamSink<SyncProgress>) -> SyncReport
+sync_official(days: i64) -> SyncReportSummary   // 同步完成后自动回填分析
 sync_status() -> SyncStatus
 
 // 查询

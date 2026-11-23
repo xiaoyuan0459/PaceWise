@@ -69,7 +69,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.13.0';
 
   @override
-  int get rustContentHash => -91253297;
+  int get rustContentHash => 529569973;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -117,6 +117,10 @@ abstract class RustLibApi extends BaseApi {
 
   List<RecoveryDayDto> crateApiAppRecoveryDays({
     required PlatformInt64 windowDays,
+  });
+
+  Future<SyncReportSummaryDto> crateApiAppSyncOfficial({
+    required PlatformInt64 days,
   });
 }
 
@@ -432,6 +436,36 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TaskConstMeta get kCrateApiAppRecoveryDaysConstMeta =>
       const TaskConstMeta(debugName: "recovery_days", argNames: ["windowDays"]);
 
+  @override
+  Future<SyncReportSummaryDto> crateApiAppSyncOfficial({
+    required PlatformInt64 days,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_i_64(days, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 13,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_sync_report_summary_dto,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiAppSyncOfficialConstMeta,
+        argValues: [days],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiAppSyncOfficialConstMeta =>
+      const TaskConstMeta(debugName: "sync_official", argNames: ["days"]);
+
   @protected
   AnyhowException dco_decode_AnyhowException(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
@@ -560,6 +594,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  List<SyncStreamSummaryDto> dco_decode_list_sync_stream_summary_dto(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>)
+        .map(dco_decode_sync_stream_summary_dto)
+        .toList();
+  }
+
+  @protected
   List<TrendPointDto> dco_decode_list_trend_point_dto(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return (raw as List<dynamic>).map(dco_decode_trend_point_dto).toList();
@@ -643,6 +687,36 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       date: dco_decode_String(arr[0]),
       recoveryScore: dco_decode_opt_box_autoadd_i_64(arr[1]),
       fullyRecovered: dco_decode_opt_box_autoadd_bool(arr[2]),
+    );
+  }
+
+  @protected
+  SyncReportSummaryDto dco_decode_sync_report_summary_dto(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 6)
+      throw Exception('unexpected arr length: expect 6 but see ${arr.length}');
+    return SyncReportSummaryDto(
+      success: dco_decode_bool(arr[0]),
+      coreOk: dco_decode_bool(arr[1]),
+      recordsWritten: dco_decode_i_64(arr[2]),
+      message: dco_decode_opt_String(arr[3]),
+      cleanupFailed: dco_decode_bool(arr[4]),
+      streams: dco_decode_list_sync_stream_summary_dto(arr[5]),
+    );
+  }
+
+  @protected
+  SyncStreamSummaryDto dco_decode_sync_stream_summary_dto(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 4)
+      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+    return SyncStreamSummaryDto(
+      stream: dco_decode_String(arr[0]),
+      status: dco_decode_String(arr[1]),
+      recordsWritten: dco_decode_i_64(arr[2]),
+      message: dco_decode_opt_String(arr[3]),
     );
   }
 
@@ -830,6 +904,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  List<SyncStreamSummaryDto> sse_decode_list_sync_stream_summary_dto(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var len_ = sse_decode_i_32(deserializer);
+    var ans_ = <SyncStreamSummaryDto>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_sync_stream_summary_dto(deserializer));
+    }
+    return ans_;
+  }
+
+  @protected
   List<TrendPointDto> sse_decode_list_trend_point_dto(
     SseDeserializer deserializer,
   ) {
@@ -966,6 +1054,44 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       date: var_date,
       recoveryScore: var_recoveryScore,
       fullyRecovered: var_fullyRecovered,
+    );
+  }
+
+  @protected
+  SyncReportSummaryDto sse_decode_sync_report_summary_dto(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_success = sse_decode_bool(deserializer);
+    var var_coreOk = sse_decode_bool(deserializer);
+    var var_recordsWritten = sse_decode_i_64(deserializer);
+    var var_message = sse_decode_opt_String(deserializer);
+    var var_cleanupFailed = sse_decode_bool(deserializer);
+    var var_streams = sse_decode_list_sync_stream_summary_dto(deserializer);
+    return SyncReportSummaryDto(
+      success: var_success,
+      coreOk: var_coreOk,
+      recordsWritten: var_recordsWritten,
+      message: var_message,
+      cleanupFailed: var_cleanupFailed,
+      streams: var_streams,
+    );
+  }
+
+  @protected
+  SyncStreamSummaryDto sse_decode_sync_stream_summary_dto(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_stream = sse_decode_String(deserializer);
+    var var_status = sse_decode_String(deserializer);
+    var var_recordsWritten = sse_decode_i_64(deserializer);
+    var var_message = sse_decode_opt_String(deserializer);
+    return SyncStreamSummaryDto(
+      stream: var_stream,
+      status: var_status,
+      recordsWritten: var_recordsWritten,
+      message: var_message,
     );
   }
 
@@ -1139,6 +1265,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_list_sync_stream_summary_dto(
+    List<SyncStreamSummaryDto> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_sync_stream_summary_dto(item, serializer);
+    }
+  }
+
+  @protected
   void sse_encode_list_trend_point_dto(
     List<TrendPointDto> self,
     SseSerializer serializer,
@@ -1243,6 +1381,32 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_String(self.date, serializer);
     sse_encode_opt_box_autoadd_i_64(self.recoveryScore, serializer);
     sse_encode_opt_box_autoadd_bool(self.fullyRecovered, serializer);
+  }
+
+  @protected
+  void sse_encode_sync_report_summary_dto(
+    SyncReportSummaryDto self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_bool(self.success, serializer);
+    sse_encode_bool(self.coreOk, serializer);
+    sse_encode_i_64(self.recordsWritten, serializer);
+    sse_encode_opt_String(self.message, serializer);
+    sse_encode_bool(self.cleanupFailed, serializer);
+    sse_encode_list_sync_stream_summary_dto(self.streams, serializer);
+  }
+
+  @protected
+  void sse_encode_sync_stream_summary_dto(
+    SyncStreamSummaryDto self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.stream, serializer);
+    sse_encode_String(self.status, serializer);
+    sse_encode_i_64(self.recordsWritten, serializer);
+    sse_encode_opt_String(self.message, serializer);
   }
 
   @protected

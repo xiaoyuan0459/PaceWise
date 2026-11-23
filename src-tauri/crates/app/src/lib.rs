@@ -7,17 +7,20 @@
 //! 方法名和 DTO 字段保持不变。
 
 use std::path::PathBuf;
+use std::sync::atomic::AtomicBool;
 use std::sync::Mutex;
 
 use chrono::Utc;
 use serde::Serialize;
 
 use zeppbridge_core::models::error::ZeppBridgeError;
+use zeppbridge_core::official::fetch::system_time_zone;
 use zeppbridge_core::official::{
     current_generation, invalidate_pending_logins, AuthorizationRequest, ClaimOutcome,
     OfficialClient, OfficialStore,
 };
 pub use zeppbridge_core::storage::analytics::{LoadDay, MetricSummary, RecoveryDay, TrendPoint};
+use zeppbridge_core::sync::{OfficialMode, OfficialSync, StreamStatus, SyncReport};
 
 use zeppbridge_core::storage::{Database, CURRENT_SCHEMA_VERSION};
 
@@ -88,6 +91,54 @@ pub struct AuthStatus {
     pub nickname: Option<String>,
     pub expires_at: Option<i64>,
     pub needs_reauth: bool,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SyncStreamSummary {
+    pub stream: String,
+    pub status: String,
+    pub records_written: i64,
+    pub message: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SyncReportSummary {
+    pub success: bool,
+    pub core_ok: bool,
+    pub records_written: i64,
+    pub message: Option<String>,
+    pub cleanup_failed: bool,
+    pub streams: Vec<SyncStreamSummary>,
+}
+
+impl From<SyncReport> for SyncReportSummary {
+    fn from(report: SyncReport) -> Self {
+        Self {
+            success: report.success,
+            core_ok: report.core_ok,
+            records_written: report.records_written,
+            message: report.message,
+            cleanup_failed: report.cleanup_failed,
+            streams: report
+                .streams
+                .into_iter()
+                .map(|stream| SyncStreamSummary {
+                    stream: stream.stream,
+                    status: match stream.status {
+                        StreamStatus::Success => "success",
+                        StreamStatus::Failed => "failed",
+                        StreamStatus::Unavailable => "unavailable",
+                        StreamStatus::Unverified => "unverified",
+                    }
+                    .to_string(),
+                    records_written: stream.records_written,
+                    message: stream.message,
+                })
+                .collect(),
+        }
+    }
 }
 
 /// App 的唯一入口。生命周期内持有一个数据库连接和一个 tokio runtime。
@@ -190,6 +241,28 @@ impl AppCore {
         store.disconnect()?;
         invalidate_pending_logins();
         Ok(())
+    }
+
+    /// 从官方接口同步最近 `days` 天，完成后回填分析结果。
+    ///
+    /// 这里另开一条 SQLite 连接：同步要拿跨进程写锁，不能和 UI 的读连接共用
+    /// 同一个 `Database` 句柄。完成后主连接直接读 WAL 里的新数据。
+    pub fn sync_official(&self, days: i64) -> Result<SyncReportSummary, AppError> {
+        let days = days.clamp(1, 3650);
+        let db = Database::open_without_migration(self.data_dir.join("zepp.db"))?;
+        let time_zone = db.device_time_zone()?.unwrap_or_else(system_time_zone);
+        let cancel = std::sync::Arc::new(AtomicBool::new(false));
+        let sync = OfficialSync::new(&self.data_dir, db, cancel, time_zone)?;
+        let mut report = self
+            .runtime
+            .block_on(sync.run(days, OfficialMode::Only, &|_| {}))?;
+        if let Err(error) = self.recompute_analytics(days) {
+            report.message = Some(match report.message {
+                Some(message) => format!("{message}; 分析回填失败：{}", error.message),
+                None => format!("分析回填失败：{}", error.message),
+            });
+        }
+        Ok(report.into())
     }
 
     /// 同步完成或算法版本变化后调用。第一次会回填两年。
