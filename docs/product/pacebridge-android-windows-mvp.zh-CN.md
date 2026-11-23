@@ -354,12 +354,14 @@ App **不读** `raw_records`，也**不读**逐秒采样；训练详情只读内
 1. **稳定段筛选**（逐次训练）：
    - 连续 ≥ 180 秒；
    - 配速变异系数 ≤ 5%，心率变异系数 ≤ 3%；
-   - 坡度变化 ≤ 2%；
+   - 平均坡度在 ±12% 以内；
    - 最多取总时长最长的 3 段。
 2. **坡度补偿配速**：
 
    ```text
-   pace_gap = pace - k_up × grade_pos + k_down × grade_neg
+   grade_up   = max(grade, 0)
+   grade_down = max(-grade, 0)
+   pace_gap   = pace - k_up × grade_up + k_down × grade_down
    k_up = 12 s/km 每 1% 上坡
    k_down = 8 s/km 每 1% 下坡
    ```
@@ -949,6 +951,7 @@ cloud_backup_restore(remoteId: String, passphrase: String) -> RestoreReport
 | 当前跑力窗口 | 42 天 | 是 |
 | 当前跑力半衰期 | 14 天 | 是 |
 | 稳定段最短时长 | 180 秒 | 是 |
+| 稳定段平均坡度上限 | ±12% | 是 |
 | 配速 CV 上限 | 5% | 是 |
 | 心率 CV 上限 | 3% | 是 |
 | 上坡补偿 | 12 s/km 每 1% | 是 |
