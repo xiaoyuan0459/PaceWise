@@ -4,18 +4,18 @@ use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 
 use chrono::{Duration, TimeZone, Utc};
-use zeppbridge_core::models::{MetricSample, SleepSession, SourceScope, Workout};
-use zeppbridge_core::storage::Database;
+use pacebridge_core::models::{MetricSample, SleepSession, SourceScope, Workout};
+use pacebridge_core::storage::Database;
 
 #[test]
 fn stdio_recovers_from_bad_input_and_returns_tool_errors_in_result() {
     let missing_dir = std::env::temp_dir().join(format!(
-        "zeppbridge-mcp-stdio-{}-{}",
+        "pacebridge-mcp-stdio-{}-{}",
         std::process::id(),
-        zeppbridge_core::unique_suffix()
+        pacebridge_core::unique_suffix()
     ));
-    let mut child = Command::new(env!("CARGO_BIN_EXE_zeppbridge-mcp"))
-        .env("ZEPPBRIDGE_DATA_DIR", &missing_dir)
+    let mut child = Command::new(env!("CARGO_BIN_EXE_pacebridge-mcp"))
+        .env("PACEBRIDGE_DATA_DIR", &missing_dir)
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
@@ -77,7 +77,7 @@ fn bad_argv_exits_nonzero_without_serving() {
         vec!["--scope", "task", "--scope", "task"], // 重复
         vec!["positional"],
     ] {
-        let output = Command::new(env!("CARGO_BIN_EXE_zeppbridge-mcp"))
+        let output = Command::new(env!("CARGO_BIN_EXE_pacebridge-mcp"))
             .args(&args)
             .stdin(Stdio::null())
             .output()
@@ -167,9 +167,9 @@ fn sleep_session(id: &str, end_days_ago: i64) -> SleepSession {
 /// - t2 锚 `private`：只开 sleep，workout 类别关着——锚点不等于可读（R01）。
 fn scoped_library() -> PathBuf {
     let dir = std::env::temp_dir().join(format!(
-        "zeppbridge-mcp-scope-{}-{}",
+        "pacebridge-mcp-scope-{}-{}",
         std::process::id(),
-        zeppbridge_core::unique_suffix()
+        pacebridge_core::unique_suffix()
     ));
     std::fs::create_dir_all(&dir).unwrap();
     {
@@ -228,9 +228,9 @@ fn scoped_library() -> PathBuf {
 }
 
 fn spawn_mcp(args: &[&str], data_dir: &Path) -> Child {
-    Command::new(env!("CARGO_BIN_EXE_zeppbridge-mcp"))
+    Command::new(env!("CARGO_BIN_EXE_pacebridge-mcp"))
         .args(args)
-        .env("ZEPPBRIDGE_DATA_DIR", data_dir)
+        .env("PACEBRIDGE_DATA_DIR", data_dir)
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())

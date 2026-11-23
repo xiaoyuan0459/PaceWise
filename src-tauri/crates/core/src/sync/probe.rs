@@ -1,6 +1,6 @@
 //! 同步前先探云端新不新。
 //!
-//! 链路是 手表 → 手机 Zepp（蓝牙）→ 云端 → ZeppBridge，电脑叫不动手表也叫不动手机。用户在电脑上点
+//! 链路是 手表 → 手机 Zepp（蓝牙）→ 云端 → PaceBridge，电脑叫不动手表也叫不动手机。用户在电脑上点
 //! 「同步」时，手机多半还没把手表的新数据传上去：以前照样跑完整套七八条流（十几到几十秒），结论是
 //! 「没有新数据」，看不出该去手机上下拉一下。
 //!
@@ -112,7 +112,7 @@ impl OfficialSync {
             let Some(tokens) =
                 fresh_tokens(&self.store, &self.client, Utc::now().timestamp()).await?
             else {
-                return Err(ZeppBridgeError::NeedsReauth(
+                return Err(PaceBridgeError::NeedsReauth(
                     "还没有连接 Zepp 官方授权".into(),
                 ));
             };

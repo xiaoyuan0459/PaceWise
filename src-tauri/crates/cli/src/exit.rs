@@ -6,29 +6,29 @@ use super::*;
 ///
 /// 分类是为了让调度脚本能写出「busy 就等五分钟重试，云端失败就退避，
 /// 数据库错误就报警」这种逻辑，而不是对着同一个 1 猜。
-pub(super) fn exit_code_for(error: &ZeppBridgeError) -> (u8, &'static str) {
+pub(super) fn exit_code_for(error: &PaceBridgeError) -> (u8, &'static str) {
     match error {
-        ZeppBridgeError::AuthError(_) | ZeppBridgeError::NeedsReauth(_) => {
+        PaceBridgeError::AuthError(_) | PaceBridgeError::NeedsReauth(_) => {
             (EXIT_NOT_CONFIGURED, "auth")
         }
-        ZeppBridgeError::NetworkError(_)
-        | ZeppBridgeError::RetryExhausted { .. }
-        | ZeppBridgeError::HttpStatus { .. }
-        | ZeppBridgeError::Unavailable(_)
-        | ZeppBridgeError::TimedOut(_) => (EXIT_CLOUD, "cloud"),
-        ZeppBridgeError::DataUnavailable(_) => (EXIT_FAILED, "data_unavailable"),
-        ZeppBridgeError::Busy(_) => (EXIT_BUSY, "busy"),
-        ZeppBridgeError::DatabaseError(_) => (EXIT_DATABASE, "database"),
-        ZeppBridgeError::ConfigError(_) | ZeppBridgeError::InvalidHost(_) => (EXIT_USAGE, "usage"),
+        PaceBridgeError::NetworkError(_)
+        | PaceBridgeError::RetryExhausted { .. }
+        | PaceBridgeError::HttpStatus { .. }
+        | PaceBridgeError::Unavailable(_)
+        | PaceBridgeError::TimedOut(_) => (EXIT_CLOUD, "cloud"),
+        PaceBridgeError::DataUnavailable(_) => (EXIT_FAILED, "data_unavailable"),
+        PaceBridgeError::Busy(_) => (EXIT_BUSY, "busy"),
+        PaceBridgeError::DatabaseError(_) => (EXIT_DATABASE, "database"),
+        PaceBridgeError::ConfigError(_) | PaceBridgeError::InvalidHost(_) => (EXIT_USAGE, "usage"),
         // 库要先升级和「拿不到令牌」是两码事：前者重试没用、要先跑一次
         // reprocess（调度脚本按这个码决定别再试了），后者要人把凭据给进来。
         // 库比程序新同样是 7（文档：「或把命令行升级到同一版本」），重试没用。
-        ZeppBridgeError::Headless(
+        PaceBridgeError::Headless(
             HeadlessProblem::SchemaUpgradeRequired { .. } | HeadlessProblem::ProgramOutdated { .. },
         ) => (EXIT_SCHEMA, "schema"),
-        ZeppBridgeError::Headless(_) => (EXIT_NOT_CONFIGURED, "auth"),
+        PaceBridgeError::Headless(_) => (EXIT_NOT_CONFIGURED, "auth"),
         // 库属于另一个账号：重试没用，要人换数据目录或换回原账号。
-        ZeppBridgeError::AccountMismatch => (EXIT_NOT_CONFIGURED, "account_mismatch"),
+        PaceBridgeError::AccountMismatch => (EXIT_NOT_CONFIGURED, "account_mismatch"),
         _ => (EXIT_FAILED, "failed"),
     }
 }
@@ -47,28 +47,28 @@ pub(super) fn exit_code_for(error: &ZeppBridgeError) -> (u8, &'static str) {
 /// match 不留 `_`：core 加了新变体，这里编译不过，逼着补一句英文。
 /// 带原话的分支一律先过 core 的脱敏（去地址、限长），不能把带请求地址的
 /// Display 原样写到 stdout / stderr。
-pub(super) fn user_text(error: &ZeppBridgeError) -> String {
+pub(super) fn user_text(error: &PaceBridgeError) -> String {
     let code = error.code();
     match error {
-        ZeppBridgeError::Headless(problem) => problem.english(),
-        ZeppBridgeError::WorkoutFitOriginalMissing => "The original details are missing. Check an earlier backup or the original activity file.".into(),
-        ZeppBridgeError::AccountMismatch => "This database already holds another Zepp account's             data, so nothing was written for this account. To switch accounts, move or rename             the data folder, then connect again."
+        PaceBridgeError::Headless(problem) => problem.english(),
+        PaceBridgeError::WorkoutFitOriginalMissing => "The original details are missing. Check an earlier backup or the original activity file.".into(),
+        PaceBridgeError::AccountMismatch => "This database already holds another Zepp account's             data, so nothing was written for this account. To switch accounts, move or rename             the data folder, then connect again."
             .to_string(),
-        ZeppBridgeError::TimedOut(_) => {
+        PaceBridgeError::TimedOut(_) => {
             "This sync ran out of time; the remaining streams will continue next time.".to_string()
         }
-        ZeppBridgeError::NetworkError(_) => {
+        PaceBridgeError::NetworkError(_) => {
             "Could not reach the Zepp region service. Check the network and try again.".to_string()
         }
-        ZeppBridgeError::NeedsReauth(_) => "The saved Zepp sign-in is no longer valid. Reconnect             the account in the desktop app, or supply a fresh ZEPPBRIDGE_APP_TOKEN, then try again."
+        PaceBridgeError::NeedsReauth(_) => "The saved Zepp sign-in is no longer valid. Reconnect             the account in the desktop app, or supply a fresh PACEBRIDGE_APP_TOKEN, then try again."
             .to_string(),
-        ZeppBridgeError::RetryExhausted { status, .. } => {
+        PaceBridgeError::RetryExhausted { status, .. } => {
             format!("The Zepp service is temporarily unavailable (HTTP {status}). Try again later.")
         }
-        ZeppBridgeError::HttpStatus { status, .. } => {
+        PaceBridgeError::HttpStatus { status, .. } => {
             format!("The Zepp service returned HTTP {status}. Try again later.")
         }
-        ZeppBridgeError::CloudRejected {
+        PaceBridgeError::CloudRejected {
             code: cloud_code,
             message,
         } => with_detail(
@@ -78,45 +78,45 @@ pub(super) fn user_text(error: &ZeppBridgeError) -> String {
             message,
             code,
         ),
-        ZeppBridgeError::Cancelled => "The sync was cancelled.".to_string(),
-        ZeppBridgeError::ParseError(_) => "The data Zepp returned could not be parsed.".to_string(),
+        PaceBridgeError::Cancelled => "The sync was cancelled.".to_string(),
+        PaceBridgeError::ParseError(_) => "The data Zepp returned could not be parsed.".to_string(),
         // SQLite 的错误类、扩展码和原话（英文），打开失败时还有打了码的路径。
         // 只有一句「暂时不可用」时，3.1.1 那位用户的 exit 6 无从查起。
-        ZeppBridgeError::DatabaseError(inner) => format!(
+        PaceBridgeError::DatabaseError(inner) => format!(
             "The local database is temporarily unavailable ({}).",
-            zeppbridge_core::storage::sqlite_error_detail(inner)
+            pacebridge_core::storage::sqlite_error_detail(inner)
         ),
-        ZeppBridgeError::IoError(_) => "Reading or writing a local file failed.".to_string(),
-        ZeppBridgeError::Busy(_) => "Another ZeppBridge process is writing to this library.             Try again in a moment."
+        PaceBridgeError::IoError(_) => "Reading or writing a local file failed.".to_string(),
+        PaceBridgeError::Busy(_) => "Another PaceBridge process is writing to this library.             Try again in a moment."
             .to_string(),
-        ZeppBridgeError::AuthError(message) => with_detail("Authentication failed", message, code),
-        ZeppBridgeError::CredentialStore(message) => with_detail(
+        PaceBridgeError::AuthError(message) => with_detail("Authentication failed", message, code),
+        PaceBridgeError::CredentialStore(message) => with_detail(
             "The system credential store refused to read or write the token",
             message,
             code,
         ),
-        ZeppBridgeError::InvalidHost(message) => {
+        PaceBridgeError::InvalidHost(message) => {
             with_detail("The Zepp region host is not allowed", message, code)
         }
-        ZeppBridgeError::ConfigError(message) => {
+        PaceBridgeError::ConfigError(message) => {
             with_detail("Configuration problem", message, code)
         }
-        ZeppBridgeError::Unavailable(message) | ZeppBridgeError::DataUnavailable(message) => {
+        PaceBridgeError::Unavailable(message) | PaceBridgeError::DataUnavailable(message) => {
             with_detail(
                 "Not available: this library or account does not provide the requested data",
                 message,
                 code,
             )
         }
-        ZeppBridgeError::TrainingPlan { message, .. } => {
+        PaceBridgeError::TrainingPlan { message, .. } => {
             with_detail("The training-plan action failed", message, code)
         }
-        ZeppBridgeError::AiTask(inner) => with_detail(
+        PaceBridgeError::AiTask(inner) => with_detail(
             "The AI task could not be completed",
             &inner.user_message(),
             code,
         ),
-        ZeppBridgeError::Unknown(message) => with_detail("Unexpected error", message, code),
+        PaceBridgeError::Unknown(message) => with_detail("Unexpected error", message, code),
     }
 }
 
@@ -144,7 +144,7 @@ pub(super) fn is_cjk(character: char) -> bool {
 /// 文档注释）。但 CLI 没有那层，直接把它塞进 usage 错误里，就会在这份英文
 /// 命令行输出里冒出中文，和 `user_text()` 顶上要解决的是同一个问题。
 ///
-/// 消息集合比 `ZeppBridgeError` 的变体小得多，这里直接按原文匹配；认不出
+/// 消息集合比 `PaceBridgeError` 的变体小得多，这里直接按原文匹配；认不出
 /// 的（原文改了、或者以后新增了分支）是中文就换成一句笼统的英文，否则原样透传；
 /// 不瞎猜，不递归。测试直接拿 core 的 `validated()` 造这五种错误，原文一改就会挂。
 pub(super) fn translate_export_scope_error(message: String) -> String {
@@ -188,9 +188,9 @@ pub(super) fn data_dir() -> Result<std::path::PathBuf, String> {
 /// 「在哪儿找的」这句话，附在每一条「找不到」后面。
 ///
 /// issue #40 的两个小时全花在这上面：那位用户在
-/// `~/ZeppBridge/src-tauri/target/release/` 下跑 CLI，而
+/// `~/PaceBridge/src-tauri/target/release/` 下跑 CLI，而
 /// `paths::is_build_artifact_dir()` 认出 `target/release` 是构建产物目录，
-/// 把数据目录重定向到了**仓库根**的 `~/ZeppBridge/data/`。那条规则是对的
+/// 把数据目录重定向到了**仓库根**的 `~/PaceBridge/data/`。那条规则是对的
 /// （否则 `cargo run` 会往构建缓存里丢一个上 GB 的库），但程序自己一个字
 /// 都没说——他把 data 文件夹放在了 exe 旁边，看到的却是「没有本地数据库」，
 /// 无从知道该往哪儿放。最后是维护者手动告诉他的。
@@ -200,8 +200,8 @@ pub(super) fn data_dir() -> Result<std::path::PathBuf, String> {
 /// 「没有连接账号」到底缺了什么。
 ///
 /// 连接一个账号要两样东西：`auth.json`（用户 id 和区域），和凭据存储里的
-/// 令牌。以前无论缺哪一样，这里都印同一句「请设 ZEPPBRIDGE_CREDENTIAL_STORE
-/// =env 并提供 ZEPPBRIDGE_APP_TOKEN」——而 issue #40 那位用户**两个都设了**，
+/// 令牌。以前无论缺哪一样，这里都印同一句「请设 PACEBRIDGE_CREDENTIAL_STORE
+/// =env 并提供 PACEBRIDGE_APP_TOKEN」——而 issue #40 那位用户**两个都设了**，
 /// 缺的是 `auth.json`。程序把他已经做过的那件事又叫他做了一遍，来回四轮。
 ///
 /// 现在先看 `auth.json` 在不在，再决定说哪一句。
@@ -214,15 +214,15 @@ pub(super) fn not_connected_message(dir: &std::path::Path) -> String {
              desktop app, or copy auth.json here from a machine that already has one. \
              Note that the token is NOT in that file: it lives in the platform \
              credential store and does not copy across machines, so supply it with \
-             ZEPPBRIDGE_CREDENTIAL_STORE=env and ZEPPBRIDGE_APP_TOKEN. {}",
+             PACEBRIDGE_CREDENTIAL_STORE=env and PACEBRIDGE_APP_TOKEN. {}",
             auth_file.display(),
             where_it_looked(dir)
         );
     }
     format!(
         "No Zepp account is connected. The command line does not sign in: sign in from \
-         the desktop app, or set ZEPPBRIDGE_CREDENTIAL_STORE=env and supply \
-         ZEPPBRIDGE_APP_TOKEN. Moving a library between machines: see \
+         the desktop app, or set PACEBRIDGE_CREDENTIAL_STORE=env and supply \
+         PACEBRIDGE_APP_TOKEN. Moving a library between machines: see \
          docs/guides/linux.md. {}",
         where_it_looked(dir)
     )
@@ -246,7 +246,7 @@ pub(super) fn where_it_looked_from(
         text.push_str(
             ". That is not next to the executable because this binary sits in a build \
              directory (target/debug, target/release or a cargo target cache), and \
-             ZeppBridge keeps data out of build directories -- it uses the repository \
+             PaceBridge keeps data out of build directories -- it uses the repository \
              data/ folder instead",
         );
     }

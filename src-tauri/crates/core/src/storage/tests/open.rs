@@ -9,20 +9,20 @@ use super::*;
 /// 每次加迁移步骤时都能对着真库跑一遍，而不是只在发版当天临时想办法。
 ///
 /// ```powershell
-/// $env:ZEPPBRIDGE_UPGRADE_FIXTURE = "D:/somewhere/a-copy-of/zepp.db"
-/// cargo test --manifest-path src-tauri/Cargo.toml -p zeppbridge-core --jobs 1 `
+/// $env:PACEBRIDGE_UPGRADE_FIXTURE = "D:/somewhere/a-copy-of/zepp.db"
+/// cargo test --manifest-path src-tauri/Cargo.toml -p pacebridge-core --jobs 1 `
 ///   -- --ignored upgrade_a_real_old_database
 /// ```
 ///
 /// **传一份副本。** 这个测试会真的迁移你指给它的文件。
 #[test]
-#[ignore = "需要真实旧库，用 ZEPPBRIDGE_UPGRADE_FIXTURE 指定一份副本"]
+#[ignore = "需要真实旧库，用 PACEBRIDGE_UPGRADE_FIXTURE 指定一份副本"]
 fn upgrade_a_real_old_database_without_losing_rows() {
-    let Ok(source) = std::env::var("ZEPPBRIDGE_UPGRADE_FIXTURE") else {
-        panic!("没有设置 ZEPPBRIDGE_UPGRADE_FIXTURE");
+    let Ok(source) = std::env::var("PACEBRIDGE_UPGRADE_FIXTURE") else {
+        panic!("没有设置 PACEBRIDGE_UPGRADE_FIXTURE");
     };
     let source = PathBuf::from(source);
-    let dir = std::env::temp_dir().join("zeppbridge-upgrade-drill");
+    let dir = std::env::temp_dir().join("pacebridge-upgrade-drill");
     let _ = std::fs::remove_dir_all(&dir);
     std::fs::create_dir_all(&dir).unwrap();
     let path = dir.join("zepp.db");
@@ -131,7 +131,7 @@ fn upgrade_a_real_old_database_without_losing_rows() {
 fn a_read_only_connection_refuses_writes_and_ignores_the_write_lock() {
     // MCP 和 CLI 的查询路径靠这两条性质成立：写不进去是连接层保证的，
     // 不是靠调用方自觉；而且一次长同步持有写锁时，只读查询不该被挡住。
-    let dir = std::env::temp_dir().join("zeppbridge-readonly-contract");
+    let dir = std::env::temp_dir().join("pacebridge-readonly-contract");
     let _ = std::fs::remove_dir_all(&dir);
     std::fs::create_dir_all(&dir).unwrap();
     let path = dir.join("zepp.db");
@@ -154,7 +154,7 @@ fn the_pre_migration_backup_can_still_read_a_database_that_is_out_of_date() {
     // 「只读连接必须版本一致」是给用户查询用的策略，不是打开文件的机制。
     // 把它写进机制里，升级前的自动备份就打不开旧库，于是备份失败，
     // 于是迁移拒绝开始——所有老用户都升不了级。
-    let dir = std::env::temp_dir().join("zeppbridge-premigration-open");
+    let dir = std::env::temp_dir().join("pacebridge-premigration-open");
     let _ = std::fs::remove_dir_all(&dir);
     std::fs::create_dir_all(&dir).unwrap();
     let path = dir.join("zepp.db");
@@ -184,7 +184,7 @@ fn the_pre_migration_backup_can_still_read_a_database_that_is_out_of_date() {
 fn a_read_only_open_says_which_side_is_out_of_date_instead_of_failing_later() {
     // 旧库 + 新程序会一路撞到「没有这张表」，用户看到的是一句
     // 「数据库暂时不可用」——不知道原因，也不知道该做什么。
-    let dir = std::env::temp_dir().join("zeppbridge-readonly-schema");
+    let dir = std::env::temp_dir().join("pacebridge-readonly-schema");
     let _ = std::fs::remove_dir_all(&dir);
     std::fs::create_dir_all(&dir).unwrap();
     let path = dir.join("zepp.db");
@@ -195,11 +195,11 @@ fn a_read_only_open_says_which_side_is_out_of_date_instead_of_failing_later() {
     for (version, expected) in [
         (
             CURRENT_SCHEMA_VERSION - 1,
-            vec!["zeppbridge-cli reprocess", "桌面应用"],
+            vec!["pacebridge-cli reprocess", "桌面应用"],
         ),
         (
             CURRENT_SCHEMA_VERSION + 1,
-            vec!["ZeppBridge.mcpb", "重新连接", env!("CARGO_PKG_VERSION")],
+            vec!["PaceBridge.mcpb", "重新连接", env!("CARGO_PKG_VERSION")],
         ),
     ] {
         let conn = Connection::open(&path).unwrap();
@@ -232,7 +232,7 @@ fn current_schema_marker_survives_repeated_idempotent_migrations() {
 
 fn temp_dir(label: &str) -> PathBuf {
     let dir = std::env::temp_dir().join(format!(
-        "zeppbridge-storage-{}-{}-{}",
+        "pacebridge-storage-{}-{}-{}",
         label,
         std::process::id(),
         crate::unique_suffix()

@@ -9,7 +9,7 @@ pub(super) fn open_db() -> Result<(Database, u64), (i64, String)> {
     if !db_path.exists() {
         return Err((
             ERR_NOT_CONFIGURED,
-            "本机还没有 ZeppBridge 数据库。请先在桌面应用里连接账号并同步一次。".into(),
+            "本机还没有 PaceBridge 数据库。请先在桌面应用里连接账号并同步一次。".into(),
         ));
     }
     let bytes = std::fs::metadata(&db_path)
@@ -448,7 +448,7 @@ pub(super) fn execute_tool_with_db(
     // 用户排除的指标（metric_prefs）：从返回里去掉并写明是用户的选择。读不出名单就照常给——
     // 排除是用户的偏好，不是授权边界。
     if let Ok(excluded) = db.excluded_metrics() {
-        zeppbridge_core::storage::metric_prefs::apply_exclusions(&mut payload, &excluded);
+        pacebridge_core::storage::metric_prefs::apply_exclusions(&mut payload, &excluded);
     }
 
     // task 范围的第二道保险（R6）：白名单挑字段的出口本来就没有 device_id，

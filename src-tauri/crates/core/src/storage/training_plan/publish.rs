@@ -1,6 +1,6 @@
 //! 发布引擎：按天推算「上次发过去的」，算出这次要推哪几个窗口、怎么推，记结果。
 //!
-//! 服务端的语义是**逐天替换**：推一个窗口 `[s, s+6]`，ZeppBridge 名下这 7 天整体换成
+//! 服务端的语义是**逐天替换**：推一个窗口 `[s, s+6]`，PaceBridge 名下这 7 天整体换成
 //! 报文里的训练，别的日子不动。窗口每天都从「今天」重新切，所以账本按天算：某一天
 //! 上次发过去的是什么，取覆盖这一天的最近一行（`sent` / `unknown` / `pending`）。
 //!
@@ -395,7 +395,7 @@ impl Database {
                 if !confirm_clear {
                     return Ok(Prepared::NeedsClearConfirmation);
                 }
-                // 清掉今天起**全部**窗口里 ZeppBridge 发过去的训练，不只本周（10-14 用户：
+                // 清掉今天起**全部**窗口里 PaceBridge 发过去的训练，不只本周（10-14 用户：
                 // 只清本周时，下周的训练留在手表上，手机上又找不到删除的地方）。
                 // 未来窗口由下面的占位 + 重推前一窗口清掉（v2::clear_future_window）。
                 let last = horizon(today).last().map_or(current.end(), |w| w.end());

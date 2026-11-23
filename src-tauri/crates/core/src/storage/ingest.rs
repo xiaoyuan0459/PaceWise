@@ -14,7 +14,7 @@ pub(super) struct SerializedPayload {
 impl SerializedPayload {
     pub(super) fn of(record: &RawRecord) -> Result<Self> {
         let json = serde_json::to_string(&record.payload)
-            .map_err(|error| ZeppBridgeError::ParseError(error.to_string()))?;
+            .map_err(|error| PaceBridgeError::ParseError(error.to_string()))?;
         let mut hasher = Sha256::new();
         hasher.update(json.as_bytes());
         let hash = hex::encode(hasher.finalize());
@@ -275,7 +275,7 @@ impl Database {
                     && batch.metric_samples.is_empty()
                     && !batch.diagnostics.is_empty()
                 {
-                    return Err(ZeppBridgeError::DataUnavailable(
+                    return Err(PaceBridgeError::DataUnavailable(
                         batch.diagnostics.join("; "),
                     ));
                 }
@@ -321,7 +321,7 @@ impl Database {
                     } else {
                         band.diagnostics.join("; ")
                     };
-                    return Err(ZeppBridgeError::DataUnavailable(detail));
+                    return Err(PaceBridgeError::DataUnavailable(detail));
                 }
                 counts.primary_records = band.sleep_sessions.len() as i64;
                 counts.band_heart_rate_records = band.heart_rate_samples.len() as i64;
@@ -363,10 +363,10 @@ impl Database {
             }
             "workout_detail" => {
                 let workout_id = workout_id_from_detail_key(source_key).ok_or_else(|| {
-                    ZeppBridgeError::ConfigError("workout_detail source_key 无效".into())
+                    PaceBridgeError::ConfigError("workout_detail source_key 无效".into())
                 })?;
                 if !self.workout_exists(&workout_id)? {
-                    return Err(ZeppBridgeError::DataUnavailable(
+                    return Err(PaceBridgeError::DataUnavailable(
                         "detail 对应的训练摘要还不存在".into(),
                     ));
                 }
@@ -380,7 +380,7 @@ impl Database {
                     + decoded.pauses.len()
                     + decoded.strength_sets.len()) as i64;
             }
-            other => return Err(ZeppBridgeError::ConfigError(format!("未知同步流: {other}"))),
+            other => return Err(PaceBridgeError::ConfigError(format!("未知同步流: {other}"))),
         }
         // Keep the processing result even when another raw payload later
         // replaces all canonical rows through their natural-key upserts.

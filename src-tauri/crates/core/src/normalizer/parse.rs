@@ -5,27 +5,27 @@ use super::*;
 pub(super) fn decode_base64_json(encoded: &str) -> Result<Value> {
     let bytes = STANDARD
         .decode(encoded.trim())
-        .map_err(|error| ZeppBridgeError::ParseError(format!("Base64 无效: {error}")))?;
+        .map_err(|error| PaceBridgeError::ParseError(format!("Base64 无效: {error}")))?;
     serde_json::from_slice(&bytes)
-        .map_err(|error| ZeppBridgeError::ParseError(format!("Base64 内容不是 JSON: {error}")))
+        .map_err(|error| PaceBridgeError::ParseError(format!("Base64 内容不是 JSON: {error}")))
 }
 
 pub(super) fn extract_items(raw: &Value) -> Result<Vec<&Value>> {
     if let Some(items) = raw.as_array() {
         if items.is_empty() {
-            return Err(ZeppBridgeError::DataUnavailable("响应 items 为空".into()));
+            return Err(PaceBridgeError::DataUnavailable("响应 items 为空".into()));
         }
         return Ok(items.iter().collect());
     }
     let Some(object) = raw.as_object() else {
-        return Err(ZeppBridgeError::ParseError(
+        return Err(PaceBridgeError::ParseError(
             "响应必须是 object 或 array".into(),
         ));
     };
     for key in ["items", "records", "results", "list"] {
         if let Some(array) = object.get(key).and_then(Value::as_array) {
             if array.is_empty() {
-                return Err(ZeppBridgeError::DataUnavailable(format!("响应 {key} 为空")));
+                return Err(PaceBridgeError::DataUnavailable(format!("响应 {key} 为空")));
             }
             return Ok(array.iter().collect());
         }
@@ -33,7 +33,7 @@ pub(super) fn extract_items(raw: &Value) -> Result<Vec<&Value>> {
     if let Some(data) = object.get("data") {
         if let Some(array) = data.as_array() {
             if array.is_empty() {
-                return Err(ZeppBridgeError::DataUnavailable("响应 data 为空".into()));
+                return Err(PaceBridgeError::DataUnavailable("响应 data 为空".into()));
             }
             return Ok(array.iter().collect());
         }
@@ -41,7 +41,7 @@ pub(super) fn extract_items(raw: &Value) -> Result<Vec<&Value>> {
             for key in ["items", "records", "results", "list", "summary"] {
                 if let Some(array) = data_object.get(key).and_then(Value::as_array) {
                     if array.is_empty() {
-                        return Err(ZeppBridgeError::DataUnavailable(format!(
+                        return Err(PaceBridgeError::DataUnavailable(format!(
                             "响应 data.{key} 为空"
                         )));
                     }
@@ -50,12 +50,12 @@ pub(super) fn extract_items(raw: &Value) -> Result<Vec<&Value>> {
             }
         }
         if data.is_string() {
-            return Err(ZeppBridgeError::DataUnavailable(
+            return Err(PaceBridgeError::DataUnavailable(
                 "响应 data 是编码字符串，无法安全完整解码".into(),
             ));
         }
     }
-    Err(ZeppBridgeError::ParseError(format!(
+    Err(PaceBridgeError::ParseError(format!(
         "响应缺少 items/data 数组，{}{}",
         crate::models::error::PARSE_KEYS_MARKER,
         object.keys().cloned().collect::<Vec<_>>().join(", ")

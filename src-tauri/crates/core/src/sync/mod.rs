@@ -208,9 +208,9 @@ impl SyncManager {
                 }
                 // 「有人在写」和「锁建不起来」要分开：前者可重试，后者要人介入。
                 Err(error @ write_lock::WriteLockError::Busy { .. }) => {
-                    return Err(ZeppBridgeError::Busy(error.to_string()))
+                    return Err(PaceBridgeError::Busy(error.to_string()))
                 }
-                Err(error) => return Err(ZeppBridgeError::ConfigError(error.to_string())),
+                Err(error) => return Err(PaceBridgeError::ConfigError(error.to_string())),
             }
         }
     }
@@ -266,14 +266,14 @@ impl SyncManager {
             } else {
                 "正在用本地原始报文重建派生数据"
             };
-            return Err(ZeppBridgeError::Busy(message.into()));
+            return Err(PaceBridgeError::Busy(message.into()));
         }
         Ok(())
     }
 
     pub(super) fn abort_if_cancelled(&self) -> Result<()> {
         if self.cancel.load(Ordering::SeqCst) {
-            return Err(ZeppBridgeError::Cancelled);
+            return Err(PaceBridgeError::Cancelled);
         }
         Ok(())
     }
@@ -297,7 +297,7 @@ impl SyncManager {
         // 旗一直立着，连接器每个请求都直接回 Cancelled，探测静默地返回空、什么都不报。
         // 同步正在跑就不排队等它（可能好几分钟），直接说忙；那一轮自己会顺带刷新能力。
         let Ok(_run_guard) = self.run_lock.try_lock() else {
-            return Err(ZeppBridgeError::Busy("同步进行中，稍后再探测".into()));
+            return Err(PaceBridgeError::Busy("同步进行中，稍后再探测".into()));
         };
         self.cancel.store(false, Ordering::SeqCst);
         let day = (Utc::now() - Duration::days(1)).date_naive();

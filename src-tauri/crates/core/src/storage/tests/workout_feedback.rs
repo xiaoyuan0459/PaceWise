@@ -150,7 +150,7 @@ fn toast_link_rates_once_with_its_own_token_and_never_reissues() {
     );
     assert!(db.workout_feedback("run").unwrap().is_none());
 
-    let link = format!("zeppbridge://feedback/?t={}&r=4", due.token);
+    let link = format!("pacebridge://feedback/?t={}&r=4", due.token);
     let (token, rating) = parse_feedback_link(&link).unwrap();
     assert_eq!(
         db.rate_from_toast(&token, rating, now).unwrap(),
@@ -164,7 +164,7 @@ fn toast_link_rates_once_with_its_own_token_and_never_reissues() {
     );
     assert_eq!(db.workout_feedback("run").unwrap().unwrap().rating, Some(4));
 
-    assert!(parse_feedback_link("zeppbridge://feedback?t=abc&r=4").is_none());
-    assert!(parse_feedback_link(&format!("zeppbridge://feedback?t={token}&r=9")).is_none());
-    assert!(parse_feedback_link("zeppbridge://open").is_none());
+    assert!(parse_feedback_link("pacebridge://feedback?t=abc&r=4").is_none());
+    assert!(parse_feedback_link(&format!("pacebridge://feedback?t={token}&r=9")).is_none());
+    assert!(parse_feedback_link("pacebridge://open").is_none());
 }

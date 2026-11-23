@@ -1,25 +1,16 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
+	// Cloudflare Pages 项目名和 D1 库名沿用已登记的外部标识，改名会让
+	// Zepp 控制台里的授权回调失效。
 	"name": "zeppbridge",
 	"compatibility_date": "2026-08-18",
-	"pages_build_output_dir": "./dist",
+	"pages_build_output_dir": "./public",
 	"d1_databases": [
-		{
-			"binding": "FEEDBACK_DB",
-			"database_name": "zeppbridge-feedback",
-			"database_id": "0a25f637-ed8f-41ad-9927-2c80cdad5bf2"
-		},
 		{
 			"binding": "OFFICIAL_DB",
 			"database_name": "zeppbridge-official",
 			"database_id": "d44cc752-232c-4b80-ae32-f0fb680d1afd",
 			"migrations_dir": "migrations-official"
-		}
-	],
-	"r2_buckets": [
-		{
-			"binding": "LETTER_ATTACHMENTS",
-			"bucket_name": "zeppbridge-letter-attachments"
 		}
 	]
 }

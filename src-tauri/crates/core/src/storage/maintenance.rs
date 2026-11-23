@@ -308,7 +308,7 @@ impl Database {
 
     pub fn cleanup_old_data(&self, days: i64) -> Result<()> {
         if !(1..=365).contains(&days) {
-            return Err(ZeppBridgeError::ConfigError(
+            return Err(PaceBridgeError::ConfigError(
                 "retention 天数必须在 1..=365".into(),
             ));
         }
@@ -399,7 +399,7 @@ impl Database {
         match deleted {
             Ok(()) => {
                 if self.conn.is_autocommit() {
-                    return Err(ZeppBridgeError::DataUnavailable(
+                    return Err(PaceBridgeError::DataUnavailable(
                         "清理被中断，没有任何改动写入。".into(),
                     ));
                 }
@@ -434,7 +434,7 @@ impl Database {
         raw_record_id: i64,
         stream: &str,
         source_key: &str,
-        error: &ZeppBridgeError,
+        error: &PaceBridgeError,
         payload: Option<&serde_json::Value>,
     ) -> Result<()> {
         let empty_response = error.is_unavailable()
@@ -489,7 +489,7 @@ impl Database {
         }
         // 原样又回了一份「云端没有」：结论照旧，不重新入库、不重新隔离。
         if let Some(detail) = self.touch_unchanged_empty_raw(record, &serialized)? {
-            return Err(ZeppBridgeError::DataUnavailable(detail));
+            return Err(PaceBridgeError::DataUnavailable(detail));
         }
         let raw_id = self.insert_serialized_raw(record, &serialized, &Utc::now().to_rfc3339())?;
         let normalized = (|| {

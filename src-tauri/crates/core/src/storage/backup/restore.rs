@@ -34,7 +34,7 @@ pub fn restore_preview(data_dir: &Path, id: &str) -> Result<RestorePreview> {
             .or_else(|| Some("备份未通过校验".into()))
     } else if compatibility == RestoreCompatibility::FutureSchemaRefused {
         Some(format!(
-            "这份备份来自更新版本的 ZeppBridge（schema {}，当前 {}）。降级打开会丢字段，所以不恢复，也不会改动当前库。请先升级 ZeppBridge。",
+            "这份备份来自更新版本的 PaceBridge（schema {}，当前 {}）。降级打开会丢字段，所以不恢复，也不会改动当前库。请先升级 PaceBridge。",
             manifest.schema_version, current_schema_version
         ))
     } else {
@@ -84,13 +84,13 @@ pub fn stage_restore(data_dir: &Path, id: &str, app_version: &str) -> Result<Pen
         }
         remove_if_present(&publication_path(data_dir))?;
     } else if publication_path(data_dir).exists() || previous_path(data_dir).exists() {
-        return Err(ZeppBridgeError::Busy(
+        return Err(PaceBridgeError::Busy(
             "恢复已开始，请重启以完成恢复。".into(),
         ));
     }
     let preview = restore_preview(data_dir, id)?;
     if !preview.can_restore {
-        return Err(ZeppBridgeError::DataUnavailable(
+        return Err(PaceBridgeError::DataUnavailable(
             preview
                 .blocker
                 .unwrap_or_else(|| "这份备份当前不可恢复".into()),
@@ -104,7 +104,7 @@ pub fn stage_restore(data_dir: &Path, id: &str, app_version: &str) -> Result<Pen
         rollback_backup_id: rollback.id,
     };
     let encoded = serde_json::to_vec_pretty(&pending)
-        .map_err(|error| ZeppBridgeError::ParseError(format!("无法写入恢复计划: {error}")))?;
+        .map_err(|error| PaceBridgeError::ParseError(format!("无法写入恢复计划: {error}")))?;
     crate::paths::write_file_atomically(&data_dir.join(PENDING_RESTORE_FILE), &encoded)?;
     Ok(pending)
 }
@@ -123,7 +123,7 @@ pub fn cancel_pending_restore(data_dir: &Path) -> Result<()> {
 /// 调用方持有写锁时使用。
 pub fn cancel_pending_restore_unlocked(data_dir: &Path) -> Result<()> {
     if publication_path(data_dir).exists() || previous_path(data_dir).exists() {
-        return Err(ZeppBridgeError::Busy(
+        return Err(PaceBridgeError::Busy(
             "恢复已开始，请重启以完成恢复。".into(),
         ));
     }
@@ -198,7 +198,7 @@ pub(crate) fn check_incomplete_restore(db_path: &Path) -> Result<()> {
             && previous_path(data_dir).try_exists()?
             && (!db_path.try_exists()? || data_dir.join(PENDING_RESTORE_FILE).try_exists()?)
         {
-            return Err(ZeppBridgeError::DataUnavailable(
+            return Err(PaceBridgeError::DataUnavailable(
                 "有一项数据库恢复尚未完成。请重启桌面应用继续恢复。".into(),
             ));
         }
@@ -258,7 +258,7 @@ fn publish_restore(data_dir: &Path, pending: &PendingRestore) -> Result<()> {
     let existing = match std::fs::read(&publication) {
         Ok(bytes) => Some(
             serde_json::from_slice::<RestorePublication>(&bytes)
-                .map_err(|error| ZeppBridgeError::ParseError(error.to_string()))?,
+                .map_err(|error| PaceBridgeError::ParseError(error.to_string()))?,
         ),
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => None,
         Err(error) => return Err(error.into()),
@@ -266,7 +266,7 @@ fn publish_restore(data_dir: &Path, pending: &PendingRestore) -> Result<()> {
 
     if let Some(existing) = existing {
         if existing.pending != *pending {
-            return Err(ZeppBridgeError::DataUnavailable(
+            return Err(PaceBridgeError::DataUnavailable(
                 "恢复状态与排队的备份不一致".into(),
             ));
         }
@@ -275,7 +275,7 @@ fn publish_restore(data_dir: &Path, pending: &PendingRestore) -> Result<()> {
                 .iter()
                 .any(|suffix| sidecar(&live, suffix).exists())
             {
-                return Err(ZeppBridgeError::DataUnavailable(
+                return Err(PaceBridgeError::DataUnavailable(
                     "恢复目标仍有 SQLite 日志。请保留当前库及恢复副本。".into(),
                 ));
             }
@@ -285,7 +285,7 @@ fn publish_restore(data_dir: &Path, pending: &PendingRestore) -> Result<()> {
 
     let verification = verify_backup(data_dir, &pending.backup_id)?;
     if !verification.is_usable() {
-        return Err(ZeppBridgeError::DataUnavailable(
+        return Err(PaceBridgeError::DataUnavailable(
             verification
                 .problem
                 .unwrap_or_else(|| "备份未通过校验".into()),
@@ -310,7 +310,7 @@ fn publish_restore(data_dir: &Path, pending: &PendingRestore) -> Result<()> {
     remove_sqlite_group(&staging)?;
     std::fs::copy(snapshot_path(data_dir, &pending.backup_id), &staging)?;
     if file_sha256(&staging)? != manifest.sha256 {
-        return Err(ZeppBridgeError::DataUnavailable(
+        return Err(PaceBridgeError::DataUnavailable(
             "恢复临时文件的校验值不匹配".into(),
         ));
     }
@@ -319,7 +319,7 @@ fn publish_restore(data_dir: &Path, pending: &PendingRestore) -> Result<()> {
         .conn
         .query_row("PRAGMA integrity_check(1)", [], |row| row.get(0))?;
     if !integrity.eq_ignore_ascii_case("ok") {
-        return Err(ZeppBridgeError::DataUnavailable(
+        return Err(PaceBridgeError::DataUnavailable(
             "恢复临时文件没有通过完整性检查".into(),
         ));
     }
@@ -327,7 +327,7 @@ fn publish_restore(data_dir: &Path, pending: &PendingRestore) -> Result<()> {
         .conn
         .query_row("PRAGMA journal_mode=DELETE", [], |row| row.get(0))?;
     if !journal.eq_ignore_ascii_case("delete") {
-        return Err(ZeppBridgeError::DataUnavailable(
+        return Err(PaceBridgeError::DataUnavailable(
             "无法将恢复临时库合并为单一文件".into(),
         ));
     }
@@ -341,11 +341,11 @@ fn publish_restore(data_dir: &Path, pending: &PendingRestore) -> Result<()> {
         sha256: file_sha256(&staging)?,
     };
     let bytes = serde_json::to_vec(&state)
-        .map_err(|error| ZeppBridgeError::ParseError(error.to_string()))?;
+        .map_err(|error| PaceBridgeError::ParseError(error.to_string()))?;
     crate::paths::write_file_atomically(&publication, &bytes)?;
 
     if live.exists() && displaced.exists() {
-        return Err(ZeppBridgeError::DataUnavailable(
+        return Err(PaceBridgeError::DataUnavailable(
             "无法确认上一次恢复的状态。请保留当前库及恢复副本。".into(),
         ));
     }
@@ -353,7 +353,7 @@ fn publish_restore(data_dir: &Path, pending: &PendingRestore) -> Result<()> {
         displace_sqlite_group(&live, &displaced).and_then(|()| std::fs::rename(&staging, &live))
     {
         if let Err(rollback) = restore_sqlite_group(&displaced, &live) {
-            return Err(ZeppBridgeError::DataUnavailable(format!(
+            return Err(PaceBridgeError::DataUnavailable(format!(
                 "换入备份失败（{error}），自动回滚也失败（{rollback}）。请保留恢复过程中生成的数据库文件。"
             )));
         }

@@ -2,9 +2,9 @@
 
 use super::*;
 
-pub fn is_corrupt_error(error: &ZeppBridgeError) -> bool {
+pub fn is_corrupt_error(error: &PaceBridgeError) -> bool {
     match error {
-        ZeppBridgeError::DatabaseError(inner) => is_corrupt_sqlite(inner),
+        PaceBridgeError::DatabaseError(inner) => is_corrupt_sqlite(inner),
         other => looks_corrupt(&other.to_string()),
     }
 }
@@ -290,9 +290,9 @@ impl Database {
         .map(Some)
         .map_err(|error| match error {
             error @ write_lock::WriteLockError::Busy { .. } => {
-                ZeppBridgeError::Busy(error.to_string())
+                PaceBridgeError::Busy(error.to_string())
             }
-            error => ZeppBridgeError::ConfigError(error.to_string()),
+            error => PaceBridgeError::ConfigError(error.to_string()),
         })
     }
 
@@ -367,7 +367,7 @@ impl Database {
                 let _ = backup::prune_migration_backups(data_dir);
                 Ok(true)
             }
-            Err(error) => Err(ZeppBridgeError::DataUnavailable(format!(
+            Err(error) => Err(PaceBridgeError::DataUnavailable(format!(
                 "数据库需要升级到新版本，但升级前的自动备份没有成功，所以没有开始升级：{}。请确认数据文件夹所在磁盘还有空间后重试。",
                 error.user_message()
             ))),
@@ -418,7 +418,7 @@ impl Database {
             .conn
             .query_row("PRAGMA user_version", [], |row| row.get(0))?;
         if version != CURRENT_SCHEMA_VERSION {
-            return Err(ZeppBridgeError::Busy(format!(
+            return Err(PaceBridgeError::Busy(format!(
                 "本地库版本是 v{version}，这个程序需要 v{CURRENT_SCHEMA_VERSION}；重启应用完成升级后再试"
             )));
         }
@@ -429,7 +429,7 @@ impl Database {
     /// Open a query-only connection.
     ///
     /// Read paths that must never write — the local REST API, the MCP server,
-    /// `zeppbridge status` — use this so a bug in an adapter cannot mutate the
+    /// `pacebridge status` — use this so a bug in an adapter cannot mutate the
     /// user's library, and so they never contend for the write lock.
     /// `query_only` is belt-and-braces on top of the read-only open flag.
     /// 只读打开任意版本的库。
@@ -476,7 +476,7 @@ impl Database {
                 }
             }
         }
-        Err(ZeppBridgeError::DatabaseError(annotate_with_path(
+        Err(PaceBridgeError::DatabaseError(annotate_with_path(
             first, &db_path,
         )))
     }
@@ -533,7 +533,7 @@ impl Database {
             std::cmp::Ordering::Equal => Ok(db),
             // 自己的错误码：撞上这一条的人几乎都在无头环境里，而命令行没有
             // i18n 层，只有按码才出得了英文。见 `HeadlessProblem`。
-            std::cmp::Ordering::Less => Err(ZeppBridgeError::Headless(
+            std::cmp::Ordering::Less => Err(PaceBridgeError::Headless(
                 crate::models::error::HeadlessProblem::SchemaUpgradeRequired {
                     found: version,
                     required: CURRENT_SCHEMA_VERSION,
@@ -541,7 +541,7 @@ impl Database {
             )),
             // 旧版命令行 / MCP 读新库。文案说清是哪个程序、怎么让 AI 工具改指
             // 新版（3.1.1 反馈：「数据库 v47 / 程序 v41」，用户不知道该干什么）。
-            std::cmp::Ordering::Greater => Err(ZeppBridgeError::Headless(
+            std::cmp::Ordering::Greater => Err(PaceBridgeError::Headless(
                 crate::models::error::HeadlessProblem::ProgramOutdated {
                     found: version,
                     supported: CURRENT_SCHEMA_VERSION,

@@ -5,14 +5,14 @@ use std::{
     process::Command,
     sync::{Arc, Barrier},
 };
-use zeppbridge_core::{
+use pacebridge_core::{
     auth::{AuthManager, CredentialBackend, FileCredentialBackend},
     models::AuthInfo,
 };
 
 #[test]
 fn live_manager_uses_consented_file_without_restart() {
-    const CHILD: &str = "ZEPPBRIDGE_TEST_LIVE_CREDENTIAL_DIR";
+    const CHILD: &str = "PACEBRIDGE_TEST_LIVE_CREDENTIAL_DIR";
     if let Some(dir) = std::env::var_os(CHILD) {
         let dir = std::path::PathBuf::from(dir);
         let running = AuthManager::new(dir.clone());
@@ -50,7 +50,7 @@ fn live_manager_uses_consented_file_without_restart() {
         return;
     }
     let dir = std::env::temp_dir().join(format!(
-        "zeppbridge-live-credentials-{}",
+        "pacebridge-live-credentials-{}",
         std::process::id()
     ));
     fs::create_dir_all(&dir).unwrap();
@@ -61,8 +61,8 @@ fn live_manager_uses_consented_file_without_restart() {
             "--nocapture",
         ])
         .env(CHILD, &dir)
-        .env_remove("ZEPPBRIDGE_CREDENTIAL_STORE")
-        .env_remove("ZEPPBRIDGE_APP_TOKEN")
+        .env_remove("PACEBRIDGE_CREDENTIAL_STORE")
+        .env_remove("PACEBRIDGE_APP_TOKEN")
         .output()
         .unwrap();
     fs::remove_dir_all(dir).unwrap();
@@ -77,7 +77,7 @@ fn live_manager_uses_consented_file_without_restart() {
 #[test]
 fn concurrent_stores_preserve_every_login_entry() {
     let dir = std::env::temp_dir().join(format!(
-        "zeppbridge-concurrent-credentials-{}",
+        "pacebridge-concurrent-credentials-{}",
         std::process::id()
     ));
     fs::create_dir_all(&dir).unwrap();

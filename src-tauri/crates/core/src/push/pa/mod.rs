@@ -1,5 +1,5 @@
-//! 推到用户自己的 PA 站点（ZeppBridge-Cloud 的 Worker）。移植自
-//! `ZeppBridge-Cloud/uploader/upload.mjs`：只读取数 → 去轨迹 → 拆分 → gzip → 加密 → PUT。
+//! 推到用户自己的 PA 站点（PaceBridge-Cloud 的 Worker）。移植自
+//! `PaceBridge-Cloud/uploader/upload.mjs`：只读取数 → 去轨迹 → 拆分 → gzip → 加密 → PUT。
 //!
 //! 对象布局和组件一致：`days/<日>.json`、`workouts/<id>.json`（15 秒采样）和可选的
 //! `.full.json`、`summary.json`、`contract.json`、`index.json`、`status.json`（**最后传**，
@@ -16,7 +16,7 @@ pub mod crypto;
 pub mod summary;
 
 use super::client::{self, SiteUrl};
-use crate::models::error::{Result, ZeppBridgeError};
+use crate::models::error::{Result, PaceBridgeError};
 use crate::models::ExportDetail;
 use crate::records::{self, RecordQuery};
 use crate::storage::{Database, EXPORT_DATA_TYPES};
@@ -149,7 +149,7 @@ impl Plan {
     }
 }
 
-/// 本机状态里 `status.json` 要用的几项（和 `zeppbridge-cli status --json` 同源）。
+/// 本机状态里 `status.json` 要用的几项（和 `pacebridge-cli status --json` 同源）。
 #[derive(Debug, Clone, Default)]
 pub struct LocalStatus {
     pub last_cloud_sync_at: Option<String>,
@@ -282,7 +282,7 @@ pub fn build_plan(
             plan.unchanged += 1;
         } else {
             let text = serde_json::to_string(&value)
-                .map_err(|error| ZeppBridgeError::ParseError(error.to_string()))?;
+                .map_err(|error| PaceBridgeError::ParseError(error.to_string()))?;
             objects.insert(rel.clone(), hash);
             plan.outgoing.push((rel, text));
         }
@@ -449,19 +449,19 @@ pub fn build_plan(
     )?;
     snapshot.commit()?;
     let status_value = json!({
-        "schema": "zeppbridge-cloud/1",
+        "schema": "pacebridge-cloud/1",
         "last_upload_at": now_text,
         "last_cloud_sync_at": status.last_cloud_sync_at,
         "latest_day": status.latest_day,
         "latest_workout_at": status.latest_workout_at,
         "sync_error": Value::Null,
-        "sync": { "skipped": true, "note": "pushed by ZeppBridge itself after its own sync" },
+        "sync": { "skipped": true, "note": "pushed by PaceBridge itself after its own sync" },
         "full_resolution_workouts": options.full_resolution_workouts,
         "retention_days": options.retention_days,
         "summary_days": summary_count,
         "time_zone": time_zone,
         "app_version": env!("CARGO_PKG_VERSION"),
-        "uploader": "zeppbridge",
+        "uploader": "pacebridge",
         "time_note": "last_upload_at = when this computer uploaded; last_cloud_sync_at = when it last pulled from the Zepp cloud; each record carries its own sample time.",
     });
 
@@ -472,7 +472,7 @@ pub fn build_plan(
     // 有内容变了（或要删东西）才附上 status.json，放在最后；什么都没变就一个请求都不发。
     if !plan.outgoing.is_empty() || !deletes.is_empty() {
         let text = serde_json::to_string(&status_value)
-            .map_err(|error| ZeppBridgeError::ParseError(error.to_string()))?;
+            .map_err(|error| PaceBridgeError::ParseError(error.to_string()))?;
         manifest
             .objects
             .insert("status.json".into(), content_hash(&status_value));

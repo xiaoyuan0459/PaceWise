@@ -6,7 +6,7 @@ impl Database {
     /// 单次运动的确定性洞察。
     pub fn workout_insight(&self, workout_id: &str) -> Result<WorkoutInsight> {
         let Some(workout) = self.get_workout_detail(workout_id)? else {
-            return Err(crate::models::ZeppBridgeError::DataUnavailable(
+            return Err(crate::models::PaceBridgeError::DataUnavailable(
                 "本地库里没有这条运动记录".into(),
             ));
         };
@@ -33,7 +33,7 @@ impl Database {
         }
 
         let target = self.run_row(workout_id)?.ok_or_else(|| {
-            crate::models::ZeppBridgeError::DataUnavailable("本地库里没有这条运动记录".into())
+            crate::models::PaceBridgeError::DataUnavailable("本地库里没有这条运动记录".into())
         })?;
         let (included, excluded) = self.comparable_runs(&target)?;
 
@@ -346,7 +346,7 @@ pub(super) fn parse_time(value: &str) -> Result<DateTime<Utc>> {
     DateTime::parse_from_rfc3339(value)
         .map(|time| time.with_timezone(&Utc))
         .map_err(|error| {
-            crate::models::ZeppBridgeError::ParseError(format!("运动时间无效: {error}"))
+            crate::models::PaceBridgeError::ParseError(format!("运动时间无效: {error}"))
         })
 }
 

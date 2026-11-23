@@ -11,7 +11,7 @@
 //!   不让一个话痨 AI 把收件箱塞满。
 //! - 文字是用户 / AI 写的数据，不是指令；交给 AI 时照样这么标。
 use super::Database;
-use crate::models::{error::Result, ZeppBridgeError};
+use crate::models::{error::Result, PaceBridgeError};
 use chrono::Utc;
 use rusqlite::{params, OptionalExtension};
 use serde::Serialize;
@@ -59,8 +59,8 @@ pub enum Proposal {
     InboxFull,
 }
 
-fn invalid(message: &str) -> ZeppBridgeError {
-    ZeppBridgeError::ConfigError(message.into())
+fn invalid(message: &str) -> PaceBridgeError {
+    PaceBridgeError::ConfigError(message.into())
 }
 
 /// 去首尾空白、把连续空白压成一个；空的或太长的不收。

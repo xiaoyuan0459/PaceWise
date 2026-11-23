@@ -9,7 +9,7 @@
 //! - **达成率只比能比的**：计划按时间写就比时长，按距离写就比距离，混写就不算——不估配速。
 //! - 打分属于用户：不挂外键到 `workouts`，重放、保留期清理都不碰。
 use super::Database;
-use crate::models::{error::Result, ZeppBridgeError};
+use crate::models::{error::Result, PaceBridgeError};
 use crate::storage::plan_adherence::PlannedDay;
 use chrono::{DateTime, Datelike, Duration, Local, NaiveDate, Utc};
 use rusqlite::{params, OptionalExtension};
@@ -94,8 +94,8 @@ pub struct WorkoutFeedback {
     pub plan_date: Option<String>,
 }
 
-fn invalid(message: &str) -> ZeppBridgeError {
-    ZeppBridgeError::ConfigError(message.into())
+fn invalid(message: &str) -> PaceBridgeError {
+    PaceBridgeError::ConfigError(message.into())
 }
 
 fn parse_time(text: &str) -> Option<DateTime<Utc>> {

@@ -247,7 +247,7 @@ impl DataFetcher {
                     },
                     // Not reachable: `WELLNESS_STREAMS` has no weight row, because
                     // weight is not an event stream. It has its own fetcher.
-                    ProbeSurface::WeightRecords => Err(ZeppBridgeError::Unavailable(
+                    ProbeSurface::WeightRecords => Err(PaceBridgeError::Unavailable(
                         "体重不是事件流，不能从这里取".into(),
                     )),
                     ProbeSurface::BloodPressureDays => {
@@ -309,7 +309,7 @@ impl DataFetcher {
                         let candidate_contract_rejected = label == "blood_pressure"
                             && matches!(
                                 error,
-                                ZeppBridgeError::HttpStatus {
+                                PaceBridgeError::HttpStatus {
                                     status: 400 | 422,
                                     ..
                                 }
@@ -466,7 +466,7 @@ impl DataFetcher {
                     )
                     .await
             }
-            _ => Err(ZeppBridgeError::Unavailable(
+            _ => Err(PaceBridgeError::Unavailable(
                 "这个接口不按时间窗口翻页".into(),
             )),
         }

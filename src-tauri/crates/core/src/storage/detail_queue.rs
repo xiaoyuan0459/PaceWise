@@ -144,7 +144,7 @@ mod tests {
     #[test]
     fn detail_queue_resumes_after_reopening_a_temporary_library() {
         let dir = std::env::temp_dir().join(format!(
-            "zeppbridge-detail-queue-{}-{}",
+            "pacebridge-detail-queue-{}-{}",
             std::process::id(),
             crate::unique_suffix()
         ));

@@ -125,10 +125,10 @@ impl CredentialBackend for MacOsCredentialBackend {
 /// Select credential storage: `keychain` / `file` on macOS, or
 /// `secret-service` / `file` / `env` on Linux. Windows uses Credential Manager.
 /// File storage must be opted into; a locked system store never enables it.
-pub const CREDENTIAL_STORE_ENV: &str = "ZEPPBRIDGE_CREDENTIAL_STORE";
+pub const CREDENTIAL_STORE_ENV: &str = "PACEBRIDGE_CREDENTIAL_STORE";
 
 /// 由环境直接给出的令牌（只读存储）。
-pub const APP_TOKEN_ENV: &str = "ZEPPBRIDGE_APP_TOKEN";
+pub const APP_TOKEN_ENV: &str = "PACEBRIDGE_APP_TOKEN";
 
 /// 文件存储的文件名，放在数据目录里。
 #[cfg(unix)]
@@ -259,7 +259,7 @@ impl CredentialBackend for EnvCredentialBackend {
 /// 或无法解锁钥匙串的 macOS 上可能根本用不了系统存储——而把令牌塞进
 /// shell 历史或者 `docker inspect` 看得见的地方比这更糟。
 ///
-/// 所以它必须被显式选中（`ZEPPBRIDGE_CREDENTIAL_STORE=file`），不会在密钥环
+/// 所以它必须被显式选中（`PACEBRIDGE_CREDENTIAL_STORE=file`），不会在密钥环
 /// 不可用时被静默启用。
 #[cfg(unix)]
 #[derive(Debug)]
@@ -433,9 +433,9 @@ impl CredentialBackend for FileCredentialBackend {
     }
 }
 
-/// `ZEPPBRIDGE_CREDENTIAL_STORE` 写了一个认不出来的值。
+/// `PACEBRIDGE_CREDENTIAL_STORE` 写了一个认不出来的值。
 ///
-/// 不静默回落到默认值：把 `ZEPPBRIDGE_CREDENTIAL_STORE=secretservice` 当成
+/// 不静默回落到默认值：把 `PACEBRIDGE_CREDENTIAL_STORE=secretservice` 当成
 /// 「没设」，就等于让一处拼写错误安静地改变令牌存到哪里去。
 #[cfg(unix)]
 #[derive(Debug)]
@@ -501,7 +501,7 @@ mod unix_credential_tests {
     /// 那条路径影响到别的测试。
     fn temp_dir(tag: &str) -> PathBuf {
         let dir = std::env::temp_dir().join(format!(
-            "zeppbridge-cred-{tag}-{}-{}",
+            "pacebridge-cred-{tag}-{}-{}",
             std::process::id(),
             crate::unique_suffix()
         ));

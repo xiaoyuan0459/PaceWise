@@ -1,18 +1,6 @@
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 
-mod fresh_start;
-#[path = "paths/store.rs"]
-mod store;
-pub use fresh_start::{apply_pending_fresh_start, request_fresh_start};
-pub use store::{
-    current_executable_is_windows_apps_alias, current_package_identity_mismatch,
-    import_store_library, mark_store_import_reviewed, package_local_data_dir,
-    prepare_configured_store_data_dir, prepare_package_local_data_dir,
-    recover_interrupted_store_import, require_store_import_decision, store_import_candidates,
-    store_import_required, store_import_reviewed, windows_apps_alias_dir,
-};
-
 const SQLITE_GROUP: [&str; 3] = ["zepp.db", "zepp.db-wal", "zepp.db-shm"];
 const LEGACY_FILES: [&str; 8] = [
     "auth.json",
@@ -33,11 +21,11 @@ const LEGACY_DIRS: [&str; 2] = ["exports", "backups"];
 /// 而用户挂进来的卷可以在任何路径上。同样的问题也出现在 systemd 单元和
 /// NAS 的任务计划里——那里没人会去关心可执行文件躺在哪。给出这一个变量，
 /// 是为了让「数据在哪」变成部署时的一句声明，而不是一条要去反推的规则。
-pub const DATA_DIR_ENV: &str = "ZEPPBRIDGE_DATA_DIR";
+pub const DATA_DIR_ENV: &str = "PACEBRIDGE_DATA_DIR";
 
 /// Install-local data directory: `{exe_dir}/data`.
 ///
-/// `ZEPPBRIDGE_DATA_DIR` overrides everything below when it is set to an
+/// `PACEBRIDGE_DATA_DIR` overrides everything below when it is set to an
 /// absolute path.
 ///
 /// Build-cache binaries (`cargo-target`, rustc `target/`) never own user data.
@@ -46,77 +34,21 @@ pub const DATA_DIR_ENV: &str = "ZEPPBRIDGE_DATA_DIR";
 ///
 /// macOS: `.app` bundles are replaced during updates, so user data lives in
 /// the user Application Support
-/// directory (`~/Library/Application Support/com.zeppbridge.ZeppBridge/data`).
+/// directory (`~/Library/Application Support/com.pacebridge.PaceBridge/data`).
 ///
 /// Linux: a packaged build is installed into a shared, root-owned prefix
 /// (`/usr/bin` for deb/rpm, `/app/bin` inside a Flatpak sandbox). There is no
 /// "next to the executable" there, so those go straight to the XDG data
-/// directory (`~/.local/share/zeppbridge/data`, which a Flatpak redirects into
-/// `~/.var/app/com.zeppbridge.app/`). An AppImage or an unpacked tarball keeps
+/// directory (`~/.local/share/pacebridge/data`, which a Flatpak redirects into
+/// `~/.var/app/com.pacebridge.app/`). An AppImage or an unpacked tarball keeps
 /// the install-local layout, because for those the folder really is the
 /// user's.
 pub fn resolve_data_dir() -> io::Result<PathBuf> {
-    // A packaged Store process must always use its package's real LocalState.
-    // Ignore ZEPPBRIDGE_DATA_DIR here so a sidecar cannot accidentally attach to
-    // the GitHub library or a redirected AppData view. Until the desktop app has
-    // recorded an import/skip choice, CLI and MCP fail closed instead of
-    // creating a fresh empty database on first use.
-    #[cfg(feature = "store")]
-    {
-        if let Some(dir) = prepare_package_local_data_dir()? {
-            require_store_import_decision(&dir)?;
-            return Ok(dir);
-        }
-
-        let explicit = data_dir_from_env()?;
-        if let Some(dir) = explicit {
-            if prepare_configured_store_data_dir(&dir)? {
-                require_store_import_decision(&dir)?;
-                return Ok(dir);
-            }
-            if let Some(family) = current_package_identity_mismatch()? {
-                return Err(io::Error::new(
-                    io::ErrorKind::PermissionDenied,
-                    format!(
-                        "Store build expected package family LincStudio.ZeppBridge_pwftgd5x5w3va, but this process has {family}. Only a validated ZeppBridge Store LocalState path may be used."
-                    ),
-                ));
-            }
-            if current_executable_is_windows_apps_alias() {
-                return Err(io::Error::new(
-                    io::ErrorKind::PermissionDenied,
-                    "Store execution aliases require package identity or their Store LocalState path. Open ZeppBridge from the Start menu or use its generated MCP configuration.",
-                ));
-            }
-            ensure_writable_dir(&dir)?;
-            return Ok(dir);
-        }
-        if let Some(family) = current_package_identity_mismatch()? {
-            return Err(io::Error::new(
-                io::ErrorKind::PermissionDenied,
-                format!(
-                    "Store build expected package family LincStudio.ZeppBridge_pwftgd5x5w3va, but this process has {family}. Launch it with the Store identity or its validated Store LocalState path."
-                ),
-            ));
-        }
-        if current_executable_is_windows_apps_alias() {
-            return Err(io::Error::new(
-                io::ErrorKind::PermissionDenied,
-                "Store execution aliases require package identity or their Store LocalState path. Open ZeppBridge from the Start menu or use its generated MCP configuration.",
-            ));
-        }
-    }
-
-    #[cfg(not(feature = "store"))]
     if let Some(dir) = data_dir_from_env()? {
         ensure_writable_dir(&dir)?;
         return Ok(dir);
     }
 
-    // The Store build runs with package identity. Keep its user library in the
-    // package's LocalState so it is separate from the GitHub portable build and
-    // is removed with the package. Unpackaged developer runs still use the
-    // ordinary install-local layout below.
     let exe = std::env::current_exe()?;
     let exe_dir = exe.parent().ok_or_else(|| {
         io::Error::new(
@@ -303,7 +235,7 @@ fn copy_bundle_entry(source: &Path, destination: &Path) -> io::Result<()> {
 ///
 /// 以前这条退路只有 unix 有（`/Applications/...` 和只读前缀），Windows 那一支
 /// 是 `Err(error) => Err(error)`——一个字的退路都没有。可 Windows 上这件事**更
-/// 常见**：`.msi` 装的是 `C:\Program Files\ZeppBridge`，普通用户对它没有写权限；
+/// 常见**：`.msi` 装的是 `C:\Program Files\PaceBridge`，普通用户对它没有写权限；
 /// 受控文件夹访问、组策略、杀软的目录保护也都会命中。而调用方
 /// （`lib.rs` 的 `setup()`）对这个 `Err` 用的是 `?`，于是应用**静默退出**：
 /// 窗口没出来，通知区里留一个已经画好的死图标，日志一个字都没有。
@@ -333,7 +265,7 @@ fn fall_back_to_user_data_dir(blocked: &Path, error: io::Error) -> io::Result<Pa
     Ok(base)
 }
 
-/// `ZEPPBRIDGE_DATA_DIR`，校验过的。
+/// `PACEBRIDGE_DATA_DIR`，校验过的。
 ///
 /// 相对路径被当成配置错误而不是悄悄按当前工作目录展开：cron 和容器
 /// entrypoint 的工作目录都不是写单元文件的人能看见的东西，按它展开等于
@@ -365,8 +297,8 @@ fn data_dir_from_env_value(raw: Option<std::ffi::OsString>) -> io::Result<Option
 }
 
 /// User-writable data directory: `~/Library/Application Support/
-/// com.zeppbridge.ZeppBridge/data` on macOS, `~/.local/share/zeppbridge/data`
-/// on Linux, `%APPDATA%\zeppbridge\ZeppBridge\data` on Windows. All three keep
+/// com.pacebridge.PaceBridge/data` on macOS, `~/.local/share/pacebridge/data`
+/// on Linux, `%APPDATA%\pacebridge\PaceBridge\data` on Windows. All three keep
 /// the same `data/` layout as the install-local folder, so the CLI and MCP
 /// tools resolve the same place the app does.
 ///
@@ -374,7 +306,7 @@ fn data_dir_from_env_value(raw: Option<std::ffi::OsString>) -> io::Result<Option
 /// `relocate_legacy_data()` 不会把它自己搬给自己（那里有 `source == data_dir`
 /// 的短路）。
 fn user_data_dir() -> io::Result<PathBuf> {
-    let project = directories::ProjectDirs::from("com", "zeppbridge", "ZeppBridge")
+    let project = directories::ProjectDirs::from("com", "pacebridge", "PaceBridge")
         .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "无法确定用户数据目录"))?;
     Ok(project.data_dir().join("data"))
 }
@@ -396,7 +328,7 @@ pub fn validate_update_data_location(data_dir: &Path, executable: &Path) -> io::
     let executable = executable.canonicalize()?;
     let data_dir = data_dir.canonicalize()?;
     // 祖先里名字以 `.app` 结尾的目录**不一定**是 bundle——Windows 上一条
-    // `D:\tools.app\release\ZeppBridge.exe` 就会被误伤，把本来合法的便携
+    // `D:\tools.app\release\PaceBridge.exe` 就会被误伤，把本来合法的便携
     // 目录判成「数据在包里」而拒装更新。真 bundle 一定有 `Contents/`。
     if let Some(bundle) = executable.ancestors().find(|ancestor| {
         ancestor
@@ -406,7 +338,7 @@ pub fn validate_update_data_location(data_dir: &Path, executable: &Path) -> io::
     }) {
         if data_dir.starts_with(bundle) {
             return Err(io::Error::new(io::ErrorKind::InvalidInput,
-                "User data is inside the app bundle. Quit ZeppBridge, copy the data folder to Application Support, and point ZEPPBRIDGE_DATA_DIR there before updating."));
+                "User data is inside the app bundle. Quit PaceBridge, copy the data folder to Application Support, and point PACEBRIDGE_DATA_DIR there before updating."));
         }
     }
     Ok(())
@@ -475,8 +407,8 @@ pub fn other_libraries_on_this_machine(data_dir: &Path) -> Vec<PathBuf> {
 /// Copy-or-move leftover AppData libraries into the install-local folder.
 /// Existing destination files are never overwritten.
 ///
-/// v3 注记：3.x 开发期间与 2.x 并存（当时叫 ZeppBridge3），这里曾整体跳过，免得从
-/// 还在用的 2.x 手里抢数据。2026-09-30 起测试版改回叫 ZeppBridge、产品名和
+/// v3 注记：3.x 开发期间与 2.x 并存（当时叫 PaceBridge3），这里曾整体跳过，免得从
+/// 还在用的 2.x 手里抢数据。2026-09-30 起测试版改回叫 PaceBridge、产品名和
 /// identifier 与 2.x 相同、本机不再并行跑 2.x，3.0 是 2.x 的原地升级，于是
 /// 2026-10-14 去掉了那道跳过：还停在 AppData 时代的老用户升级到 3.x 也能搬过来。
 /// 目的地已有的文件照旧一个不覆盖（`zepp.db` 在就整组不动）。
@@ -520,7 +452,7 @@ fn default_library_sources(
 /// 哪些旧目录该搬进 `data_dir`。
 ///
 /// `live` 是装好的应用正在用的库（macOS 的 Application Support、Linux 的 XDG
-/// 目录）。它也在 `legacy_source_dirs()` 里，可它不是旧版遗留：`ZEPPBRIDGE_DATA_DIR`
+/// 目录）。它也在 `legacy_source_dirs()` 里，可它不是旧版遗留：`PACEBRIDGE_DATA_DIR`
 /// 指到别处、或者从 `target/` 跑一次开发版，都会把整个库连同凭据挪走，装好的
 /// 应用下次打开就是一个空库。Windows 上传 `None`：那里 `%APPDATA%` 的库本来就
 /// 该搬进安装目录旁边。
@@ -602,21 +534,21 @@ fn ensure_writable_dir(dir: &Path) -> io::Result<()> {
 
 fn legacy_source_dirs() -> Vec<PathBuf> {
     let mut dirs = Vec::new();
-    if let Some(project) = directories::ProjectDirs::from("com", "zeppbridge", "ZeppBridge") {
+    if let Some(project) = directories::ProjectDirs::from("com", "pacebridge", "PaceBridge") {
         dirs.push(project.data_dir().to_path_buf());
         dirs.push(project.data_dir().join("data"));
     }
     if let Ok(roaming) = std::env::var("APPDATA") {
-        dirs.push(PathBuf::from(&roaming).join("com.zeppbridge.app"));
+        dirs.push(PathBuf::from(&roaming).join("com.pacebridge.app"));
         dirs.push(
             PathBuf::from(&roaming)
-                .join("zeppbridge")
-                .join("ZeppBridge"),
+                .join("pacebridge")
+                .join("PaceBridge"),
         );
         dirs.push(
             PathBuf::from(roaming)
-                .join("zeppbridge")
-                .join("ZeppBridge")
+                .join("pacebridge")
+                .join("PaceBridge")
                 .join("data"),
         );
     }

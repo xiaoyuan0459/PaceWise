@@ -1,6 +1,6 @@
 //! 推送到用户自己的服务器。
 //!
-//! 现在只有一种目标：PA 站点（ZeppBridge-Cloud 的 Worker，加密上传）。SparkyFitness
+//! 现在只有一种目标：PA 站点（PaceBridge-Cloud 的 Worker，加密上传）。SparkyFitness
 //! 不在这里——它改成了由对方来拉本机的只读 REST（`/v1/records`），见 `local_api`。
 //!
 //! 硬规则（每条都有测试守着）：

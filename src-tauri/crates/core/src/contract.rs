@@ -55,7 +55,7 @@ pub struct MetricContract {
     pub description: &'static str,
 }
 
-/// `zeppbridge-cli contract` 打印的那份 JSON。CLI 和推送（PA 的 `contract.json`）
+/// `pacebridge-cli contract` 打印的那份 JSON。CLI 和推送（PA 的 `contract.json`）
 /// 都用它，免得两边各拼一份。
 pub fn contract_json() -> serde_json::Value {
     serde_json::json!({

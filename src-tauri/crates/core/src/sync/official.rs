@@ -96,7 +96,7 @@ impl OfficialSync {
 
     fn abort_if_cancelled(&self) -> Result<()> {
         if self.cancel.load(Ordering::SeqCst) {
-            return Err(ZeppBridgeError::Cancelled);
+            return Err(PaceBridgeError::Cancelled);
         }
         Ok(())
     }
@@ -119,9 +119,9 @@ impl OfficialSync {
                     tokio::time::sleep(LOCK_POLL).await;
                 }
                 Err(error @ write_lock::WriteLockError::Busy { .. }) => {
-                    return Err(ZeppBridgeError::Busy(error.to_string()))
+                    return Err(PaceBridgeError::Busy(error.to_string()))
                 }
-                Err(error) => return Err(ZeppBridgeError::ConfigError(error.to_string())),
+                Err(error) => return Err(PaceBridgeError::ConfigError(error.to_string())),
             }
         }
     }
@@ -140,7 +140,7 @@ impl OfficialSync {
         let fresh =
             refresh_tokens(&self.store, &self.client, tokens, Utc::now().timestamp()).await?;
         if fresh.user_id != tokens.user_id {
-            return Err(ZeppBridgeError::AccountMismatch);
+            return Err(PaceBridgeError::AccountMismatch);
         }
         Ok(fresh)
     }
@@ -189,7 +189,7 @@ impl OfficialSync {
                 Err(error)
                     if error.is_cancelled()
                         || error.needs_reauth()
-                        || matches!(error, ZeppBridgeError::AccountMismatch) =>
+                        || matches!(error, PaceBridgeError::AccountMismatch) =>
                 {
                     return Err(error)
                 }
@@ -287,7 +287,7 @@ impl OfficialSync {
             || (end - start).num_days() >= UserPrefs::MAX_HISTORY_SYNC_DAYS
             || end > today
         {
-            return Err(ZeppBridgeError::ConfigError(
+            return Err(PaceBridgeError::ConfigError(
                 "Invalid official sleep history date range".into(),
             ));
         }
@@ -299,7 +299,7 @@ impl OfficialSync {
                 .user_prefs()?
                 .backfill_would_be_cleaned_up((today - start).num_days() + 1)
             {
-                return Err(ZeppBridgeError::ConfigError(
+                return Err(PaceBridgeError::ConfigError(
                     "Enable long-term archive or increase retention to cover the start date."
                         .into(),
                 ));
@@ -322,12 +322,12 @@ impl OfficialSync {
 
     async fn tokens_for_sync(&self) -> Result<OfficialTokens> {
         if crate::storage::compaction_in_progress() || crate::storage::replay_in_progress() {
-            return Err(ZeppBridgeError::Busy("本地数据正在整理".into()));
+            return Err(PaceBridgeError::Busy("本地数据正在整理".into()));
         }
         self.abort_if_cancelled()?;
         let tokens = fresh_tokens(&self.store, &self.client, Utc::now().timestamp())
             .await?
-            .ok_or_else(|| ZeppBridgeError::NeedsReauth("还没有连接 Zepp 官方授权".into()))?;
+            .ok_or_else(|| PaceBridgeError::NeedsReauth("还没有连接 Zepp 官方授权".into()))?;
         self.abort_if_cancelled()?;
         self.write_db()
             .await?
@@ -441,12 +441,12 @@ impl OfficialSync {
         let _lease = self.lock(true).await?;
         self.abort_if_cancelled()?;
         if crate::storage::compaction_in_progress() || crate::storage::replay_in_progress() {
-            return Err(ZeppBridgeError::Busy("本地维护正在进行".into()));
+            return Err(PaceBridgeError::Busy("本地维护正在进行".into()));
         }
         let Some(mut tokens) =
             fresh_tokens(&self.store, &self.client, Utc::now().timestamp()).await?
         else {
-            return Err(ZeppBridgeError::NeedsReauth(
+            return Err(PaceBridgeError::NeedsReauth(
                 "还没有连接 Zepp 官方授权".into(),
             ));
         };

@@ -7,7 +7,7 @@
 use super::*;
 
 use chrono::NaiveDate;
-use zeppbridge_core::storage::StoredMetricRecord;
+use pacebridge_core::storage::StoredMetricRecord;
 
 /// 序列化成 JSON；失败（理论上不会）如实报出来。这个 crate 不直接依赖 serde，写成宏免得要命名 Serialize。
 macro_rules! to_json {
@@ -190,7 +190,7 @@ pub(super) fn run_sleep_sessions(
         // 睡眠按醒来那天归属，与 get_sleep_detail 同口径。
         collect_permitted(
             fetch,
-            |session: &zeppbridge_core::models::SleepSession| {
+            |session: &pacebridge_core::models::SleepSession| {
                 permit.day_permitted(AccessCategory::Sleep, local_day(&session.end_time))
             },
             limit,

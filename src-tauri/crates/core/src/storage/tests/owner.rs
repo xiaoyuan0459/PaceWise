@@ -32,11 +32,11 @@ fn an_empty_library_is_claimed_by_the_first_account_and_refuses_others() {
     // 另一个账号：登录和同步都拒绝，主人不变。
     assert!(matches!(
         db.claim_library_for_login("2000", &[]),
-        Err(ZeppBridgeError::AccountMismatch)
+        Err(PaceBridgeError::AccountMismatch)
     ));
     assert!(matches!(
         db.claim_library_for_sync("2000"),
-        Err(ZeppBridgeError::AccountMismatch)
+        Err(PaceBridgeError::AccountMismatch)
     ));
     assert_eq!(db.library_owner().unwrap().as_deref(), Some("1000"));
 }
@@ -48,7 +48,7 @@ fn an_upgraded_library_with_data_refuses_a_new_account_that_differs_from_the_con
     // 老库有数据、没有主人：已配置的是 1000，新登录 2000 → 拒绝，不认领。
     assert!(matches!(
         db.claim_library_for_login("2000", &["1000".into()]),
-        Err(ZeppBridgeError::AccountMismatch)
+        Err(PaceBridgeError::AccountMismatch)
     ));
     assert_eq!(db.library_owner().unwrap(), None);
     // 同一个账号重新登录 → 认领（推定归属）。

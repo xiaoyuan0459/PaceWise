@@ -171,19 +171,19 @@ fn the_guide_names_exactly_the_registered_tools() {
 #[test]
 fn the_guide_is_listed_and_readable_as_a_resource() {
     let list = handle("resources/list", &json!({})).unwrap();
-    assert_eq!(list["resources"][0]["uri"], "zeppbridge://guide");
-    let read = handle("resources/read", &json!({ "uri": "zeppbridge://guide" })).unwrap();
+    assert_eq!(list["resources"][0]["uri"], "pacebridge://guide");
+    let read = handle("resources/read", &json!({ "uri": "pacebridge://guide" })).unwrap();
     assert!(read["contents"][0]["text"]
         .as_str()
         .unwrap()
         .contains("no delete tools"));
-    assert!(handle("resources/read", &json!({ "uri": "zeppbridge://nope" })).is_err());
+    assert!(handle("resources/read", &json!({ "uri": "pacebridge://nope" })).is_err());
     let init = handle("initialize", &json!({})).unwrap();
     assert_eq!(init["capabilities"]["resources"], json!({}));
     assert!(init["instructions"]
         .as_str()
         .unwrap()
-        .contains("zeppbridge://guide"));
+        .contains("pacebridge://guide"));
 }
 
 #[test]

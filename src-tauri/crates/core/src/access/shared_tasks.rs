@@ -23,7 +23,7 @@ pub fn shared_task_grants(db: &Database) -> Result<Vec<TaskGrant>> {
         match serde_json::from_str::<SharedTaskPayload>(&payload) {
             Ok(task) => tasks.push(task),
             Err(error) => {
-                eprintln!("zeppbridge-mcp: 跳过一条解析失败的授权任务：{error}");
+                eprintln!("pacebridge-mcp: 跳过一条解析失败的授权任务：{error}");
             }
         }
     }
@@ -209,7 +209,7 @@ pub(super) fn workout_local_days(
     for row in rows {
         let (workout_id, value) = row?;
         let day = NaiveDate::parse_from_str(&value, "%Y-%m-%d")
-            .map_err(|error| ZeppBridgeError::ParseError(format!("运动开始日无效: {error}")))?;
+            .map_err(|error| PaceBridgeError::ParseError(format!("运动开始日无效: {error}")))?;
         days.insert(workout_id, day);
     }
     Ok(days)

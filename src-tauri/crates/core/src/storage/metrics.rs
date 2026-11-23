@@ -96,12 +96,12 @@ impl Database {
             let key: String = row.get(0)?;
             let payload = decode_raw_payload(row.get(1)?, row.get(2)?)?;
             let payload = serde_json::from_str(&payload)
-                .map_err(|error| ZeppBridgeError::ParseError(error.to_string()))?;
+                .map_err(|error| PaceBridgeError::ParseError(error.to_string()))?;
             for entry in Normalizer::normalize_wellness(&key, &payload).food_entries {
                 let identity = match &entry.food_log_id {
                     Some(id) => format!("id:{id}"),
                     None => serde_json::to_string(&entry)
-                        .map_err(|error| ZeppBridgeError::ParseError(error.to_string()))?,
+                        .map_err(|error| PaceBridgeError::ParseError(error.to_string()))?,
                 };
                 if seen.insert(identity) && entry.date >= start && entry.date <= end {
                     entries.push(entry);
@@ -256,7 +256,7 @@ impl Database {
             || !["daily_metrics", "metric_samples", "sleep_sessions"].contains(&source)
             || (source == "sleep_sessions" && metric != "sleep_score")
         {
-            return Err(ZeppBridgeError::ConfigError("Invalid metric query".into()));
+            return Err(PaceBridgeError::ConfigError("Invalid metric query".into()));
         }
         let limit = limit.clamp(1, 201) as i64;
         let offset = offset.min(1_000_000) as i64;

@@ -1,4 +1,4 @@
-//! ZeppBridge 共享核心。
+//! PaceBridge 共享核心。
 //!
 //! 桌面应用（Tauri）、命令行、MCP server 和本机 REST API 都只是这层的适配器：
 //! 数据模型、SQLite schema 与迁移、归一化、查询语义、导出、洞察和写入协调全部
@@ -14,11 +14,9 @@ pub mod device_catalog;
 pub mod event_days;
 pub mod export_fit;
 pub mod export_formats;
-pub mod export_unstrap;
 pub mod fetcher;
 pub mod import;
 pub mod insight;
-pub mod letters;
 pub mod local_api;
 pub mod models;
 pub mod normalizer;

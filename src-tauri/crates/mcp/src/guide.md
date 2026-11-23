@@ -1,6 +1,6 @@
-# ZeppBridge for local AI — guide
+# PaceBridge for local AI — guide
 
-ZeppBridge keeps the user's Zepp health and training data in a database on this computer. This MCP server reads it, and can write a few user-authored records that the user can undo in the desktop app. Nothing leaves the computer except `sync_now` (pulls from Zepp cloud) and `publish_training_plan` (sends a plan to the watch).
+PaceBridge keeps the user's Zepp health and training data in a database on this computer. This MCP server reads it, and can write a few user-authored records that the user can undo in the desktop app. Nothing leaves the computer except `sync_now` (pulls from Zepp cloud) and `publish_training_plan` (sends a plan to the watch).
 
 ## Where to start
 
@@ -23,13 +23,13 @@ ZeppBridge keeps the user's Zepp health and training data in a database on this 
 
 ## Training plans
 
-- `get_training_plan` — what ZeppBridge last sent to the watch, open drafts, and `aiMayPublish`.
+- `get_training_plan` — what PaceBridge last sent to the watch, open drafts, and `aiMayPublish`.
 - `draft_training_plan` — validates and saves a draft; nothing is sent.
 - `publish_training_plan` — sends a draft only if the user turned on "Allow AI to publish" in settings; explain the preview and get the user's yes first.
 
 ## Writing (local, undoable)
 
-Every write below is recorded in a change ledger. The user can undo each one in ZeppBridge → Settings → Local AI → Recent AI changes. There are **no delete tools**: mark an injury healed with `endDate`, retire a shoe with `retiredOn`. When editing an existing record, pass its `id` and only the fields you change.
+Every write below is recorded in a change ledger. The user can undo each one in PaceBridge → Settings → Local AI → Recent AI changes. There are **no delete tools**: mark an injury healed with `endDate`, retire a shoe with `retiredOn`. When editing an existing record, pass its `id` and only the fields you change.
 
 - `save_injury` — an injury the user told you about.
 - `save_life_event` — travel, illness, routine changes, named periods (`epoch`).
@@ -41,7 +41,7 @@ Every write below is recorded in a change ledger. The user can undo each one in 
 
 ## Actions (not in the ledger)
 
-- `sync_now` — pull new data from Zepp cloud, same path as `zeppbridge-cli sync`. Waits up to 45 s; `running` means it continues in the background, `deferred` means ZeppBridge is reorganising local data first. Many AI apps time out tool calls after 60 s — do not call it repeatedly. No new data is normal until the watch has synced to the Zepp App.
+- `sync_now` — pull new data from Zepp cloud, same path as `pacebridge-cli sync`. Waits up to 45 s; `running` means it continues in the background, `deferred` means PaceBridge is reorganising local data first. Many AI apps time out tool calls after 60 s — do not call it repeatedly. No new data is normal until the watch has synced to the Zepp App.
 - `export_data` — write a summary JSON of a date range (≤ 366 days, no routes) into the `exports` folder and return its name (relative to the data folder; no absolute paths are returned). Only when the user wants a file.
 
 ## Scope

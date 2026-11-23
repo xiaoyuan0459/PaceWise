@@ -11,7 +11,7 @@ use super::*;
 pub fn validate_region_host(input: &str) -> Result<String> {
     let trimmed = input.trim();
     if trimmed.is_empty() {
-        return Err(ZeppBridgeError::InvalidHost("主机为空".into()));
+        return Err(PaceBridgeError::InvalidHost("主机为空".into()));
     }
 
     let candidate = if trimmed.contains("://") {
@@ -38,38 +38,38 @@ pub fn validate_region_host(input: &str) -> Result<String> {
             .and_then(|(_, port)| port.parse::<u16>().ok())
             .is_some()
         {
-            return Err(ZeppBridgeError::InvalidHost("不允许端口".into()));
+            return Err(PaceBridgeError::InvalidHost("不允许端口".into()));
         }
     }
 
     let url = Url::parse(&candidate)
-        .map_err(|_| ZeppBridgeError::InvalidHost("主机 URL 无法解析".into()))?;
+        .map_err(|_| PaceBridgeError::InvalidHost("主机 URL 无法解析".into()))?;
     if url.scheme() != "https" {
-        return Err(ZeppBridgeError::InvalidHost("只允许 HTTPS".into()));
+        return Err(PaceBridgeError::InvalidHost("只允许 HTTPS".into()));
     }
     if !url.username().is_empty() || url.password().is_some() {
-        return Err(ZeppBridgeError::InvalidHost("不允许凭据".into()));
+        return Err(PaceBridgeError::InvalidHost("不允许凭据".into()));
     }
     if url.port().is_some() {
-        return Err(ZeppBridgeError::InvalidHost("不允许端口".into()));
+        return Err(PaceBridgeError::InvalidHost("不允许端口".into()));
     }
     if url.path() != "/" && !url.path().is_empty() {
-        return Err(ZeppBridgeError::InvalidHost("不允许路径".into()));
+        return Err(PaceBridgeError::InvalidHost("不允许路径".into()));
     }
     if url.query().is_some() || url.fragment().is_some() {
-        return Err(ZeppBridgeError::InvalidHost(
+        return Err(PaceBridgeError::InvalidHost(
             "不允许 query 或 fragment".into(),
         ));
     }
 
     let host = url
         .host_str()
-        .ok_or_else(|| ZeppBridgeError::InvalidHost("缺少主机名".into()))?
+        .ok_or_else(|| PaceBridgeError::InvalidHost("缺少主机名".into()))?
         .to_ascii_lowercase();
     let valid_zepp = host.starts_with("api-mifit") && host.ends_with(".zepp.com");
     let valid_huami = host.starts_with("api-mifit") && host.ends_with(".huami.com");
     if !(valid_zepp || valid_huami) {
-        return Err(ZeppBridgeError::InvalidHost(
+        return Err(PaceBridgeError::InvalidHost(
             "仅允许 api-mifit*.zepp.com 或 api-mifit*.huami.com".into(),
         ));
     }
@@ -156,16 +156,16 @@ pub(super) fn exponential_backoff_ms(attempt: usize, base_ms: u64) -> u64 {
 
 /// Classification is kept pure so callers/tests can verify the security
 /// boundary without constructing a live HTTP response.
-pub fn classify_status(status: u16) -> Option<ZeppBridgeError> {
+pub fn classify_status(status: u16) -> Option<PaceBridgeError> {
     match status {
-        401 | 403 => Some(ZeppBridgeError::NeedsReauth(format!("HTTP {status}"))),
-        404 => Some(ZeppBridgeError::Unavailable(format!("HTTP {status}"))),
-        429 | 500..=599 => Some(ZeppBridgeError::RetryExhausted {
+        401 | 403 => Some(PaceBridgeError::NeedsReauth(format!("HTTP {status}"))),
+        404 => Some(PaceBridgeError::Unavailable(format!("HTTP {status}"))),
+        429 | 500..=599 => Some(PaceBridgeError::RetryExhausted {
             status,
             message: "服务暂时不可用".into(),
         }),
         200..=299 => None,
-        _ => Some(ZeppBridgeError::HttpStatus {
+        _ => Some(PaceBridgeError::HttpStatus {
             status,
             message: "服务返回非成功状态".into(),
         }),
@@ -197,7 +197,7 @@ pub fn classify_status(status: u16) -> Option<ZeppBridgeError> {
 /// 下一份带着具体 code 的报告就能把它精确地映射成 `NeedsReauth`。
 pub(super) const CLOUD_SUCCESS_CODE: i64 = 1;
 
-pub(super) fn classify_business_code(payload: &Value) -> Option<ZeppBridgeError> {
+pub(super) fn classify_business_code(payload: &Value) -> Option<PaceBridgeError> {
     let code = payload.as_object()?.get("code")?.as_i64()?;
     if code == CLOUD_SUCCESS_CODE {
         return None;
@@ -207,7 +207,7 @@ pub(super) fn classify_business_code(payload: &Value) -> Option<ZeppBridgeError>
         .and_then(Value::as_str)
         .unwrap_or("(云端没有给出说明)")
         .to_string();
-    Some(ZeppBridgeError::CloudRejected { code, message })
+    Some(PaceBridgeError::CloudRejected { code, message })
 }
 
 /// 一次 JSON 响应最多读这么大。没有上限时，一个异常大的报文会在
@@ -225,7 +225,7 @@ pub(super) fn validate_api_path(path: &str) -> Result<()> {
         || path.contains('\\')
         || path.contains('\0')
     {
-        return Err(ZeppBridgeError::ConfigError("非法 API 路径".into()));
+        return Err(PaceBridgeError::ConfigError("非法 API 路径".into()));
     }
     Ok(())
 }
@@ -244,7 +244,7 @@ pub(super) fn validate_member_id(input: &str) -> Result<&str> {
         return Ok(trimmed);
     }
     if trimmed.is_empty() || trimmed.len() > 32 || !trimmed.chars().all(|c| c.is_ascii_digit()) {
-        return Err(ZeppBridgeError::ConfigError("member_id 无效".into()));
+        return Err(PaceBridgeError::ConfigError("member_id 无效".into()));
     }
     Ok(trimmed)
 }
@@ -256,7 +256,7 @@ pub(super) async fn read_json_body(response: reqwest::Response) -> Result<Value>
 pub fn validate_track_id(input: &str) -> Result<String> {
     let trimmed = input.trim();
     if trimmed.is_empty() || trimmed.len() > 32 || !trimmed.chars().all(|c| c.is_ascii_digit()) {
-        return Err(ZeppBridgeError::ConfigError("trackid 无效".into()));
+        return Err(PaceBridgeError::ConfigError("trackid 无效".into()));
     }
     Ok(trimmed.to_owned())
 }
@@ -269,7 +269,7 @@ pub fn validate_detail_source(input: &str) -> Result<String> {
             .chars()
             .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '-'))
     {
-        return Err(ZeppBridgeError::ConfigError("source 无效".into()));
+        return Err(PaceBridgeError::ConfigError("source 无效".into()));
     }
     Ok(trimmed.to_owned())
 }

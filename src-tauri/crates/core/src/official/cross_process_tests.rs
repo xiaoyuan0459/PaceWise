@@ -18,9 +18,9 @@ use std::sync::mpsc;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-const ROLE_ENV: &str = "ZEPPBRIDGE_OFFICIAL_CHILD_ROLE";
-const DIR_ENV: &str = "ZEPPBRIDGE_OFFICIAL_CHILD_DIR";
-const RELAY_ENV: &str = "ZEPPBRIDGE_OFFICIAL_CHILD_RELAY";
+const ROLE_ENV: &str = "PACEBRIDGE_OFFICIAL_CHILD_ROLE";
+const DIR_ENV: &str = "PACEBRIDGE_OFFICIAL_CHILD_DIR";
+const RELAY_ENV: &str = "PACEBRIDGE_OFFICIAL_CHILD_RELAY";
 const CHILD_TEST: &str = "official::cross_process_tests::child_process_entry";
 
 /// 假凭据存储：每个条目是 `secrets/` 下的一个文件，另一个进程也读得到。
@@ -100,7 +100,7 @@ impl CredentialBackend for PausingBackend {
 fn temp_dir() -> PathBuf {
     static SERIAL: AtomicUsize = AtomicUsize::new(0);
     let dir = std::env::temp_dir().join(format!(
-        "zeppbridge-official-xproc-{}-{}-{}",
+        "pacebridge-official-xproc-{}-{}-{}",
         std::process::id(),
         SERIAL.fetch_add(1, Ordering::Relaxed),
         crate::unique_suffix()

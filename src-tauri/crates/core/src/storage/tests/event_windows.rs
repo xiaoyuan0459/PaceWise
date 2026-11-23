@@ -244,7 +244,7 @@ fn a_window_still_owning_a_derived_row_is_kept() {
 #[test]
 fn the_first_consolidation_leaves_a_verified_backup_behind() {
     let dir = std::env::temp_dir().join(format!(
-        "zeppbridge-consolidate-backup-{}",
+        "pacebridge-consolidate-backup-{}",
         std::process::id()
     ));
     let _ = std::fs::remove_dir_all(&dir);

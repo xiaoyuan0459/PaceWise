@@ -6,7 +6,7 @@
 
 use super::model::*;
 use super::AiTaskError;
-use crate::models::error::{Result, ZeppBridgeError};
+use crate::models::error::{Result, PaceBridgeError};
 use crate::storage::Database;
 use chrono::{NaiveDate, Utc};
 use rusqlite::{params, OptionalExtension};
@@ -240,7 +240,7 @@ impl Database {
                         task
                     })
                     .map_err(|error| {
-                        ZeppBridgeError::ParseError(format!(
+                        PaceBridgeError::ParseError(format!(
                             "ai_tasks[{id}] 的 payload 损坏: {error}"
                         ))
                     })
@@ -276,7 +276,7 @@ impl Database {
         task.updated_at = now;
 
         let payload = serde_json::to_string(&task)
-            .map_err(|error| ZeppBridgeError::ParseError(format!("ai_task 序列化失败: {error}")))?;
+            .map_err(|error| PaceBridgeError::ParseError(format!("ai_task 序列化失败: {error}")))?;
         self.conn.execute(
             "INSERT INTO ai_tasks
                 (id, title, template_id, payload, workout_count, mcp_shared, created_at, updated_at)
@@ -387,7 +387,7 @@ impl Database {
                 continue;
             };
             let mut task = serde_json::from_str::<AiTask>(&payload).map_err(|error| {
-                ZeppBridgeError::ParseError(format!("ai_tasks[{id}] 的 payload 损坏: {error}"))
+                PaceBridgeError::ParseError(format!("ai_tasks[{id}] 的 payload 损坏: {error}"))
             })?;
             upgrade_heart_rate_split(&mut task.categories);
             transaction.execute("DELETE FROM ai_tasks WHERE id = ?1", [id])?;
@@ -412,7 +412,7 @@ impl Database {
             let payload = row?;
             let mut template =
                 serde_json::from_str::<AiTaskTemplate>(&payload).map_err(|error| {
-                    ZeppBridgeError::ParseError(format!(
+                    PaceBridgeError::ParseError(format!(
                         "ai_task_templates 的 payload 损坏: {error}"
                     ))
                 })?;
@@ -439,7 +439,7 @@ impl Database {
                         template
                     })
                     .map_err(|error| {
-                        ZeppBridgeError::ParseError(format!(
+                        PaceBridgeError::ParseError(format!(
                             "ai_task_templates[{id}] 的 payload 损坏: {error}"
                         ))
                     })
@@ -480,7 +480,7 @@ impl Database {
         template.updated_at = now;
 
         let payload = serde_json::to_string(&template).map_err(|error| {
-            ZeppBridgeError::ParseError(format!("ai_task_template 序列化失败: {error}"))
+            PaceBridgeError::ParseError(format!("ai_task_template 序列化失败: {error}"))
         })?;
         self.conn.execute(
             "INSERT INTO ai_task_templates (id, builtin, name, payload, created_at, updated_at)
@@ -523,7 +523,7 @@ impl Database {
                 return Ok(id);
             }
         }
-        Err(ZeppBridgeError::Busy("无法分配唯一的任务 id".into()))
+        Err(PaceBridgeError::Busy("无法分配唯一的任务 id".into()))
     }
 
     fn new_ai_template_id(&self) -> Result<String> {
@@ -533,7 +533,7 @@ impl Database {
                 return Ok(id);
             }
         }
-        Err(ZeppBridgeError::Busy("无法分配唯一的模板 id".into()))
+        Err(PaceBridgeError::Busy("无法分配唯一的模板 id".into()))
     }
 }
 

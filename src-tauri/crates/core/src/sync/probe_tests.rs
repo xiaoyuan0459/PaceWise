@@ -55,12 +55,12 @@ fn an_empty_cloud_answer_never_blocks_the_sync() {
 async fn a_failed_probe_falls_back_to_a_full_sync() {
     let since = at("2026-10-07T08:12:00Z");
     let failed = bounded(since, async {
-        Err::<Option<DateTime<Utc>>, _>(ZeppBridgeError::Unavailable("502".into()))
+        Err::<Option<DateTime<Utc>>, _>(PaceBridgeError::Unavailable("502".into()))
     })
     .await;
     assert_eq!(failed, CloudProbe::Unknown);
     let reauth = bounded(since, async {
-        Err::<Option<DateTime<Utc>>, _>(ZeppBridgeError::NeedsReauth("expired".into()))
+        Err::<Option<DateTime<Utc>>, _>(PaceBridgeError::NeedsReauth("expired".into()))
     })
     .await;
     assert_eq!(reauth, CloudProbe::Unknown);

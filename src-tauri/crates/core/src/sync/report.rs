@@ -351,7 +351,7 @@ pub(super) fn chunk_month_label(chunk_start: &str) -> &str {
 /// 从来没有待拉取（`last_error` 为 None）才是空成功。
 pub(super) fn pending_details_outcome<T>(
     records: Vec<T>,
-    last_error: Option<ZeppBridgeError>,
+    last_error: Option<PaceBridgeError>,
 ) -> Result<Vec<T>> {
     if records.is_empty() {
         if let Some(error) = last_error {

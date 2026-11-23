@@ -1,6 +1,6 @@
 //! Explicit, bounded detail retrieval independent of summary sync.
 use super::*;
-use zeppbridge_core::storage::detail_queue::DetailCoverage;
+use pacebridge_core::storage::detail_queue::DetailCoverage;
 
 fn options(flags: &Flags) -> Result<(Option<bool>, usize), String> {
     flags.reject_unknown(&["status", "channel", "max-items", "retry-failed", "json"])?;
@@ -69,11 +69,11 @@ pub(super) fn cmd_details(args: &[String]) -> u8 {
     };
     let retry = flags.has("retry-failed");
     let result = if channel == Some(true) {
-        zeppbridge_core::sync::OfficialSync::new(
+        pacebridge_core::sync::OfficialSync::new(
             &dir,
             db,
             cancel.clone(),
-            zeppbridge_core::official::fetch::system_time_zone(),
+            pacebridge_core::official::fetch::system_time_zone(),
         )
         .and_then(|manager| {
             runtime.block_on(async {

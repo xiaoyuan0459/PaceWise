@@ -23,7 +23,7 @@ impl Database {
         payload: &serde_json::Value,
     ) -> Result<NormalizationCounts> {
         let kind = OfficialKind::from_source_key(source_key).ok_or_else(|| {
-            ZeppBridgeError::ConfigError(format!("认不出的官方报文: {source_key}"))
+            PaceBridgeError::ConfigError(format!("认不出的官方报文: {source_key}"))
         })?;
         let mut counts = NormalizationCounts::default();
         match kind {
@@ -116,11 +116,11 @@ impl Database {
                     .next()
                     .filter(|id| !id.is_empty())
                     .ok_or_else(|| {
-                        ZeppBridgeError::ConfigError("官方运动明细的 source_key 无效".into())
+                        PaceBridgeError::ConfigError("官方运动明细的 source_key 无效".into())
                     })?
                     .to_string();
                 if !self.workout_exists(&workout_id)? {
-                    return Err(ZeppBridgeError::DataUnavailable(
+                    return Err(PaceBridgeError::DataUnavailable(
                         "明细对应的运动汇总还不存在".into(),
                     ));
                 }

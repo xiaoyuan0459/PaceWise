@@ -10,7 +10,7 @@ use crate::official::fake_server::{serve, Reply};
 async fn file_grant_refreshes_and_supplement_imports_sleep_and_naps_idempotently() {
     use crate::auth::FileCredentialBackend;
     let dir = std::env::temp_dir().join(format!(
-        "zeppbridge-official-sync-{}",
+        "pacebridge-official-sync-{}",
         crate::unique_suffix()
     ));
     let backend = Arc::new(FileCredentialBackend::new(&dir));

@@ -23,7 +23,7 @@ impl TestDir {
         static COUNTER: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
         let serial = COUNTER.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         let dir = std::env::temp_dir().join(format!(
-            "zeppbridge-access-{tag}-{}-{nonce}-{serial}",
+            "pacebridge-access-{tag}-{}-{nonce}-{serial}",
             std::process::id()
         ));
         std::fs::create_dir_all(&dir).unwrap();

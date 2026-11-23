@@ -50,7 +50,7 @@ pub(super) fn encode_workout(workout: &Value) -> Result<Option<(Vec<u8>, usize)>
     });
 
     // 设备名只在本地库确实记了的时候写。这里写的是 Zepp 报的那块表，不是
-    // ZeppBridge 自己。
+    // PaceBridge 自己。
     let device_label = text(workout.get("device_label"));
     if !device_label.is_empty() {
         messages.push(Message {

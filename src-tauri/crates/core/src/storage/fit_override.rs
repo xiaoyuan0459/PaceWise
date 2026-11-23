@@ -20,7 +20,7 @@ use super::util::{parse_datetime, workout_id_from_detail_key};
 use super::Database;
 use crate::decoder::{decode_workout_detail, DecodedWorkout};
 use crate::export_fit::{decode_fit_file, ImportedFit};
-use crate::models::error::{Result, ZeppBridgeError};
+use crate::models::error::{Result, PaceBridgeError};
 use crate::normalizer::Normalizer;
 
 /// 修正文件和原记录的起点最多能差多少秒。用户说修正时保留原来的起点；
@@ -179,7 +179,7 @@ impl Database {
         } else if let Some(original) = original {
             self.restore_fit_original(workout_id, original)?;
         } else {
-            return Err(ZeppBridgeError::WorkoutFitOriginalMissing);
+            return Err(PaceBridgeError::WorkoutFitOriginalMissing);
         }
         self.conn.execute(
             "DELETE FROM workout_fit_overrides WHERE workout_id = ?1",
@@ -222,7 +222,7 @@ impl Database {
             let rows = original
                 .rows
                 .get(table)
-                .ok_or(ZeppBridgeError::WorkoutFitOriginalMissing)?;
+                .ok_or(PaceBridgeError::WorkoutFitOriginalMissing)?;
             let values = columns
                 .split(',')
                 .map(|_| "?")

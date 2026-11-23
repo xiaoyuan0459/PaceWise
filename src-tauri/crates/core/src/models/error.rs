@@ -20,7 +20,7 @@ pub enum HeadlessProblem {
     /// 库的 schema 比这个程序新：读库的是旧版命令行 / MCP。
     ///
     /// 3.1.1 反馈里的「数据库 v47 / 程序 v41」就是这一条：桌面应用升级了，
-    /// AI 工具里登记的还是旧安装目录或旧工具包里的 `zeppbridge-mcp`。
+    /// AI 工具里登记的还是旧安装目录或旧工具包里的 `pacebridge-mcp`。
     /// 用户能做的只有一件事——让 AI 工具改指新版——所以文案直接说怎么做，
     /// 并带上**是哪个程序**在报（打码后的路径 + 版本），好认出是哪份旧登记。
     ProgramOutdated {
@@ -54,12 +54,12 @@ impl HeadlessProblem {
             Self::NoCredentialStore { detail } => format!(
                 "{detail}。这台机器上可能没有运行 Secret Service（GNOME Keyring / \
                  KWallet）——无头服务器和容器通常没有。改用 \
-                 ZEPPBRIDGE_CREDENTIAL_STORE=file（令牌以 0600 写在数据目录里），\
-                 或 ZEPPBRIDGE_CREDENTIAL_STORE=env 配合 ZEPPBRIDGE_APP_TOKEN"
+                 PACEBRIDGE_CREDENTIAL_STORE=file（令牌以 0600 写在数据目录里），\
+                 或 PACEBRIDGE_CREDENTIAL_STORE=env 配合 PACEBRIDGE_APP_TOKEN"
             ),
             Self::SchemaUpgradeRequired { found, required } => format!(
                 "本机数据库还是 v{found}，这个程序需要 v{required}。只读连接无法\
-                 升级——无头环境请跑一次 `zeppbridge-cli reprocess`，有桌面应用就\
+                 升级——无头环境请跑一次 `pacebridge-cli reprocess`，有桌面应用就\
                  启动一次（两条路都会在升级前自动生成备份），再重试。"
             ),
             Self::ProgramOutdated {
@@ -71,12 +71,12 @@ impl HeadlessProblem {
                 "本机数据库是 v{found}，而这个程序（{program} {version}）只认到 \
                  v{supported}——它比桌面应用旧。多半是 AI 工具里还登记着旧版：在桌面\
                  应用的设置里重新连接这个 AI 工具（Claude Desktop 重新生成并安装 \
-                 ZeppBridge.mcpb，其他工具重新复制连接命令），删掉旧的扩展或指向旧\
+                 PaceBridge.mcpb，其他工具重新复制连接命令），删掉旧的扩展或指向旧\
                  安装目录的登记，再重启 AI 工具。"
             ),
             Self::TokenNotInStore => "认证元数据在，但凭据管理器里没有这个账号的\
                  令牌。库能跨机器拷，令牌不能。请重新登录，或设 \
-                 ZEPPBRIDGE_CREDENTIAL_STORE=file / =env 后重试"
+                 PACEBRIDGE_CREDENTIAL_STORE=file / =env 后重试"
                 .to_string(),
         }
     }
@@ -90,13 +90,13 @@ impl HeadlessProblem {
             Self::NoCredentialStore { detail } => format!(
                 "{detail}. There may be no Secret Service running on this machine \
                  (GNOME Keyring / KWallet) -- headless servers and containers \
-                 usually have none. Use ZEPPBRIDGE_CREDENTIAL_STORE=file (the token \
+                 usually have none. Use PACEBRIDGE_CREDENTIAL_STORE=file (the token \
                  is written 0600 into the data directory) or \
-                 ZEPPBRIDGE_CREDENTIAL_STORE=env together with ZEPPBRIDGE_APP_TOKEN"
+                 PACEBRIDGE_CREDENTIAL_STORE=env together with PACEBRIDGE_APP_TOKEN"
             ),
             Self::SchemaUpgradeRequired { found, required } => format!(
                 "This library is still v{found} and this build needs v{required}. A \
-                 read-only connection cannot upgrade it: run `zeppbridge-cli \
+                 read-only connection cannot upgrade it: run `pacebridge-cli \
                  reprocess` on a headless machine, or launch the desktop app once. \
                  Both take a backup before upgrading. Then try again."
             ),
@@ -110,13 +110,13 @@ impl HeadlessProblem {
                  understands up to v{supported} -- it is older than the desktop app. \
                  Usually an AI tool still points at an old copy: reconnect that tool \
                  from the desktop app's settings (for Claude Desktop, generate and \
-                 install ZeppBridge.mcpb again; for other tools, copy the connect \
+                 install PaceBridge.mcpb again; for other tools, copy the connect \
                  command again), remove the old extension or any entry pointing at an \
                  old install folder, then restart the AI tool."
             ),
             Self::TokenNotInStore => "The account metadata is here but the credential \
                  store has no token for it. A library copies between machines; a token \
-                 does not. Sign in again, or set ZEPPBRIDGE_CREDENTIAL_STORE=file / \
+                 does not. Sign in again, or set PACEBRIDGE_CREDENTIAL_STORE=file / \
                  =env and retry"
                 .to_string(),
         }
@@ -130,7 +130,7 @@ impl std::fmt::Display for HeadlessProblem {
 }
 
 #[derive(Error, Debug)]
-pub enum ZeppBridgeError {
+pub enum PaceBridgeError {
     #[error("认证错误: {0}")]
     AuthError(String),
 
@@ -242,17 +242,17 @@ pub enum ZeppBridgeError {
     Unknown(String),
 }
 
-pub type Result<T> = std::result::Result<T, ZeppBridgeError>;
+pub type Result<T> = std::result::Result<T, PaceBridgeError>;
 
 /// `serde_json` 的失败一律落 `ParseError`——载荷序列化/反序列化错误在
 /// 出口语义上和「云端报文解析不了」是同一类。
-impl From<serde_json::Error> for ZeppBridgeError {
+impl From<serde_json::Error> for PaceBridgeError {
     fn from(error: serde_json::Error) -> Self {
         Self::ParseError(format!("JSON 处理失败: {error}"))
     }
 }
 
-impl ZeppBridgeError {
+impl PaceBridgeError {
     pub fn needs_reauth(&self) -> bool {
         matches!(self, Self::NeedsReauth(_))
     }
@@ -359,7 +359,7 @@ impl ZeppBridgeError {
             Self::AiTask(inner) => inner.user_message(),
             Self::TrainingPlan { message, .. } => sanitize_user_text(message),
             Self::AccountMismatch => "这个数据库里已经是另一个 Zepp 账号的数据，没有写入当前账号。\
-                要换账号，请先关掉 ZeppBridge，把 data 文件夹移走或改名，再重新连接。"
+                要换账号，请先关掉 PaceBridge，把 data 文件夹移走或改名，再重新连接。"
                 .into(),
             Self::Unknown(message) => sanitize_user_text(message),
         }
@@ -404,7 +404,7 @@ mod tests {
 
     #[test]
     fn user_message_strips_request_urls() {
-        let error = ZeppBridgeError::ConfigError(
+        let error = PaceBridgeError::ConfigError(
             "error sending request for url (https://api-mifit.huami.com/users/abc123/heartRate)"
                 .into(),
         );
@@ -416,14 +416,14 @@ mod tests {
 
     #[test]
     fn an_unrecognised_structure_names_its_top_level_keys() {
-        let error = ZeppBridgeError::ParseError(format!(
+        let error = PaceBridgeError::ParseError(format!(
             "响应缺少 items/data 数组，{PARSE_KEYS_MARKER}code, message"
         ));
         assert_eq!(
             error.user_message(),
             "Zepp 返回的数据无法解析（可用字段：code, message）"
         );
-        let other = ZeppBridgeError::ParseError("JSON 处理失败: eof".into());
+        let other = PaceBridgeError::ParseError("JSON 处理失败: eof".into());
         assert_eq!(other.user_message(), "Zepp 返回的数据无法解析");
     }
 }

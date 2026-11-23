@@ -3,7 +3,7 @@
 
 use super::*;
 
-use zeppbridge_core::models::{DailyMetric, SourceScope};
+use pacebridge_core::models::{DailyMetric, SourceScope};
 
 /// 文档工具表里的名字（首格是带下划线的反引号名；CLI 子命令表的 `sync` 之类不算）。
 fn documented_tools(doc: &str) -> BTreeSet<String> {

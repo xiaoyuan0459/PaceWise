@@ -1,19 +1,15 @@
 [package]
-name = "zeppbridge-mcp"
+name = "pacebridge-mcp"
 version = "3.2.1"
-description = "ZeppBridge MCP 服务：stdio、不监听任何端口；写入都能在应用里撤销"
+description = "PaceBridge MCP 服务：stdio、不监听任何端口；写入都能撤销"
 edition = "2021"
 
-[features]
-default = []
-store = ["zeppbridge-core/store"]
-
 [[bin]]
-name = "zeppbridge-mcp"
+name = "pacebridge-mcp"
 path = "src/main.rs"
 
 [dependencies]
-zeppbridge-core = { workspace = true }
+pacebridge-core = { workspace = true }
 serde_json = { workspace = true }
 chrono = { workspace = true }
 

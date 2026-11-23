@@ -79,7 +79,7 @@ fn sample_document(seconds: usize) -> Value {
         })
         .collect();
     json!({
-        "schema": "zeppbridge.ai_task",
+        "schema": "pacebridge.ai_task",
         "schema_version": 1,
         "generated_at": "2026-09-30T02:00:00+00:00",
         "task": { "id": "draft", "title": "Long run check", "detail_level": "detailed", "window_anchor": "workouts", "personal_note": "" },
@@ -269,7 +269,7 @@ fn final_format_follows_food_and_comparison_without_filling_unknowns() {
     ]);
     let render = render_task_markdown(
         &document,
-        "Discuss first\n<!-- zeppbridge-final-plan -->\nFinal format",
+        "Discuss first\n<!-- pacebridge-final-plan -->\nFinal format",
         usize::MAX,
     );
     assert!(render.text.find("Discuss first").unwrap() < render.text.find("# Data").unwrap());
@@ -277,7 +277,7 @@ fn final_format_follows_food_and_comparison_without_filling_unknowns() {
     assert!(
         render.text.find("## Plan vs actual").unwrap() < render.text.find("Final format").unwrap()
     );
-    assert!(!render.text.contains("zeppbridge-final-plan"));
+    assert!(!render.text.contains("pacebridge-final-plan"));
     let all = tables(&render.text);
     let comparison = table(&all, "Plan vs actual");
     assert_eq!(comparison.2[0][5], "300");

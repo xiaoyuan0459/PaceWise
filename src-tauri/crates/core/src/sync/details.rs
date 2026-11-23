@@ -1,10 +1,10 @@
 use super::*;
 use crate::storage::detail_queue::DetailCoverage;
 
-pub(super) fn detail_failure_status(error: &ZeppBridgeError) -> &'static str {
+pub(super) fn detail_failure_status(error: &PaceBridgeError) -> &'static str {
     if error.is_unavailable() {
         "empty_from_cloud"
-    } else if matches!(error, ZeppBridgeError::ParseError(_)) {
+    } else if matches!(error, PaceBridgeError::ParseError(_)) {
         "parse_failed"
     } else {
         "request_failed"
@@ -25,7 +25,7 @@ impl SyncManager {
         let _run = self
             .run_lock
             .try_lock()
-            .map_err(|_| ZeppBridgeError::Busy("另一个同步任务正在进行".into()))?;
+            .map_err(|_| PaceBridgeError::Busy("另一个同步任务正在进行".into()))?;
         self.cancel.store(false, Ordering::SeqCst);
         self.stand_aside_if_local_maintenance()?;
         let _lease = self.begin_run(WritePurpose::HistoryBackfill).await?;
@@ -145,15 +145,15 @@ mod tests {
     #[test]
     fn detail_response_parse_errors_are_distinct_from_request_errors() {
         assert_eq!(
-            detail_failure_status(&ZeppBridgeError::ParseError("invalid json".into())),
+            detail_failure_status(&PaceBridgeError::ParseError("invalid json".into())),
             "parse_failed"
         );
         assert_eq!(
-            detail_failure_status(&ZeppBridgeError::Unavailable("no details".into())),
+            detail_failure_status(&PaceBridgeError::Unavailable("no details".into())),
             "empty_from_cloud"
         );
         assert_eq!(
-            detail_failure_status(&ZeppBridgeError::HttpStatus {
+            detail_failure_status(&PaceBridgeError::HttpStatus {
                 status: 500,
                 message: "retry".into()
             }),

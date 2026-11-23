@@ -58,11 +58,11 @@ impl Database {
     pub fn hourly_steps(&self, start: &str, end: &str) -> Result<Vec<HourlySteps>> {
         let parse = |value: &str| {
             NaiveDate::parse_from_str(value, "%Y-%m-%d")
-                .map_err(|_| ZeppBridgeError::ConfigError("日期需要 YYYY-MM-DD".into()))
+                .map_err(|_| PaceBridgeError::ConfigError("日期需要 YYYY-MM-DD".into()))
         };
         let (first, last) = (parse(start)?, parse(end)?);
         if first > last {
-            return Err(ZeppBridgeError::ConfigError("开始日期晚于结束日期".into()));
+            return Err(PaceBridgeError::ConfigError("开始日期晚于结束日期".into()));
         }
 
         let legacy = self.legacy_hourly_steps(first, last)?;

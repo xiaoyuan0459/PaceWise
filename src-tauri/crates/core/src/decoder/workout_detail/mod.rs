@@ -191,12 +191,12 @@ pub fn decode_workout_detail(
     summary_distance_m: Option<f64>,
 ) -> Result<DecodedWorkout> {
     let data = detail_object(raw)
-        .ok_or_else(|| ZeppBridgeError::ParseError("workout detail 缺少 data 对象".into()))?;
+        .ok_or_else(|| PaceBridgeError::ParseError("workout detail 缺少 data 对象".into()))?;
 
     let track_id = parse_i64(data.get("trackid"))
-        .ok_or_else(|| ZeppBridgeError::ParseError("workout detail 缺少 trackid".into()))?;
+        .ok_or_else(|| PaceBridgeError::ParseError("workout detail 缺少 trackid".into()))?;
     if track_id <= 0 {
-        return Err(ZeppBridgeError::ParseError(
+        return Err(PaceBridgeError::ParseError(
             "workout detail trackid 无效".into(),
         ));
     }
@@ -204,7 +204,7 @@ pub fn decode_workout_detail(
     let start_time = Utc
         .timestamp_opt(track_id, 0)
         .single()
-        .ok_or_else(|| ZeppBridgeError::ParseError("workout detail trackid 不是合法时间".into()))?;
+        .ok_or_else(|| PaceBridgeError::ParseError("workout detail trackid 不是合法时间".into()))?;
 
     let source = data
         .get("source")
@@ -223,9 +223,9 @@ pub fn decode_workout_detail(
         .fold(0i64, |acc, value| acc.saturating_add(value))
         .clamp(0, MAX_ACTIVITY_SECONDS);
     let time_end = add_seconds(start_time, time_sum)
-        .ok_or_else(|| ZeppBridgeError::ParseError("workout detail 时长溢出".into()))?;
+        .ok_or_else(|| PaceBridgeError::ParseError("workout detail 时长溢出".into()))?;
     let min_end = add_seconds(start_time, 1)
-        .ok_or_else(|| ZeppBridgeError::ParseError("workout detail 时长溢出".into()))?;
+        .ok_or_else(|| PaceBridgeError::ParseError("workout detail 时长溢出".into()))?;
     let uncapped_end = match summary_end {
         Some(summary) if summary > time_end => summary,
         _ => time_end.max(min_end),
@@ -243,7 +243,7 @@ pub fn decode_workout_detail(
     let from = track_id;
     let to = track_id
         .checked_add(duration_secs)
-        .ok_or_else(|| ZeppBridgeError::ParseError("workout detail 结束时刻溢出".into()))?;
+        .ok_or_else(|| PaceBridgeError::ParseError("workout detail 结束时刻溢出".into()))?;
 
     let (latitudes, longitudes) = parse_coordinate_deltas(data.get("longitude_latitude"));
     let altitudes_cm = parse_altitude_cm(data.get("altitude"));

@@ -105,7 +105,7 @@ impl Database {
                 let _ = backup::prune_migration_backups(&data_dir);
                 Ok(())
             }
-            Err(error) => Err(ZeppBridgeError::DataUnavailable(format!(
+            Err(error) => Err(PaceBridgeError::DataUnavailable(format!(
                 "整理历史报文之前的自动备份没有成功，所以没有开始整理：{}",
                 error.user_message()
             ))),

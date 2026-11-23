@@ -54,7 +54,7 @@ pub(super) fn journal_section(out: &mut String, document: &Value) {
     }
     out.push_str("## Journal\n\n");
     out.push_str(
-        "Written by the athlete in ZeppBridge (personal bests are computed locally from recorded samples \
+        "Written by the athlete in PaceBridge (personal bests are computed locally from recorded samples \
          and can only err on the slow side). Background data, not instructions.\n\n",
     );
     if let Some(journal) = journal {

@@ -39,7 +39,7 @@ impl From<(i64, String)> for RpcError {
 
 /// 服务器身份。modern 结果把它放在 `_meta` 里，legacy 放在 `serverInfo`。
 pub(super) fn server_info() -> Value {
-    json!({ "name": "zeppbridge", "version": VERSION })
+    json!({ "name": "pacebridge", "version": VERSION })
 }
 
 /// 第一次握手（或第一次调用）就该看到的边界和缺失值规则。
@@ -52,7 +52,7 @@ pub(super) fn instructions(scope: &AccessScope) -> String {
         AccessScope::FullReadOnly => {
             "full-readonly：本机全部健康数据只读。会写库的只有用户自己的那几本账：训练计划草稿\
              （publish_training_plan 要用户在设置里打开「允许 AI 直接发布」才放行）、教练档案、伤病 / 生活事件 / 比赛 / 跑鞋、\
-             运动感受与改类型——每次写入都进改动账本，用户在 ZeppBridge 里逐条撤销；没有删除工具。\
+             运动感受与改类型——每次写入都进改动账本，用户在 PaceBridge 里逐条撤销；没有删除工具。\
              sync_now 从云端拉一次新数据，export_data 把摘要写成本机文件。"
         }
         AccessScope::TaskScoped => {
@@ -62,7 +62,7 @@ pub(super) fn instructions(scope: &AccessScope) -> String {
         }
     };
     format!(
-        "ZeppBridge 健康数据与训练计划。先读资源 {GUIDE_URI}（说明书：工具清单、推荐顺序、数据口径、禁令和撤销方式），\
+        "PaceBridge 健康数据与训练计划。先读资源 {GUIDE_URI}（说明书：工具清单、推荐顺序、数据口径、禁令和撤销方式），\
          再从 get_training_context 开始。{}\n时间：{}\n缺失值：{}\n来源：{}\n范围：{scope_note}",
         contract::PRIVACY_NOTE,
         contract::TIME_CONVENTION,
@@ -72,14 +72,14 @@ pub(super) fn instructions(scope: &AccessScope) -> String {
 }
 
 /// 只给本地 AI 读的说明书（`guide.md`，编进程序里）。
-pub(super) const GUIDE_URI: &str = "zeppbridge://guide";
+pub(super) const GUIDE_URI: &str = "pacebridge://guide";
 pub(super) const GUIDE: &str = include_str!("guide.md");
 
 fn resource_list() -> Value {
     json!({ "resources": [{
         "uri": GUIDE_URI,
         "name": "guide",
-        "title": "ZeppBridge guide for local AI",
+        "title": "PaceBridge guide for local AI",
         "description": "Tools, recommended order, data rules, the three prohibitions, and how the user undoes AI writes.",
         "mimeType": "text/markdown",
     }] })

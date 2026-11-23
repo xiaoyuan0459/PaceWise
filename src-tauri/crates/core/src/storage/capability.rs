@@ -344,7 +344,7 @@ impl Database {
             return Ok(());
         }
         let encoded = serde_json::to_string(&merged.into_values().collect::<Vec<_>>())
-            .map_err(|error| ZeppBridgeError::ParseError(error.to_string()))?;
+            .map_err(|error| PaceBridgeError::ParseError(error.to_string()))?;
         self.set_app_meta(CAPABILITY_PROBE_RESULT_KEY, &encoded)?;
         self.set_app_meta(CAPABILITY_PROBE_AT_KEY, &Utc::now().to_rfc3339())
     }

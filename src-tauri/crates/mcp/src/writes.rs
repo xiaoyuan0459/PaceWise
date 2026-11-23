@@ -3,14 +3,14 @@
 //! 规矩（`guide.md` 里也写给 AI 看）：
 //!
 //! - 只写本机库，校验全靠桌面端同一套 save 函数，MCP 不另写一套；
-//! - 每次写入记进改动账本 `mcp_writes`，用户在 ZeppBridge「设置 → 本地 AI → AI 最近的改动」里逐条撤销；
+//! - 每次写入记进改动账本 `mcp_writes`，用户在 PaceBridge「设置 → 本地 AI → AI 最近的改动」里逐条撤销；
 //! - **没有删除**：「好了」「退役」用字段表达（伤病 `endDate`、跑鞋 `retiredOn`）；
 //! - 改已有的一条时只传要改的字段，其余沿用现在的值；
 //! - task 范围里整体拒绝（`whole_library`）。
 
 use super::*;
-use zeppbridge_core::storage::mcp_writes::McpChange;
-use zeppbridge_core::training_plan::standalone;
+use pacebridge_core::storage::mcp_writes::McpChange;
+use pacebridge_core::training_plan::standalone;
 
 /// 写工具的名字。`build_request` 把它们都标成 `whole_library`。
 pub(super) const WRITE_TOOLS: [&str; 6] = [
@@ -22,7 +22,7 @@ pub(super) const WRITE_TOOLS: [&str; 6] = [
     "set_workout_type",
 ];
 
-const UNDO_NOTE: &str = "写进了本机库，并记进了改动账本：用户可以在 ZeppBridge「设置 → 本地 AI → AI 最近的改动」里撤销这一次。你这边没有删除工具。";
+const UNDO_NOTE: &str = "写进了本机库，并记进了改动账本：用户可以在 PaceBridge「设置 → 本地 AI → AI 最近的改动」里撤销这一次。你这边没有删除工具。";
 
 /// 参数名（camelCase）→ 存储结构里的键。
 type FieldMap = &'static [(&'static str, &'static str)];
@@ -65,8 +65,8 @@ const SHOE_FIELDS: FieldMap = &[
     ("notes", "notes"),
 ];
 
-fn invalid(message: impl Into<String>) -> zeppbridge_core::models::ZeppBridgeError {
-    zeppbridge_core::models::ZeppBridgeError::ConfigError(message.into())
+fn invalid(message: impl Into<String>) -> pacebridge_core::models::PaceBridgeError {
+    pacebridge_core::models::PaceBridgeError::ConfigError(message.into())
 }
 
 /// 把参数叠到一份底稿上（新建时是默认值，修改时是现在的样子），再交给存储结构反序列化。
@@ -109,7 +109,7 @@ fn dir(db: &Database) -> Result<std::path::PathBuf, CallFailure> {
         .ok_or_else(|| CallFailure::plain("找不到本机数据目录，无法写入。"))
 }
 
-fn db_failure(error: zeppbridge_core::models::ZeppBridgeError) -> CallFailure {
+fn db_failure(error: pacebridge_core::models::PaceBridgeError) -> CallFailure {
     CallFailure::coded(error.code(), error.user_message())
 }
 
@@ -120,8 +120,8 @@ fn save_book(
     args: &Value,
     fields: FieldMap,
     defaults: Value,
-    current: impl Fn(&Database, i64) -> zeppbridge_core::models::error::Result<Option<Value>>,
-    build: impl Fn(Value) -> zeppbridge_core::models::error::Result<McpChange>,
+    current: impl Fn(&Database, i64) -> pacebridge_core::models::error::Result<Option<Value>>,
+    build: impl Fn(Value) -> pacebridge_core::models::error::Result<McpChange>,
 ) -> Result<Value, CallFailure> {
     let id = record_id(args)?;
     let client = protocol::client_name();
@@ -200,7 +200,7 @@ pub(super) fn run_write(db: &Database, name: &str, args: &Value) -> Result<Value
             SHOE_FIELDS,
             json!({
                 "id": null, "notes": "", "is_default": false, "start_km": 0.0,
-                "retire_km": zeppbridge_core::storage::logbook::shoes::DEFAULT_RETIRE_KM,
+                "retire_km": pacebridge_core::storage::logbook::shoes::DEFAULT_RETIRE_KM,
             }),
             |db, id| {
                 db.list_shoe_rows()?
@@ -302,10 +302,10 @@ pub(super) fn run_remember_note(db: &Database, args: &Value) -> Result<Value, Ca
     })
     .map_err(db_failure)?;
     let next = match applied.note {
-        Some(zeppbridge_core::storage::coach_notes::Remembered::Remembered { .. }) => {
-            "已经记住：get_athlete_profile 的 coachNotes 里马上就有。用户可以在 ZeppBridge 里撤销或改写。"
+        Some(pacebridge_core::storage::coach_notes::Remembered::Remembered { .. }) => {
+            "已经记住：get_athlete_profile 的 coachNotes 里马上就有。用户可以在 PaceBridge 里撤销或改写。"
         }
-        Some(zeppbridge_core::storage::coach_notes::Remembered::AlreadyKnown { .. }) => {
+        Some(pacebridge_core::storage::coach_notes::Remembered::AlreadyKnown { .. }) => {
             "用户已经记着这句话了，不用再写。"
         }
         _ => "用户之前拒绝或撤销过这句话。不要再写，也不要换个说法再写。",

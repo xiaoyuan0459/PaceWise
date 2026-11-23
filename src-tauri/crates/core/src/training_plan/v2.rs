@@ -164,7 +164,7 @@ pub fn clear_future_window(window: Window, placeholder_id: i64) -> Value {
             "workoutId": placeholder_id,
             "workoutDate": date.to_string(),
             "sport": "RUNNING",
-            "workoutName": "ZeppBridge",
+            "workoutName": "PaceBridge",
             "steps": [{
                 "type": "WorkoutStep",
                 "stepOrder": 1,

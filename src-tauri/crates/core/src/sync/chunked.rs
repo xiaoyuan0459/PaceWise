@@ -38,7 +38,7 @@ impl SyncManager {
     {
         let mut reports = Vec::new();
         let mut reasons = std::collections::BTreeSet::new();
-        let mut last_error: Option<ZeppBridgeError> = None;
+        let mut last_error: Option<PaceBridgeError> = None;
         for chunk in window.chunks_newest_first(chunk_days) {
             self.abort_if_cancelled()?;
             match fetch(chunk).await {
@@ -80,7 +80,7 @@ impl SyncManager {
         }
         if reports.is_empty() {
             return Err(last_error.unwrap_or_else(|| {
-                ZeppBridgeError::Unavailable(format!("{stream} 窗口没有可识别记录"))
+                PaceBridgeError::Unavailable(format!("{stream} 窗口没有可识别记录"))
             }));
         }
         if let Some(error) = last_error {

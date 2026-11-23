@@ -2,14 +2,14 @@
 
 use serde_json::{json, Value};
 use std::{fs, process::Command};
-use zeppbridge_core::auth::{CredentialBackend, FileCredentialBackend};
-use zeppbridge_core::storage::Database;
+use pacebridge_core::auth::{CredentialBackend, FileCredentialBackend};
+use pacebridge_core::storage::Database;
 
 #[test]
 fn default_sync_selects_an_official_only_file_grant_and_reports_reauthorization() {
     let dir = std::env::temp_dir().join(format!(
-        "zeppbridge-cli-official-{}",
-        zeppbridge_core::unique_suffix()
+        "pacebridge-cli-official-{}",
+        pacebridge_core::unique_suffix()
     ));
     fs::create_dir_all(&dir).unwrap();
     let store = FileCredentialBackend::new(&dir);
@@ -20,9 +20,9 @@ fn default_sync_selects_an_official_only_file_grant_and_reports_reauthorization(
     )
     .unwrap();
     let run = |args: &[&str]| {
-        let output = Command::new(env!("CARGO_BIN_EXE_zeppbridge-cli"))
-            .env("ZEPPBRIDGE_DATA_DIR", &dir)
-            .env("ZEPPBRIDGE_CREDENTIAL_STORE", "file")
+        let output = Command::new(env!("CARGO_BIN_EXE_pacebridge-cli"))
+            .env("PACEBRIDGE_DATA_DIR", &dir)
+            .env("PACEBRIDGE_CREDENTIAL_STORE", "file")
             .args(args)
             .output()
             .unwrap();

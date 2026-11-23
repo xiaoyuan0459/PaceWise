@@ -101,26 +101,26 @@ pub(super) fn linux_credential_backend(data_dir: &Path) -> Arc<dyn CredentialBac
 /// 泛化的 `CredentialStore`（命令行会因此变成退出码 1 + 中文原文）。
 pub(super) const HEADLESS_NO_STORE_MARKER: &str = "\u{1e}headless.no_credential_store\u{1e}";
 
-pub(super) fn credential_error(error: String) -> ZeppBridgeError {
+pub(super) fn credential_error(error: String) -> PaceBridgeError {
     // Backends are not allowed to include secret values in their error text.
     //
     // 这是「系统凭据存储不肯配合」，不是「认证信息不对」。分开之后界面才能
     // 给出对得上的说法：一个让人重连，一个让人去看凭据管理器。
     if let Some(detail) = error.strip_prefix(HEADLESS_NO_STORE_MARKER) {
-        return ZeppBridgeError::Headless(HeadlessProblem::NoCredentialStore {
+        return PaceBridgeError::Headless(HeadlessProblem::NoCredentialStore {
             detail: detail.to_string(),
         });
     }
-    ZeppBridgeError::CredentialStore(error)
+    PaceBridgeError::CredentialStore(error)
 }
 
 pub(super) fn validate_token(raw: &str) -> Result<String> {
     let value = raw.trim();
     if value.is_empty() || value.chars().any(char::is_control) {
-        return Err(ZeppBridgeError::AuthError("令牌为空或格式无效".to_string()));
+        return Err(PaceBridgeError::AuthError("令牌为空或格式无效".to_string()));
     }
     if value.encode_utf16().count() > CREDENTIAL_MAX_UTF16_UNITS {
-        return Err(ZeppBridgeError::CredentialStore(format!(
+        return Err(PaceBridgeError::CredentialStore(format!(
             "令牌有 {} 个字符，超过系统凭据管理器能存的 {CREDENTIAL_MAX_UTF16_UNITS} 个；\
              这多半说明读到的不是 App Token 本身",
             value.chars().count()
@@ -136,7 +136,7 @@ pub(super) fn validate_user_id(raw: &str) -> Result<String> {
         || value.chars().any(char::is_control)
         || value.contains('/')
     {
-        return Err(ZeppBridgeError::AuthError(
+        return Err(PaceBridgeError::AuthError(
             "用户 ID 为空或格式无效".to_string(),
         ));
     }
@@ -148,7 +148,7 @@ pub(super) fn validate_user_id(raw: &str) -> Result<String> {
 pub fn normalize_region_host(raw: &str) -> Result<String> {
     let value = raw.trim();
     let parsed = reqwest::Url::parse(value)
-        .map_err(|_| ZeppBridgeError::AuthError("区域主机地址无效".to_string()))?;
+        .map_err(|_| PaceBridgeError::AuthError("区域主机地址无效".to_string()))?;
     if parsed.scheme() != "https"
         || parsed.host_str().is_none()
         || parsed.username() != ""
@@ -157,14 +157,14 @@ pub fn normalize_region_host(raw: &str) -> Result<String> {
         || parsed.fragment().is_some()
         || (!parsed.path().is_empty() && parsed.path() != "/")
     {
-        return Err(ZeppBridgeError::AuthError(
+        return Err(PaceBridgeError::AuthError(
             "区域主机必须是 https://host 地址".to_string(),
         ));
     }
 
     let host = parsed
         .host_str()
-        .ok_or_else(|| ZeppBridgeError::AuthError("区域主机地址无效".to_string()))?
+        .ok_or_else(|| PaceBridgeError::AuthError("区域主机地址无效".to_string()))?
         .to_ascii_lowercase();
     // 这里存进凭据文件的地址，最终要喂给 `connectors::zepp::validate_region_host`
     // 去真正建连接；那边不允许端口、只认 `api-mifit*.zepp.com` /
@@ -172,14 +172,14 @@ pub fn normalize_region_host(raw: &str) -> Result<String> {
     // 状态显示已连接，但每次同步都在连接层被拒绝」的死结，而且只能靠清除
     // 凭据重新登录才能摆脱。两处规则必须一致。
     if parsed.port().is_some() {
-        return Err(ZeppBridgeError::AuthError(
+        return Err(PaceBridgeError::AuthError(
             "区域主机不允许携带端口".to_string(),
         ));
     }
     let valid_zepp = host.starts_with("api-mifit") && host.ends_with(".zepp.com");
     let valid_huami = host.starts_with("api-mifit") && host.ends_with(".huami.com");
     if !(valid_zepp || valid_huami) {
-        return Err(ZeppBridgeError::AuthError(
+        return Err(PaceBridgeError::AuthError(
             "区域主机只能是 api-mifit*.zepp.com 或 api-mifit*.huami.com".to_string(),
         ));
     }

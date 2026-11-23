@@ -249,7 +249,7 @@ fn data_tool_definitions() -> Vec<Value> {
                  `normalizer_replay_pending` 为真时，历史记录需要重放\
                  （`stored_normalizer_revision` 是哪一版，`normalizer_revision` 是当前版）——\
                  此时运动类型、睡眠阶段这类派生字段可能过时，回答里应当说明这一点。\
-                 修正的办法是在那台机器上跑一次 `zeppbridge-cli reprocess`，\
+                 修正的办法是在那台机器上跑一次 `pacebridge-cli reprocess`，\
                  或者启动一次桌面应用；这个服务只读，做不了。{time} {missing}"
             ),
             "inputSchema": {
@@ -269,10 +269,10 @@ fn data_tool_definitions() -> Vec<Value> {
     ]
 }
 
-/// 计划书写格式（zeppbridge-plan/3）的说明，起草工具的参数说明里用。
-const PLAN_FORMAT: &str = "plan 是一个 JSON 对象（格式 zeppbridge-plan/3）：\
-    format 写 \"zeppbridge-plan/3\"；summary 一句话；from / to（YYYY-MM-DD）是这份计划管的日子，\
-    这几天里没写训练的就是休息日，发布时会清掉这几天原有的 ZeppBridge 计划；\
+/// 计划书写格式（pacebridge-plan/3）的说明，起草工具的参数说明里用。
+const PLAN_FORMAT: &str = "plan 是一个 JSON 对象（格式 pacebridge-plan/3）：\
+    format 写 \"pacebridge-plan/3\"；summary 一句话；from / to（YYYY-MM-DD）是这份计划管的日子，\
+    这几天里没写训练的就是休息日，发布时会清掉这几天原有的 PaceBridge 计划；\
     rest 可选，[{date, bedtime \"22:30\", sleepTarget \"8h30m\", note}]；\
     workouts：[{date, sport, variant, name, focus, description, steps}]。\
     sport 只有 running / cycling / pool_swim / open_water_swim 能发到手表，这是 Zepp 接口的限制\
@@ -327,7 +327,7 @@ fn coach_tool_definitions() -> Vec<Value> {
             "name": "get_training_plan",
             "description": format!(
                 "训练计划账本：今天起已生效的计划、按 7 天窗口的送达状态、最近一次推送、还没发的草稿，\
-                 以及用户是否允许 AI 直接发布（aiMayPublish）。官方没有读取接口，这是 ZeppBridge \
+                 以及用户是否允许 AI 直接发布（aiMayPublish）。官方没有读取接口，这是 PaceBridge \
                  自己记的账，不是从手表读回来的。{missing}"
             ),
             "inputSchema": { "type": "object", "properties": {}, "additionalProperties": false }
@@ -336,7 +336,7 @@ fn coach_tool_definitions() -> Vec<Value> {
             "name": "draft_training_plan",
             "description": format!(
                 "校验并保存一份训练计划草稿（不会发到手表）。没通过校验就不保存，返回 check.issues 让你改；\
-                 通过后返回 draftId 和逐日「发之前 / 发之后」预览。之后由用户在 ZeppBridge 里确认发送；\
+                 通过后返回 draftId 和逐日「发之前 / 发之后」预览。之后由用户在 PaceBridge 里确认发送；\
                  只有 aiMayPublish 为真时，才可以在用户同意后调用 publish_training_plan。\
                  起草前先用 get_training_context 和 get_athlete_profile 看清近期负荷与恢复：\
                  加量保守，恢复差就降强度，不做医疗判断。{missing}"
@@ -354,8 +354,8 @@ fn coach_tool_definitions() -> Vec<Value> {
         json!({
             "name": "publish_training_plan",
             "description": format!(
-                "把一份草稿发到用户的 Zepp App 与手表，整体替换它覆盖到的每个 7 天窗口里 ZeppBridge 发过的计划\
-                 （不动用户在 Zepp App 里自建的）。只有用户在 ZeppBridge 设置里打开了「允许 AI 直接发布」才放行，\
+                "把一份草稿发到用户的 Zepp App 与手表，整体替换它覆盖到的每个 7 天窗口里 PaceBridge 发过的计划\
+                 （不动用户在 Zepp App 里自建的）。只有用户在 PaceBridge 设置里打开了「允许 AI 直接发布」才放行，\
                  否则返回 err.training_plan.ai_publish_disabled；永远不会清空窗口，需要清空时返回\
                  err.training_plan.needs_clear_confirmation。调用前必须先把预览讲给用户并得到同意。{missing}"
             ),
@@ -372,7 +372,7 @@ fn coach_tool_definitions() -> Vec<Value> {
         json!({
             "name": "propose_coach_note",
             "description": format!(
-                "让 ZeppBridge 记住一句关于用户的长期事实或偏好（伤病史、作息、目标、喜欢 / 不喜欢的训练……），                 换任何 AI 都带得走。3.1.2 起直接生效：马上出现在 get_athlete_profile 的 coachNotes 里，                 并记进改动账本，用户可以在 ZeppBridge 里撤销或改写；用户拒绝或撤销过的同一句话不会再写进去。                 一条一句、写成第三人称的事实（例：「左膝跑 15 km 以上会痛」），最多 500 字；不要记一次性的数据                 （今天的心率、某次运动），那些本来就在健康数据里。不写任何健康数据表。{missing}"
+                "让 PaceBridge 记住一句关于用户的长期事实或偏好（伤病史、作息、目标、喜欢 / 不喜欢的训练……），                 换任何 AI 都带得走。3.1.2 起直接生效：马上出现在 get_athlete_profile 的 coachNotes 里，                 并记进改动账本，用户可以在 PaceBridge 里撤销或改写；用户拒绝或撤销过的同一句话不会再写进去。                 一条一句、写成第三人称的事实（例：「左膝跑 15 km 以上会痛」），最多 500 字；不要记一次性的数据                 （今天的心率、某次运动），那些本来就在健康数据里。不写任何健康数据表。{missing}"
             ),
             "inputSchema": {
                 "type": "object",

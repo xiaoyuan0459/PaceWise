@@ -1,12 +1,12 @@
 //! `serve`：常驻的只读 REST（给 SparkyFitness 一类自托管服务来拉）。
 //! `pull-token`：管理拉取用的 token（和桌面端的本机 token 分开）。
 //!
-//! 监听地址只认环境变量 `ZEPPBRIDGE_LISTEN`，不设就只听 127.0.0.1。监听非本机地址时
+//! 监听地址只认环境变量 `PACEBRIDGE_LISTEN`，不设就只听 127.0.0.1。监听非本机地址时
 //! 必须有拉取 token，否则拒绝启动。桌面端没有这条路：它的地址写死在 core 里。
 
 use super::*;
-use zeppbridge_core::auth::default_credential_backend_in;
-use zeppbridge_core::local_api::{self, HeadlessError, PullTokenSource};
+use pacebridge_core::auth::default_credential_backend_in;
+use pacebridge_core::local_api::{self, HeadlessError, PullTokenSource};
 
 pub(super) fn cmd_serve(args: &[String]) -> u8 {
     let flags = match Flags::parse(args) {
@@ -38,7 +38,7 @@ pub(super) fn cmd_serve(args: &[String]) -> u8 {
     }
     if server.created_token {
         eprintln!(
-            "serve: created a pull token in the credential store; print it with `zeppbridge-cli pull-token show`"
+            "serve: created a pull token in the credential store; print it with `pacebridge-cli pull-token show`"
         );
     }
 
@@ -182,7 +182,7 @@ pub(super) fn cmd_pull_token(args: &[String]) -> u8 {
                     ),
                     (false, true) => "A pull token is stored".to_string(),
                     (false, false) => {
-                        "No pull token yet; create one with `zeppbridge-cli pull-token rotate`"
+                        "No pull token yet; create one with `pacebridge-cli pull-token rotate`"
                             .to_string()
                     }
                 },
@@ -202,7 +202,7 @@ pub(super) fn cmd_pull_token(args: &[String]) -> u8 {
                 json_mode,
                 EXIT_FAILED,
                 "not_found",
-                "No pull token yet; create one with `zeppbridge-cli pull-token rotate`",
+                "No pull token yet; create one with `pacebridge-cli pull-token rotate`",
             ),
             Err(message) => store_failed(message),
         },

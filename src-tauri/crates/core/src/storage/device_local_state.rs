@@ -12,14 +12,14 @@ use chrono::Utc;
 use rusqlite::params;
 
 use super::Database;
-use crate::models::{error::Result, ZeppBridgeError};
+use crate::models::{error::Result, PaceBridgeError};
 
 impl Database {
     /// 隐藏或恢复一台设备。恢复时直接删掉那一行，表里只留藏着的。
     pub fn set_device_hidden(&self, device_key: &str, hidden: bool) -> Result<()> {
         let device_key = device_key.trim();
         if device_key.is_empty() {
-            return Err(ZeppBridgeError::ConfigError("设备标识不能为空".into()));
+            return Err(PaceBridgeError::ConfigError("设备标识不能为空".into()));
         }
         let tx = self.conn.unchecked_transaction()?;
         // 大小写不同的同一个 key 只留一行，和手动指认一样。

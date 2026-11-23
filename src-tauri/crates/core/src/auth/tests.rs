@@ -1,12 +1,8 @@
 use super::*;
 
 #[test]
-fn credential_service_is_separate_for_the_store_channel() {
-    if cfg!(feature = "store") {
-        assert_eq!(CREDENTIAL_SERVICE, "com.zeppbridge.app.store");
-    } else {
-        assert_eq!(CREDENTIAL_SERVICE, "com.zeppbridge.app");
-    }
+fn credential_service_is_namespaced() {
+    assert_eq!(CREDENTIAL_SERVICE, "com.pacebridge.app");
 }
 use std::{
     collections::HashMap,
@@ -61,7 +57,7 @@ fn temp_dir() -> PathBuf {
     static NEXT_ID: AtomicU64 = AtomicU64::new(0);
     loop {
         let path = std::env::temp_dir().join(format!(
-            "zeppbridge-auth-test-{}-{}",
+            "pacebridge-auth-test-{}-{}",
             std::process::id(),
             NEXT_ID.fetch_add(1, Ordering::Relaxed)
         ));

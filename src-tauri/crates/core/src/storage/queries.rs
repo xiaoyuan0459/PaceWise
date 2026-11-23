@@ -509,9 +509,9 @@ impl Database {
         let coverage = match (start, end) {
             (Some(start), Some(end)) => {
                 let start_date = NaiveDate::parse_from_str(&start, "%Y-%m-%d")
-                    .map_err(|error| ZeppBridgeError::ParseError(error.to_string()))?;
+                    .map_err(|error| PaceBridgeError::ParseError(error.to_string()))?;
                 let end_date = NaiveDate::parse_from_str(&end, "%Y-%m-%d")
-                    .map_err(|error| ZeppBridgeError::ParseError(error.to_string()))?;
+                    .map_err(|error| PaceBridgeError::ParseError(error.to_string()))?;
                 Some(Coverage {
                     start,
                     end,

@@ -8,7 +8,7 @@ pub enum DeviceMatchStatus {
     Exact,
     Alias,
     /// The user told us which model this is, because the account's device
-    /// response carried no product name for ZeppBridge to match on. It is a
+    /// response carried no product name for PaceBridge to match on. It is a
     /// correction, not a recognition, and the UI must say so.
     UserAssigned,
     #[default]

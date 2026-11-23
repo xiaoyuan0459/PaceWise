@@ -115,7 +115,7 @@ pub(super) fn cmd_status(args: &[String]) -> u8 {
     });
 
     let human = format!(
-        "ZeppBridge {VERSION}\nData folder: {data_dir_shown}\nAccount: {}\nOfficial: {official_state}\nLast official sync: {}\nLast official sleep fetch: {}\nDatabase: {} bytes, schema v{}\nLocal coverage: {}\nLast cloud sync: {}\nHistory ledger: {}{}",
+        "PaceBridge {VERSION}\nData folder: {data_dir_shown}\nAccount: {}\nOfficial: {official_state}\nLast official sync: {}\nLast official sleep fetch: {}\nDatabase: {} bytes, schema v{}\nLocal coverage: {}\nLast cloud sync: {}\nHistory ledger: {}{}",
         if connected { "connected" } else { "not connected" },
         official["lastSync"]["outcome"].as_str().unwrap_or("never"),
         official["lastSleepFetchAt"].as_str().unwrap_or("never"),

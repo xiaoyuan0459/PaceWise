@@ -345,7 +345,7 @@ mod tests {
         assert!(is_known_key("elliptical"));
     }
 
-    /// Issue #24 supplies code 7, matching Zepp/ZeppBridge screenshots and
+    /// Issue #24 supplies code 7, matching Zepp/PaceBridge screenshots and
     /// a Zepp GPX labelled Trail running. Cloud history codes are not the
     /// Zepp OS device-protocol enum. Do not guess a replacement swimming code.
     #[test]

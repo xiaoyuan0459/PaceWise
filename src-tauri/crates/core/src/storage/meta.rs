@@ -154,11 +154,11 @@ impl Database {
 
     pub fn set_user_prefs(&self, prefs: &UserPrefs) -> Result<UserPrefs> {
         let retention_days =
-            UserPrefs::clamp_days(prefs.retention_days).map_err(ZeppBridgeError::ConfigError)?;
+            UserPrefs::clamp_days(prefs.retention_days).map_err(PaceBridgeError::ConfigError)?;
         // 补拉范围和保留期各有各的上限：保留期决定本机留多久，补拉决定往回
         // 取多远。共用一个 365 天上限时，「把三年前的记录拿回来」根本没法表达。
         let history_sync_days = UserPrefs::clamp_history_days(prefs.history_sync_days)
-            .map_err(ZeppBridgeError::ConfigError)?;
+            .map_err(PaceBridgeError::ConfigError)?;
         self.set_app_meta(RETENTION_DAYS_KEY, &retention_days.to_string())?;
         self.set_app_meta(HISTORY_SYNC_DAYS_KEY, &history_sync_days.to_string())?;
         self.set_app_meta(

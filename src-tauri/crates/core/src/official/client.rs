@@ -1,7 +1,7 @@
 //! 和中转站、官方接口说话的 HTTP 客户端。只连固定的几个主机（中转站主域名与备用域名、官方接口），不跟随跳转。
 
 use super::{OfficialTokens, API_BASE, RELAY_BASE, RELAY_FALLBACK_BASE};
-use crate::models::{error::Result, ZeppBridgeError};
+use crate::models::{error::Result, PaceBridgeError};
 use serde::Deserialize;
 use serde_json::json;
 use std::time::Duration;
@@ -95,7 +95,7 @@ impl OfficialClient {
         let http = reqwest::Client::builder()
             .timeout(Duration::from_secs(20))
             .redirect(reqwest::redirect::Policy::none())
-            .user_agent(concat!("ZeppBridge/", env!("CARGO_PKG_VERSION")));
+            .user_agent(concat!("PaceBridge/", env!("CARGO_PKG_VERSION")));
         // Unit tests talk to loopback relays. A Windows system proxy must not
         // intercept those requests (it can return 502 before the relay sees them).
         #[cfg(test)]
@@ -145,10 +145,10 @@ impl OfficialClient {
             return Ok(ClaimOutcome::Pending);
         }
         if status == 503 {
-            return Err(ZeppBridgeError::Unavailable("官方授权服务尚未启用".into()));
+            return Err(PaceBridgeError::Unavailable("官方授权服务尚未启用".into()));
         }
         if !(200..300).contains(&status) {
-            return Err(ZeppBridgeError::HttpStatus {
+            return Err(PaceBridgeError::HttpStatus {
                 status,
                 message: "授权中转站没有接受这次领取".into(),
             });
@@ -180,7 +180,7 @@ impl OfficialClient {
             return Ok(RefreshOutcome::Revoked);
         }
         if !(200..300).contains(&status) {
-            return Err(ZeppBridgeError::HttpStatus {
+            return Err(PaceBridgeError::HttpStatus {
                 status,
                 message: "刷新官方令牌暂时失败".into(),
             });
@@ -189,7 +189,7 @@ impl OfficialClient {
         match body.into_tokens(now, Some(&tokens.user_id)) {
             Some(mut fresh) => {
                 if fresh.user_id != tokens.user_id {
-                    return Err(ZeppBridgeError::AccountMismatch);
+                    return Err(PaceBridgeError::AccountMismatch);
                 }
                 // 刷新响应没带新的 refresh_token 时，旧的继续可用。
                 if fresh.refresh_token.is_none() {
@@ -197,7 +197,7 @@ impl OfficialClient {
                 }
                 Ok(RefreshOutcome::Ready(fresh))
             }
-            None => Err(ZeppBridgeError::ParseError("刷新响应里没有访问令牌".into())),
+            None => Err(PaceBridgeError::ParseError("刷新响应里没有访问令牌".into())),
         }
     }
 
@@ -211,10 +211,10 @@ impl OfficialClient {
             .await?;
         let status = response.status().as_u16();
         if status == 401 || status == 403 {
-            return Err(ZeppBridgeError::NeedsReauth("官方令牌被拒绝".into()));
+            return Err(PaceBridgeError::NeedsReauth("官方令牌被拒绝".into()));
         }
         if !(200..300).contains(&status) {
-            return Err(ZeppBridgeError::HttpStatus {
+            return Err(PaceBridgeError::HttpStatus {
                 status,
                 message: "官方资料接口没有响应".into(),
             });
@@ -223,7 +223,7 @@ impl OfficialClient {
         let user_id = match body.get("userId") {
             Some(serde_json::Value::String(id)) if !id.is_empty() => id.clone(),
             Some(serde_json::Value::Number(id)) => id.to_string(),
-            _ => return Err(ZeppBridgeError::ParseError("官方资料里没有用户编号".into())),
+            _ => return Err(PaceBridgeError::ParseError("官方资料里没有用户编号".into())),
         };
         let nickname = body
             .get("nickName")
@@ -252,23 +252,23 @@ impl OfficialClient {
             .await?;
         let status = response.status().as_u16();
         if status == 401 || status == 403 {
-            return Err(ZeppBridgeError::NeedsReauth("官方令牌被拒绝".into()));
+            return Err(PaceBridgeError::NeedsReauth("官方令牌被拒绝".into()));
         }
         if status == 400 || status == 404 {
             let body = bounded_json(response).await.unwrap_or_default();
             let code = body.get("code").and_then(serde_json::Value::as_i64);
             if status == 404 || code == Some(-50000) {
-                return Err(ZeppBridgeError::Unavailable(format!(
+                return Err(PaceBridgeError::Unavailable(format!(
                     "官方接口 {path} 没有为这个应用开通"
                 )));
             }
-            return Err(ZeppBridgeError::HttpStatus {
+            return Err(PaceBridgeError::HttpStatus {
                 status,
                 message: format!("官方接口 {path} 拒绝了这次请求"),
             });
         }
         if !(200..300).contains(&status) {
-            return Err(ZeppBridgeError::HttpStatus {
+            return Err(PaceBridgeError::HttpStatus {
                 status,
                 message: format!("官方接口 {path} 暂时没有响应"),
             });
@@ -315,7 +315,7 @@ impl OfficialClient {
         if (200..300).contains(&status) || status == 401 || status == 403 {
             Ok(())
         } else {
-            Err(ZeppBridgeError::HttpStatus {
+            Err(PaceBridgeError::HttpStatus {
                 status,
                 message: "Zepp 没有确认撤销授权".into(),
             })

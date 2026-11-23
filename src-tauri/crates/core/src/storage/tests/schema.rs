@@ -161,7 +161,7 @@ fn unsuccessful_first_sync_remains_retryable_after_startup_migration() {
 #[test]
 fn future_schema_is_refused_without_changing_the_database() {
     let dir = std::env::temp_dir().join(format!(
-        "zeppbridge-future-schema-{}-{}",
+        "pacebridge-future-schema-{}-{}",
         std::process::id(),
         crate::unique_suffix()
     ));
@@ -192,7 +192,7 @@ fn future_schema_is_refused_without_changing_the_database() {
 /// 这里会红——而不是等用户的 CLI 报「本机数据库还是 v5」。
 #[test]
 fn migrating_twice_leaves_the_version_at_the_current_schema() {
-    let dir = std::env::temp_dir().join("zeppbridge-migration-version-invariant");
+    let dir = std::env::temp_dir().join("pacebridge-migration-version-invariant");
     let _ = std::fs::remove_dir_all(&dir);
     std::fs::create_dir_all(&dir).unwrap();
     let path = dir.join("zepp.db");
@@ -222,7 +222,7 @@ fn migrating_twice_leaves_the_version_at_the_current_schema() {
 /// 能删它们（点击无反应）。不清库的话，装了新版依然天天看见。
 #[test]
 fn migration_removes_firmware_shaped_devices_and_keeps_real_ones() {
-    let dir = std::env::temp_dir().join("zeppbridge-phantom-device-cleanup");
+    let dir = std::env::temp_dir().join("pacebridge-phantom-device-cleanup");
     let _ = std::fs::remove_dir_all(&dir);
     std::fs::create_dir_all(&dir).unwrap();
     let path = dir.join("zepp.db");
@@ -509,7 +509,7 @@ fn readiness_migration_removes_sentinels_without_raw_and_replay_keeps_them_absen
 #[test]
 fn v26_library_gains_stage_available_columns_at_v27() {
     let dir = std::env::temp_dir().join(format!(
-        "zeppbridge-v26-sleep-available-{}-{}",
+        "pacebridge-v26-sleep-available-{}-{}",
         std::process::id(),
         crate::unique_suffix()
     ));

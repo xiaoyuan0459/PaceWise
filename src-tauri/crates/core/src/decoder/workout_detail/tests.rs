@@ -472,7 +472,7 @@ fn huge_track_id_or_time_deltas_do_not_panic() {
     });
     let err = decode_workout_detail(&huge_id, None, None).expect_err("i64::MAX 不是合法 unix 时间");
     assert!(
-        matches!(err, ZeppBridgeError::ParseError(_)),
+        matches!(err, PaceBridgeError::ParseError(_)),
         "应当是 ParseError，实际 {err:?}"
     );
 
@@ -499,7 +499,7 @@ fn huge_track_id_or_time_deltas_do_not_panic() {
         None,
     );
     assert!(
-        result.is_ok() || matches!(result, Err(ZeppBridgeError::ParseError(_))),
+        result.is_ok() || matches!(result, Err(PaceBridgeError::ParseError(_))),
         "汇总结束时刻极大时不得 panic：{result:?}"
     );
 }

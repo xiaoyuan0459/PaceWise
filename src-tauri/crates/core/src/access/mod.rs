@@ -10,7 +10,7 @@ use crate::insight::{
     self, BaselineEntry, BaselineExclusion, Comparison, Confidence, InsightFact, WorkoutInsight,
 };
 
-use crate::models::error::{Result, ZeppBridgeError};
+use crate::models::error::{Result, PaceBridgeError};
 
 use crate::models::{MetricSeries, Workout};
 

@@ -64,7 +64,7 @@ pub struct ContextWorkout {
     pub training_effect: Option<f64>,
     pub anaerobic_training_effect: Option<f64>,
     pub rpe: Option<i32>,
-    /// 用户自己在 ZeppBridge 里打的 RPE（1–10，批次 7）；和手表的 `rpe` 分开放，没打是 null。
+    /// 用户自己在 PaceBridge 里打的 RPE（1–10，批次 7）；和手表的 `rpe` 分开放，没打是 null。
     pub user_rpe: Option<u8>,
     /// 用户标的酸痛部位（`knee_l` 这类键，左右是用户自己的左右）；没标是空数组。
     pub soreness: Vec<String>,

@@ -240,8 +240,8 @@ fn brief_leads_the_prompt_and_files_take_the_given_names() {
     // 自己就说清楚要 AI 做什么。文件名按前端给的主名走，非法字符被清洗。
     let parts = AiTaskPromptParts {
         brief: Some("任务说明：直接开始分析"),
-        data_stem: Some("ZeppBridge_0914-0927_睡眠:心率"),
-        prompt_stem: Some("ZeppBridge_0914-0927_睡眠:心率_提示词"),
+        data_stem: Some("PaceBridge_0914-0927_睡眠:心率"),
+        prompt_stem: Some("PaceBridge_0914-0927_睡眠:心率_提示词"),
         ..Default::default()
     };
     let result = db
@@ -257,11 +257,11 @@ fn brief_leads_the_prompt_and_files_take_the_given_names() {
     let json = result.json_path.unwrap();
     let prompt = result.prompt_path.unwrap();
     assert!(
-        json.ends_with("ZeppBridge_0914-0927_睡眠_心率.json"),
+        json.ends_with("PaceBridge_0914-0927_睡眠_心率.json"),
         "{json}"
     );
     assert!(
-        prompt.ends_with("ZeppBridge_0914-0927_睡眠_心率_提示词.txt"),
+        prompt.ends_with("PaceBridge_0914-0927_睡眠_心率_提示词.txt"),
         "{prompt}"
     );
     assert_eq!(std::fs::read_to_string(&prompt).unwrap(), *text);

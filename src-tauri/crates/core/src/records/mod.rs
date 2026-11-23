@@ -16,7 +16,7 @@
 //!
 //! GPS：`include_gps = false` 时去掉运动的 `route`。逐点采样里本来就没有坐标。
 
-use crate::models::error::{Result, ZeppBridgeError};
+use crate::models::error::{Result, PaceBridgeError};
 use crate::models::{ExportDetail, ExportScope, ExportSelection};
 use crate::storage::{Database, EXPORT_DATA_TYPES};
 use chrono::{DateTime, Duration as ChronoDuration, NaiveDate, Utc};
@@ -27,7 +27,7 @@ use std::collections::HashMap;
 mod tests;
 
 /// 记录契约的版本。字段只增不改；改了含义就换一个新版本号。
-pub const RECORDS_VERSION: &str = "zeppbridge.records.v2";
+pub const RECORDS_VERSION: &str = "pacebridge.records.v2";
 
 /// 拉取方关心的六类数据，以及它们对应的导出类型名。
 ///
@@ -147,7 +147,7 @@ pub fn query_records(db: &Database, query: &RecordQuery) -> Result<RecordSet> {
     let since = query.since;
 
     let Some(root) = value.as_object_mut() else {
-        return Err(ZeppBridgeError::ParseError("导出结果不是 JSON 对象".into()));
+        return Err(PaceBridgeError::ParseError("导出结果不是 JSON 对象".into()));
     };
     root.insert(
         "records_version".into(),
@@ -461,14 +461,14 @@ fn provenance_window(value: &Value) -> Result<(String, String)> {
     };
     match (pick("start"), pick("end")) {
         (Some(start), Some(end)) => Ok((start, end)),
-        _ => Err(ZeppBridgeError::ParseError("导出结果缺少日期区间".into())),
+        _ => Err(PaceBridgeError::ParseError("导出结果缺少日期区间".into())),
     }
 }
 
 fn widened_utc_bounds(start: &str, end: &str) -> Result<(String, String)> {
     let parse = |value: &str| {
         NaiveDate::parse_from_str(value, "%Y-%m-%d")
-            .map_err(|_| ZeppBridgeError::ConfigError("日期无效".into()))
+            .map_err(|_| PaceBridgeError::ConfigError("日期无效".into()))
     };
     let lower = parse(start)? - ChronoDuration::days(1);
     let upper = parse(end)? + ChronoDuration::days(2);

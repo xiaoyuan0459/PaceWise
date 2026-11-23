@@ -12,31 +12,31 @@ use std::sync::Arc;
 
 use std::time::{Duration, Instant};
 
-use zeppbridge_core::auth::AuthManager;
+use pacebridge_core::auth::AuthManager;
 
-use zeppbridge_core::connectors::ZeppConnector;
+use pacebridge_core::connectors::ZeppConnector;
 
-use zeppbridge_core::contract;
+use pacebridge_core::contract;
 
-use zeppbridge_core::export_fit;
+use pacebridge_core::export_fit;
 
-use zeppbridge_core::export_formats;
+use pacebridge_core::export_formats;
 
-use zeppbridge_core::fetcher::DataFetcher;
+use pacebridge_core::fetcher::DataFetcher;
 
-use zeppbridge_core::models::error::{sanitize_user_text, HeadlessProblem};
+use pacebridge_core::models::error::{sanitize_user_text, HeadlessProblem};
 
-use zeppbridge_core::models::{error::ZeppBridgeError, ExportDetail, ExportScope, ExportSelection};
+use pacebridge_core::models::{error::PaceBridgeError, ExportDetail, ExportScope, ExportSelection};
 
-use zeppbridge_core::paths;
+use pacebridge_core::paths;
 
-use zeppbridge_core::records;
+use pacebridge_core::records;
 
-use zeppbridge_core::storage::write_lock::{self, WriteLockError, WritePurpose};
+use pacebridge_core::storage::write_lock::{self, WriteLockError, WritePurpose};
 
-use zeppbridge_core::storage::{Database, ReplayPlan, EXPORT_DATA_TYPES, NORMALIZER_REVISION};
+use pacebridge_core::storage::{Database, ReplayPlan, EXPORT_DATA_TYPES, NORMALIZER_REVISION};
 
-use zeppbridge_core::sync::{SyncManager, SyncReport};
+use pacebridge_core::sync::{SyncManager, SyncReport};
 
 mod args;
 mod cmd_details;
@@ -78,11 +78,11 @@ const EXIT_USAGE: u8 = 2;
 ///
 /// 最常见的两种：从没登录过；以及把另一台机器的 `data` 文件夹整个拷了过来
 /// ——库和 `auth.json` 都在，令牌却从来不在文件里（issue #40）。两种都要人
-/// 出面：在桌面应用里登录，或者用 `ZEPPBRIDGE_CREDENTIAL_STORE` 把令牌交进
+/// 出面：在桌面应用里登录，或者用 `PACEBRIDGE_CREDENTIAL_STORE` 把令牌交进
 /// 来。见 docs/guides/linux.md。
 const EXIT_NOT_CONFIGURED: u8 = 3;
 
-/// 另一个 ZeppBridge 进程正在写库。稍后重试即可，不是错误。
+/// 另一个 PaceBridge 进程正在写库。稍后重试即可，不是错误。
 const EXIT_BUSY: u8 = 4;
 
 /// 云端请求失败（网络、鉴权、限流）。
@@ -106,15 +106,15 @@ const EXIT_FAILED: u8 = 1;
 /// 发出去的说明用英文，而 issue #40 那位 Linux 用户撞上的正是一句他读不懂的
 /// 中文提示。`--json` 的字段名和退出码是契约，一个字都没动。
 ///
-/// **边界在哪：** 这个文件里的每一句人读文案都是英文了。从 `zeppbridge-core`
+/// **边界在哪：** 这个文件里的每一句人读文案都是英文了。从 `pacebridge-core`
 /// 冒上来的错误由 `exit.rs` 的 `user_text()` 按变体出英文；带自由文本的变体，
 /// 原话是中文时换成错误码，不把中英文混在同一句里（core 那七百多处中文原话是
 /// 桌面端的兜底，桌面端按码查本地文案、根本不显示它们）。
 const HELP: &str = "\
-zeppbridge-cli — the non-interactive command line for ZeppBridge
+pacebridge-cli — the non-interactive command line for PaceBridge
 
 Usage:
-  zeppbridge-cli <command> [options]
+  pacebridge-cli <command> [options]
 
 Commands:
   status              Print local database and account status (no network)
@@ -209,8 +209,8 @@ shoes / races options:
   those writes show up under Recent AI changes and can be undone.
 
 serve (environment, no options):
-  ZEPPBRIDGE_LISTEN         Listen address; default 127.0.0.1:43921 (this machine only)
-  ZEPPBRIDGE_PULL_TOKEN     Pull token (32+ characters); otherwise the stored one
+  PACEBRIDGE_LISTEN         Listen address; default 127.0.0.1:43921 (this machine only)
+  PACEBRIDGE_PULL_TOKEN     Pull token (32+ characters); otherwise the stored one
                             (`pull-token rotate`). Required beyond loopback, or serve
                             refuses to start. Plaintext HTTP: keep it on a private
                             container network or behind an HTTPS reverse proxy.
@@ -259,7 +259,7 @@ fn run(args: &[String]) -> u8 {
             EXIT_OK
         }
         "version" | "--version" | "-V" => {
-            println!("zeppbridge-cli {VERSION}");
+            println!("pacebridge-cli {VERSION}");
             EXIT_OK
         }
         "contract" => {

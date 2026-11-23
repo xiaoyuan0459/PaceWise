@@ -116,7 +116,7 @@ async fn fake_site() -> FakeSite {
 
 fn temp_dir(name: &str) -> PathBuf {
     let dir = std::env::temp_dir().join(format!(
-        "zeppbridge-push-{name}-{}-{}",
+        "pacebridge-push-{name}-{}-{}",
         std::process::id(),
         crate::unique_suffix()
     ));

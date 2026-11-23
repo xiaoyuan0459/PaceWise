@@ -327,7 +327,7 @@ impl Database {
     /// P3 `ai_task_prepare`：把交接文件写到
     /// `<output_root>/<任务名>_<yyyyMMdd-HHmm>/{health-context.json, prompt.txt, attachments/}`。
     ///
-    /// `output_root` 由命令层决定（桌面 `ZeppBridge AI`，取不到时
+    /// `output_root` 由命令层决定（桌面 `PaceBridge AI`，取不到时
     /// `data_dir/exports/ai-tasks`）。blocked 时一个文件都不写。
     ///
     /// 拆成 [`Self::ai_task_prepare_plan`]（读侧）+ [`AiTaskPreparePlan::finish`]

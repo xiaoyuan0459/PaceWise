@@ -16,7 +16,7 @@ export async function onRequest({ request, env }) {
   // 裸地址是连通性检查，不是一次授权。
   if (!params.toString()) {
     const status = jsonResponse({
-      service: 'ZeppBridge',
+      service: 'PaceBridge',
       endpoint: 'authorization_callback',
       oauthEnabled: Boolean(config),
     });

@@ -24,11 +24,11 @@ pub use crate::access::shared_task_grants;
 pub use model::*;
 pub use store::stat_attachment_paths;
 
-use crate::models::error::ZeppBridgeError;
+use crate::models::error::PaceBridgeError;
 
 /// 任务/模板这层自己的业务失败。
 ///
-/// 为什么要单独一个枚举而不是塞进 `ZeppBridgeError::ConfigError`：
+/// 为什么要单独一个枚举而不是塞进 `PaceBridgeError::ConfigError`：
 /// 命令层要按码回 IPC（`err.ai_task.invalid` 和 `err.ai_template.invalid`
 /// 是两个码，而两者都可能来自「字段校验失败」），码在这里就定好，
 /// `AppError::from` 原样透传，不用在命令层再猜一遍是哪个实体。
@@ -52,14 +52,14 @@ pub enum AiTaskError {
     /// 交接文件写盘失败。
     #[error("{message}")]
     WriteFailed { message: String },
-    // 注意：不能在这里放 `Storage(#[from] ZeppBridgeError)`——
-    // `ZeppBridgeError::AiTask(AiTaskError)` 与它会互相内嵌成无限大的类型。
-    // 底层错误走 `ZeppBridgeError` 自己的 #[from]（rusqlite/serde_json/io），
-    // 在返回 `ZeppBridgeError` 的函数里直接 `?` 透传即可。
+    // 注意：不能在这里放 `Storage(#[from] PaceBridgeError)`——
+    // `PaceBridgeError::AiTask(AiTaskError)` 与它会互相内嵌成无限大的类型。
+    // 底层错误走 `PaceBridgeError` 自己的 #[from]（rusqlite/serde_json/io），
+    // 在返回 `PaceBridgeError` 的函数里直接 `?` 透传即可。
 }
 
 impl AiTaskError {
-    /// 稳定码——`ZeppBridgeError::AiTask` 与 `AppError::from` 都用它。
+    /// 稳定码——`PaceBridgeError::AiTask` 与 `AppError::from` 都用它。
     pub fn code(&self) -> &'static str {
         match self {
             Self::Invalid { code, .. } | Self::NotFound { code, .. } => code,
@@ -86,50 +86,50 @@ impl AiTaskError {
         }
     }
 
-    pub(crate) fn invalid_task(message: impl Into<String>) -> ZeppBridgeError {
-        ZeppBridgeError::AiTask(AiTaskError::Invalid {
+    pub(crate) fn invalid_task(message: impl Into<String>) -> PaceBridgeError {
+        PaceBridgeError::AiTask(AiTaskError::Invalid {
             code: "err.ai_task.invalid",
             message: message.into(),
         })
     }
 
-    pub(crate) fn invalid_template(message: impl Into<String>) -> ZeppBridgeError {
-        ZeppBridgeError::AiTask(AiTaskError::Invalid {
+    pub(crate) fn invalid_template(message: impl Into<String>) -> PaceBridgeError {
+        PaceBridgeError::AiTask(AiTaskError::Invalid {
             code: "err.ai_template.invalid",
             message: message.into(),
         })
     }
 
-    pub(crate) fn task_not_found(id: &str) -> ZeppBridgeError {
-        ZeppBridgeError::AiTask(AiTaskError::NotFound {
+    pub(crate) fn task_not_found(id: &str) -> PaceBridgeError {
+        PaceBridgeError::AiTask(AiTaskError::NotFound {
             code: "err.ai_task.not_found",
             message: "分析任务不存在或已删除".to_string(),
             params: Some(serde_json::json!({ "id": id })),
         })
     }
 
-    pub(crate) fn template_not_found(id: &str) -> ZeppBridgeError {
-        ZeppBridgeError::AiTask(AiTaskError::NotFound {
+    pub(crate) fn template_not_found(id: &str) -> PaceBridgeError {
+        PaceBridgeError::AiTask(AiTaskError::NotFound {
             code: "err.ai_template.not_found",
             message: "模板不存在或已删除".to_string(),
             params: Some(serde_json::json!({ "id": id })),
         })
     }
 
-    pub(crate) fn workouts_not_found(ids: Vec<String>) -> ZeppBridgeError {
-        ZeppBridgeError::AiTask(AiTaskError::NotFound {
+    pub(crate) fn workouts_not_found(ids: Vec<String>) -> PaceBridgeError {
+        PaceBridgeError::AiTask(AiTaskError::NotFound {
             code: "err.ai_task.workout_not_found",
             message: format!("选中的运动在本机不存在：{}", ids.join(", ")),
             params: Some(serde_json::json!({ "workout_ids": ids })),
         })
     }
 
-    pub(crate) fn builtin_readonly() -> ZeppBridgeError {
-        ZeppBridgeError::AiTask(AiTaskError::BuiltinReadonly)
+    pub(crate) fn builtin_readonly() -> PaceBridgeError {
+        PaceBridgeError::AiTask(AiTaskError::BuiltinReadonly)
     }
 
-    pub(crate) fn write_failed(message: impl Into<String>) -> ZeppBridgeError {
-        ZeppBridgeError::AiTask(AiTaskError::WriteFailed {
+    pub(crate) fn write_failed(message: impl Into<String>) -> PaceBridgeError {
+        PaceBridgeError::AiTask(AiTaskError::WriteFailed {
             message: message.into(),
         })
     }

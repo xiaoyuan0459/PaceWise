@@ -89,7 +89,7 @@ pub struct DiagnosticCloudRejection {
 pub struct DiagnosticWorkoutCorrection {
     /// 云端给的原始运动编号。
     pub code: i32,
-    /// ZeppBridge 自己解释成的运动 key（例如 `open_water_swimming`）。
+    /// PaceBridge 自己解释成的运动 key（例如 `open_water_swimming`）。
     pub interpreted: String,
     /// 用户改成的运动 key（例如 `trail_running`）。
     pub corrected: String,

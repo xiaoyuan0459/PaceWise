@@ -1,7 +1,7 @@
 //! 3B 教练工具：上下文不编数据、起草不存坏计划、发布受开关管、task 范围整体拒绝。
 
 use super::*;
-use zeppbridge_core::models::DailyMetric;
+use pacebridge_core::models::DailyMetric;
 
 fn daily(days_ago: i64, metric: &str, value: f64) -> DailyMetric {
     DailyMetric {
@@ -29,7 +29,7 @@ fn day(days_ahead: i64) -> String {
 
 fn easy_run_plan() -> Value {
     json!({
-        "format": "zeppbridge-plan/3",
+        "format": "pacebridge-plan/3",
         "summary": "一次轻松跑",
         "from": day(1),
         "to": day(3),

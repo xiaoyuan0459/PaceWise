@@ -3,15 +3,15 @@ use std::process::Command;
 #[test]
 fn missing_local_workout_is_not_a_cloud_failure() {
     let dir = std::env::temp_dir().join(format!(
-        "zeppbridge-missing-workout-{}-{}",
+        "pacebridge-missing-workout-{}-{}",
         std::process::id(),
-        zeppbridge_core::unique_suffix()
+        pacebridge_core::unique_suffix()
     ));
     std::fs::create_dir_all(&dir).unwrap();
-    drop(zeppbridge_core::storage::Database::open_migrated(&dir.join("zepp.db")).unwrap());
+    drop(pacebridge_core::storage::Database::open_migrated(&dir.join("zepp.db")).unwrap());
     for json_mode in [false, true] {
-        let mut command = Command::new(env!("CARGO_BIN_EXE_zeppbridge-cli"));
-        command.env("ZEPPBRIDGE_DATA_DIR", &dir).args([
+        let mut command = Command::new(env!("CARGO_BIN_EXE_pacebridge-cli"));
+        command.env("PACEBRIDGE_DATA_DIR", &dir).args([
             "export",
             "--workout",
             "missing-local-workout",
@@ -37,9 +37,9 @@ fn missing_local_workout_is_not_a_cloud_failure() {
 #[test]
 fn invalid_export_arguments_return_json_usage_errors_before_opening_a_database() {
     let missing_data_dir = std::env::temp_dir().join(format!(
-        "zeppbridge-export-usage-{}-{}",
+        "pacebridge-export-usage-{}-{}",
         std::process::id(),
-        zeppbridge_core::unique_suffix()
+        pacebridge_core::unique_suffix()
     ));
     assert!(!missing_data_dir.exists());
 
@@ -90,10 +90,10 @@ fn invalid_export_arguments_return_json_usage_errors_before_opening_a_database()
     ];
 
     for args in cases {
-        let output = Command::new(env!("CARGO_BIN_EXE_zeppbridge-cli"))
+        let output = Command::new(env!("CARGO_BIN_EXE_pacebridge-cli"))
             .arg("export")
             .args(*args)
-            .env("ZEPPBRIDGE_DATA_DIR", &missing_data_dir)
+            .env("PACEBRIDGE_DATA_DIR", &missing_data_dir)
             .output()
             .unwrap();
         assert_eq!(output.status.code(), Some(2), "{args:?}: {output:?}");

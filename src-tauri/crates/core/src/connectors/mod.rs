@@ -2,7 +2,7 @@ pub mod zepp;
 
 pub use zepp::ZeppConnector;
 
-use crate::models::{error::Result, ZeppBridgeError};
+use crate::models::{error::Result, PaceBridgeError};
 
 /// 读一个 JSON 响应，最多 `max_bytes` 字节（代码审查 R15）。
 ///
@@ -13,7 +13,7 @@ pub(crate) async fn read_json_limited(
     max_bytes: usize,
 ) -> Result<serde_json::Value> {
     let too_large = || {
-        ZeppBridgeError::ParseError(format!(
+        PaceBridgeError::ParseError(format!(
             "响应超过 {} MB，没有读完；缩小同步区间后重试",
             max_bytes / (1024 * 1024)
         ))
@@ -27,7 +27,7 @@ pub(crate) async fn read_json_limited(
     while let Some(chunk) = response
         .chunk()
         .await
-        .map_err(|error| ZeppBridgeError::ParseError(format!("JSON 响应无效: {error}")))?
+        .map_err(|error| PaceBridgeError::ParseError(format!("JSON 响应无效: {error}")))?
     {
         if buf.len().saturating_add(chunk.len()) > max_bytes {
             return Err(too_large());
@@ -35,5 +35,5 @@ pub(crate) async fn read_json_limited(
         buf.extend_from_slice(&chunk);
     }
     serde_json::from_slice(&buf)
-        .map_err(|error| ZeppBridgeError::ParseError(format!("JSON 响应无效: {error}")))
+        .map_err(|error| PaceBridgeError::ParseError(format!("JSON 响应无效: {error}")))
 }

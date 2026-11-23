@@ -186,7 +186,7 @@ fn health_response() -> HttpResponse {
         "OK",
         json!({
             "status": "ok",
-            "service": "ZeppBridge local API",
+            "service": "PaceBridge local API",
             "version": env!("CARGO_PKG_VERSION")
         }),
     )
@@ -346,7 +346,7 @@ where
             200,
             "OK",
             json!({
-                "service": "ZeppBridge local API",
+                "service": "PaceBridge local API",
                 "version": env!("CARGO_PKG_VERSION"),
                 "status": "ok",
                 "base_url": LOCAL_API_BASE_URL,
@@ -508,7 +508,7 @@ impl HttpResponse {
             json!({
                 "error": {
                     "code": "unauthorized",
-                    "message": "Authorization: Bearer <token> is required. Desktop app: the local API token from Settings. zeppbridge-cli serve: the pull token."
+                    "message": "Authorization: Bearer <token> is required. Desktop app: the local API token from Settings. pacebridge-cli serve: the pull token."
                 }
             }),
         );

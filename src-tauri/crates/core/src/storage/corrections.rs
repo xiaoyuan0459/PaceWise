@@ -3,7 +3,7 @@
 //! 三层严格分离，谁也不覆盖谁：
 //!
 //! 1. **Zepp 的原始事实** —— `raw_records` 里的报文，永远不改；
-//! 2. **ZeppBridge 的解释** —— normalizer 从原始事实推出的 `workout_type`；
+//! 2. **PaceBridge 的解释** —— normalizer 从原始事实推出的 `workout_type`；
 //! 3. **用户的本地纠正** —— 这一层。
 //!
 //! 纠正只保存在本机，不回传云端，也不参与 normalizer 重放：重放会重算第 2 层，
@@ -19,7 +19,7 @@
 //!   与其显示「未识别设备」，不如让用户从随包目录里指认一次。
 
 use super::Database;
-use crate::models::{error::Result, ZeppBridgeError};
+use crate::models::{error::Result, PaceBridgeError};
 use chrono::Utc;
 use rusqlite::{params, OptionalExtension};
 use std::collections::HashMap;
@@ -71,7 +71,7 @@ impl Database {
     /// 拼错的名字悄悄取代已验证的映射。
     pub fn set_workout_code_label(&self, zepp_type: i32, label: Option<&str>) -> Result<()> {
         if crate::sport_catalog::resolve(zepp_type as i64).is_some() {
-            return Err(ZeppBridgeError::ConfigError(
+            return Err(PaceBridgeError::ConfigError(
                 "这个编号已经能被识别，请改用单条记录的类型纠正".into(),
             ));
         }
@@ -83,12 +83,12 @@ impl Database {
             return Ok(());
         };
         if label.chars().count() > MAX_CODE_LABEL_CHARS {
-            return Err(ZeppBridgeError::ConfigError(format!(
+            return Err(PaceBridgeError::ConfigError(format!(
                 "自定义运动名称最多 {MAX_CODE_LABEL_CHARS} 个字"
             )));
         }
         if label.chars().any(|c| c.is_control()) {
-            return Err(ZeppBridgeError::ConfigError(
+            return Err(PaceBridgeError::ConfigError(
                 "自定义运动名称不能包含控制字符".into(),
             ));
         }
@@ -162,7 +162,7 @@ impl Database {
     ) -> Result<()> {
         let device_key = device_key.trim();
         if device_key.is_empty() {
-            return Err(ZeppBridgeError::ConfigError("设备标识不能为空".into()));
+            return Err(PaceBridgeError::ConfigError("设备标识不能为空".into()));
         }
         let catalog_id = catalog_id.map(str::trim).filter(|value| !value.is_empty());
         if catalog_id.is_some_and(|catalog_id| {
@@ -170,7 +170,7 @@ impl Database {
                 .iter()
                 .any(|entry| entry.catalog_id == catalog_id)
         }) {
-            return Err(ZeppBridgeError::ConfigError(
+            return Err(PaceBridgeError::ConfigError(
                 "随包设备目录里没有这个型号".into(),
             ));
         }

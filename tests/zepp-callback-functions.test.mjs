@@ -30,7 +30,7 @@ for (const endpoint of endpoints) {
     const { response } = invoke(endpoint);
     assert.equal(response.status, 200);
     const payload = await response.json();
-    assert.equal(payload.service, 'ZeppBridge');
+    assert.equal(payload.service, 'PaceBridge');
     assert.equal(payload.endpoint, endpoint.name);
     assert.equal(payload.status, 'registration_only');
     assert.equal(payload[endpoint.flag], false);

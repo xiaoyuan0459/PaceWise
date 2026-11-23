@@ -34,7 +34,7 @@ fn a_rejected_envelope_becomes_its_own_error_with_the_code_visible() {
     let error = classify_business_code(&payload).expect("非成功码必须被拦下");
     assert!(matches!(
         error,
-        ZeppBridgeError::CloudRejected { code: -1, .. }
+        PaceBridgeError::CloudRejected { code: -1, .. }
     ));
     assert_eq!(error.code(), "err.core.cloud_rejected");
     // 云端原话要出现在给用户看的文案里：这是下一份反馈报告认出具体
@@ -86,15 +86,15 @@ fn host_validation_rejects_unsafe_forms() {
 fn status_classification_is_explicit() {
     assert!(matches!(
         classify_status(401),
-        Some(ZeppBridgeError::NeedsReauth(_))
+        Some(PaceBridgeError::NeedsReauth(_))
     ));
     assert!(matches!(
         classify_status(404),
-        Some(ZeppBridgeError::Unavailable(_))
+        Some(PaceBridgeError::Unavailable(_))
     ));
     assert!(matches!(
         classify_status(503),
-        Some(ZeppBridgeError::RetryExhausted { .. })
+        Some(PaceBridgeError::RetryExhausted { .. })
     ));
     assert!(classify_status(204).is_none());
 }

@@ -14,8 +14,8 @@ impl Database {
     pub(super) fn reject_newer_schema(conn: &Connection) -> Result<()> {
         let version: i64 = conn.query_row("PRAGMA user_version", [], |row| row.get(0))?;
         if version > CURRENT_SCHEMA_VERSION {
-            return Err(ZeppBridgeError::DataUnavailable(format!(
-                "Database schema v{version} is newer than supported v{CURRENT_SCHEMA_VERSION}. Upgrade ZeppBridge before opening this database."
+            return Err(PaceBridgeError::DataUnavailable(format!(
+                "Database schema v{version} is newer than supported v{CURRENT_SCHEMA_VERSION}. Upgrade PaceBridge before opening this database."
             )));
         }
         Ok(())
@@ -44,7 +44,7 @@ impl Database {
                     // SQLite 自己把事务回滚掉了（I/O 错误、磁盘满、损坏都会
                     // 触发）。这时候一个改动都没落地，不能当成升级成功——那会
                     // 让下一步拿着旧 schema 当新的用。
-                    return Err(ZeppBridgeError::DataUnavailable(
+                    return Err(PaceBridgeError::DataUnavailable(
                         "数据库升级被中断，没有任何改动写入。请确认磁盘空间和文件权限后重试。"
                             .into(),
                     ));
@@ -525,7 +525,7 @@ impl Database {
             [Utc::now().to_rfc3339()],
         )?;
         // The user-correction layer. Kept in its own tables so a normalizer
-        // replay can rewrite ZeppBridge's interpretation without touching what
+        // replay can rewrite PaceBridge's interpretation without touching what
         // the user told us, and so a correction is always displayable as
         // "you filled this in" rather than as a recognition result.
         //

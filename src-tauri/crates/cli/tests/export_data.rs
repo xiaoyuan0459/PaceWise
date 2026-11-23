@@ -4,21 +4,21 @@ use std::process::{Command, Output};
 
 use chrono::{Duration, TimeZone, Utc};
 use serde_json::{json, Value};
-use zeppbridge_core::decoder::workout_detail::{RoutePoint, WorkoutSample};
-use zeppbridge_core::decoder::DecodedWorkout;
-use zeppbridge_core::models::{
+use pacebridge_core::decoder::workout_detail::{RoutePoint, WorkoutSample};
+use pacebridge_core::decoder::DecodedWorkout;
+use pacebridge_core::models::{
     DailyMetric, DeviceIdentityHint, MetricSample, SourceScope, Workout,
 };
-use zeppbridge_core::storage::Database;
+use pacebridge_core::storage::Database;
 
 struct Fixture(PathBuf);
 
 impl Fixture {
     fn new() -> Self {
         let dir = std::env::temp_dir().join(format!(
-            "zeppbridge-export-data-{}-{}",
+            "pacebridge-export-data-{}-{}",
             std::process::id(),
-            zeppbridge_core::unique_suffix()
+            pacebridge_core::unique_suffix()
         ));
         fs::create_dir(&dir).unwrap();
         let fixture = Self(dir);
@@ -94,10 +94,10 @@ impl Fixture {
     }
 
     fn export(&self, args: &[&str]) -> Output {
-        Command::new(env!("CARGO_BIN_EXE_zeppbridge-cli"))
+        Command::new(env!("CARGO_BIN_EXE_pacebridge-cli"))
             .arg("export")
             .args(args)
-            .env("ZEPPBRIDGE_DATA_DIR", &self.0)
+            .env("PACEBRIDGE_DATA_DIR", &self.0)
             .output()
             .unwrap()
     }
