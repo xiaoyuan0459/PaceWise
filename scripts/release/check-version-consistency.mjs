@@ -34,6 +34,9 @@ const SITES = [
   { file: 'src-tauri/crates/core/Cargo.toml', pattern: /(\nversion = ")([0-9][^"]*)(")/ },
   { file: 'src-tauri/crates/cli/Cargo.toml', pattern: /(\nversion = ")([0-9][^"]*)(")/ },
   { file: 'src-tauri/crates/mcp/Cargo.toml', pattern: /(\nversion = ")([0-9][^"]*)(")/ },
+  { file: 'src-tauri/crates/app/Cargo.toml', pattern: /(\nversion = ")([0-9][^"]*)(")/ },
+  // Flutter 的 version 带 `+build`；只比较前面的 semver，保留构建号。
+  { file: 'app/pubspec.yaml', pattern: /(^version: )([0-9][0-9.]*)(\+[0-9]+)?/m },
   // 两份架构文档都要盯。只盯一份的话，另一份的版本号会惄惄过期，
   // 而读到它的人没有任何线索知道那个数字是错的。
   {

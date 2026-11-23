@@ -24,6 +24,12 @@ const SKIP_DIRS = new Set([
   '.omo',
   'temp',
   'output',
+  // Flutter 的生成目录：pub get 会把依赖软链进 ephemeral/，里面的 README
+  // 不是本仓库的文档，链接也不该由我们负责。
+  '.dart_tool',
+  'build',
+  'ephemeral',
+  '.plugin_symlinks',
 ]);
 
 const markdownFiles = [];
