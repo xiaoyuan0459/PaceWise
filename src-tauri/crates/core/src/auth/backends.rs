@@ -33,7 +33,7 @@ pub trait CredentialBackend: Send + Sync {
 /// 以前每一处都是 `map_err(|_| "无法写入 Windows 凭据管理器")`：底层错误被整个
 /// 丢掉，包括 Win32 错误码，以及「某个字段超长」这种已经说得很清楚的原因。
 /// 用户报上来一句「无法写入」，我们和他都无从下手。
-#[cfg(any(windows, unix))]
+#[cfg(any(windows, all(unix, not(target_os = "android"))))]
 pub(super) fn describe_keyring_error(action: &str, error: &keyring::Error) -> String {
     match error {
         keyring::Error::TooLong(attribute, limit) => {
@@ -138,11 +138,11 @@ pub const CREDENTIAL_FILE: &str = "credentials.json";
 ///
 /// 走的是 D-Bus 上的 `org.freedesktop.secrets`。Flatpak 沙箱里需要
 /// `--talk-name=org.freedesktop.secrets`，manifest 里已经给了。
-#[cfg(all(unix, not(target_os = "macos")))]
+#[cfg(all(unix, not(target_os = "macos"), not(target_os = "android")))]
 #[derive(Debug, Default)]
 pub struct SecretServiceCredentialBackend;
 
-#[cfg(all(unix, not(target_os = "macos")))]
+#[cfg(all(unix, not(target_os = "macos"), not(target_os = "android")))]
 impl CredentialBackend for SecretServiceCredentialBackend {
     fn set(&self, user_id: &str, token: &str) -> std::result::Result<(), String> {
         let entry = keyring::Entry::new(CREDENTIAL_SERVICE, user_id)
@@ -180,7 +180,7 @@ impl CredentialBackend for SecretServiceCredentialBackend {
 /// 没有 Secret Service 的报错原文是一句 D-Bus 层的话（连不上会话总线、
 /// 没有实现该接口）。对着无头服务器或容器读到它的人，从那句话里推不出
 /// 「这台机器本来就不该用密钥环」——所以这里直接把另外两个选项写出来。
-#[cfg(all(unix, not(target_os = "macos")))]
+#[cfg(all(unix, not(target_os = "macos"), not(target_os = "android")))]
 pub(super) fn describe_secret_service_error(action: &str, error: &keyring::Error) -> String {
     let base = describe_keyring_error(action, error);
     match error {

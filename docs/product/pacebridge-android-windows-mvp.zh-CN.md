@@ -148,7 +148,9 @@
 /src-tauri                        # 保留目录名，避免现在改 CI 与文档
   crates/core                     # 现有内核
   crates/cli  crates/mcp          # 现有入口
-  crates/app-ffi                  # 新增：FRB 桥接层（cdylib + staticlib）
+  crates/app                      # 新增：AppCore 门面（打开库、授权、分析查询）
+/app/rust                         # 新增：FRB 桥接 crate（cdylib + staticlib），依赖 crates/app
+/app/rust_builder                 # FRB 生成：Cargokit 构建胶水
 ```
 
 `src-tauri` 这个名字已经和 Tauri 无关，但为了减少一次性改动，本期保留；等产品稳定后再统一改成 `rust/`。
@@ -157,9 +159,9 @@
 
 #### 2.4.1 FFI 桥接层
 
-新增 `crates/app-ffi`：
+新增 `crates/app`（门面）与 `app/rust`（FRB 桥接）：
 
-- 依赖 `zeppbridge-core` 与 `flutter_rust_bridge`；
+- `app/rust` 依赖 `zeppbridge-app` 与 `flutter_rust_bridge`；`zeppbridge-app` 再依赖 core；
 - 输出 `cdylib`（Android）和 `staticlib`（Windows）；
 - 内部持有一个多线程 `tokio::runtime::Runtime`，同步任务全部在这里跑；
 - 持有 `Database` 与 `SyncManager`，用 `Mutex` / 单写者 actor 串行化写操作；
@@ -310,7 +312,7 @@ class AiChunk {
 
 | 作业 | 内容 |
 |---|---|
-| Rust 门禁 | 现有 `fmt`、`clippy`、`test` 不变；新增 `crates/app-ffi` 后仍跑 workspace |
+| Rust 门禁 | 现有 `fmt`、`clippy`、`test` 不变；新增 `crates/app` 后仍跑 workspace；`app/rust` 单独跑 `cargo test` |
 | Flutter 门禁 | `flutter analyze`、`flutter test`、`dart format --set-exit-if-changed` |
 | FRB 一致性 | 重新生成绑定后 `git diff --exit-code`，防止手改生成代码 |
 | Android 构建 | Ubuntu runner + Android SDK/NDK + `cargo-ndk`，产出 APK |
@@ -773,7 +775,7 @@ danger:      #EF4444
 ### M0 技术验证
 
 - Flutter 空白工程在 Android 真机与 Windows 跑通；
-- `crates/app-ffi` 通过 FRB 调通三个函数：`db_open`、`auth_start`、`sync_now`；
+- `app/rust` 通过 FRB 调通 `open`、`auth_start`、`auth_poll`、`metric_summary`；`sync_now` 随后补；
 - Windows 用现有 Credential Manager，Android 用 `flutter_secure_storage`；
 - 90 天同步在两端各跑一次，记录耗时、内存、包体。
 
@@ -974,7 +976,8 @@ cloud_backup_restore(remoteId: String, passphrase: String) -> RestoreReport
 | `analysis_revision` | `app_meta` | 参数变化触发回放 |
 | 查询门面 | `crates/core/src/storage/` | today / summary / trend / load / recovery |
 | 降采样与轨迹简化 | `crates/core/src/` | 详情序列 ≤600 点，轨迹 ≤1000 点 |
-| FRB 桥接层 | `crates/app-ffi/` | 新增 crate，`cdylib` + `staticlib` |
+| FRB 桥接层 | `app/rust/` | 新增 crate，`cdylib` + `staticlib`，依赖 `crates/app` |
+| App 门面 | `src-tauri/crates/app/` | 包装 core 的打开、授权、分析查询 |
 | TLS | `src-tauri/Cargo.toml` | `reqwest` 切 `rustls-tls` |
 | 数据目录 | 无需改内核 | 使用 `Database::open_migrated` / `SyncManager::with_data_dir` |
 | 凭据 | 无需改 Windows；Android 由 Dart 持有 | 内核内存后端或 App 层注入 |

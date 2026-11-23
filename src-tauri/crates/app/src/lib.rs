@@ -17,7 +17,8 @@ use zeppbridge_core::official::{
     current_generation, invalidate_pending_logins, AuthorizationRequest, ClaimOutcome,
     OfficialClient, OfficialStore,
 };
-use zeppbridge_core::storage::analytics::{LoadDay, MetricSummary, RecoveryDay, TrendPoint};
+pub use zeppbridge_core::storage::analytics::{LoadDay, MetricSummary, RecoveryDay, TrendPoint};
+
 use zeppbridge_core::storage::{Database, CURRENT_SCHEMA_VERSION};
 
 /// FFI 边界上的稳定错误。Dart 按 `code` 决定重试、重新授权还是去设置。

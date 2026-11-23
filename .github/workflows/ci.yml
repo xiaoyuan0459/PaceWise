@@ -62,6 +62,9 @@ jobs:
       - name: Install Dart dependencies
         run: flutter pub get
 
+      - name: Check formatting
+        run: dart format --set-exit-if-changed lib test
+
       - name: Analyze
         run: flutter analyze
 
@@ -131,6 +134,10 @@ jobs:
       - name: Test Rust
         working-directory: src-tauri
         run: cargo test --workspace --locked
+
+      - name: Test the Rust bridge crate
+        working-directory: app/rust
+        run: cargo test
 
   verify-macos:
     name: macOS verification

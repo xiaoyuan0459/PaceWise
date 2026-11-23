@@ -1,0 +1,15 @@
+[package]
+name = "pacebridge_bridge"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "staticlib", "lib"]
+
+[dependencies]
+flutter_rust_bridge = "=2.13.0"
+anyhow = "1"
+zeppbridge-app = { path = "../../src-tauri/crates/app" }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(frb_expand)"] }

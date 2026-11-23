@@ -14,9 +14,12 @@ analyzer:
     - build/**
     - android/**
     - windows/**
+    - rust_builder/cargokit/**
     # gen-l10n 生成的文件仍引用 flutter/material 的本地化代理；
     # 框架在 3.47 之后把它标成弃用，等生成器切换后再删掉这条排除。
     - lib/l10n/app_localizations*.dart
+    # flutter_rust_bridge 生成的绑定由 codegen 负责，不参与本仓库的 lint。
+    - lib/src/rust/**
 
 linter:
   # The lint rules applied to this project can be customized in the

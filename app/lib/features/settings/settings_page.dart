@@ -1,12 +1,15 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:pacebridge/data/core.dart';
 import 'package:pacebridge/l10n/app_localizations.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final appInfo = ref.watch(appInfoProvider);
     return CustomScrollView(
       slivers: [
         SliverAppBar.large(title: Text(l10n.navSettings)),
@@ -20,7 +23,11 @@ class SettingsPage extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.folder_outlined),
               title: Text(l10n.settingsDataDir),
-              subtitle: Text(l10n.settingsAppData),
+              subtitle: Text(
+                appInfo.dataDir.isEmpty
+                    ? l10n.settingsAppData
+                    : appInfo.dataDir,
+              ),
             ),
             ListTile(
               leading: const Icon(Icons.lock_outline),
@@ -30,7 +37,9 @@ class SettingsPage extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.info_outline),
               title: Text(l10n.settingsAbout),
-              subtitle: Text('${l10n.version} 3.2.1'),
+              subtitle: Text(
+                '${l10n.version} 3.2.1 · schema ${appInfo.schemaVersion}',
+              ),
             ),
           ]),
         ),

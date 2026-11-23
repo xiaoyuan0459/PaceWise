@@ -20,7 +20,13 @@ pub fn default_credential_backend_in(data_dir: &Path) -> Arc<dyn CredentialBacke
             std::env::var(CREDENTIAL_STORE_ENV).ok().as_deref(),
         )
     }
-    #[cfg(all(unix, not(target_os = "macos")))]
+    #[cfg(target_os = "android")]
+    {
+        // Android 没有 Secret Service。P0 先用应用沙盒内的文件存储，
+        // 令牌的长期归属由 Dart 的 flutter_secure_storage 接管。
+        Arc::new(FileCredentialBackend::new(data_dir))
+    }
+    #[cfg(all(unix, not(target_os = "macos"), not(target_os = "android")))]
     {
         linux_credential_backend(data_dir)
     }
@@ -63,7 +69,7 @@ pub(super) fn macos_credential_backend(
 }
 
 /// Linux 上按环境和现状挑一个存储。
-#[cfg(all(unix, not(target_os = "macos")))]
+#[cfg(all(unix, not(target_os = "macos"), not(target_os = "android")))]
 pub(super) fn linux_credential_backend(data_dir: &Path) -> Arc<dyn CredentialBackend> {
     let requested = std::env::var(CREDENTIAL_STORE_ENV)
         .ok()

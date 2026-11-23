@@ -48,7 +48,7 @@ libc = "0.2"
 #
 # `crypto-rust` 而不是 `crypto-openssl`：会话加密用纯 Rust 实现，不再多引入
 # 一个 OpenSSL 的系统库依赖。
-[target.'cfg(all(unix, not(target_os = "macos")))'.dependencies]
+[target.'cfg(all(unix, not(target_os = "macos"), not(target_os = "android")))'.dependencies]
 keyring = { version = "3.6.3", default-features = false, features = [
   "sync-secret-service",
   "crypto-rust",
