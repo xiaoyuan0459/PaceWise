@@ -1,14 +1,14 @@
 #![cfg(target_os = "macos")]
 
 use std::{fs, path::PathBuf, process::Command};
-use pacebridge_core::{
+use zeppbridge_core::{
     auth::{AuthManager, CredentialBackend, FileCredentialBackend, CREDENTIAL_FILE},
     local_api::{LocalApiController, LOCAL_API_CREDENTIAL_ACCOUNT},
     models::AuthInfo,
 };
 
-const TEST_DIR_ENV: &str = "PACEBRIDGE_TEST_CREDENTIAL_DIR";
-const TEST_PHASE_ENV: &str = "PACEBRIDGE_TEST_CREDENTIAL_PHASE";
+const TEST_DIR_ENV: &str = "ZEPPBRIDGE_TEST_CREDENTIAL_DIR";
+const TEST_PHASE_ENV: &str = "ZEPPBRIDGE_TEST_CREDENTIAL_PHASE";
 const APP_TOKEN: &str = "fixture-app-token";
 const API_TOKEN: &str = "zbk_fixture-local-api-token";
 
@@ -34,9 +34,9 @@ impl keyring::credential::CredentialBuilderApi for ForbiddenKeychain {
 #[test]
 fn file_credentials_survive_a_normal_macos_launch() {
     let dir = std::env::temp_dir().join(format!(
-        "pacebridge-macos-credentials-{}-{}",
+        "zeppbridge-macos-credentials-{}-{}",
         std::process::id(),
-        pacebridge_core::unique_suffix()
+        zeppbridge_core::unique_suffix()
     ));
     fs::create_dir_all(&dir).unwrap();
     // Simulate an upgrade with metadata pointing at an inaccessible Keychain.
@@ -52,10 +52,10 @@ fn file_credentials_survive_a_normal_macos_launch() {
             .args(["--exact", "credential_store_child", "--nocapture"])
             .env(TEST_DIR_ENV, &dir)
             .env(TEST_PHASE_ENV, phase)
-            .env_remove("PACEBRIDGE_CREDENTIAL_STORE")
-            .env_remove("PACEBRIDGE_APP_TOKEN");
+            .env_remove("ZEPPBRIDGE_CREDENTIAL_STORE")
+            .env_remove("ZEPPBRIDGE_APP_TOKEN");
         if phase == "save" || phase == "legacy" {
-            command.env("PACEBRIDGE_CREDENTIAL_STORE", " FILE ");
+            command.env("ZEPPBRIDGE_CREDENTIAL_STORE", " FILE ");
         }
         let output = command.output().unwrap();
         assert!(

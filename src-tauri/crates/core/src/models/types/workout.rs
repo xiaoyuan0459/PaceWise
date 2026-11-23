@@ -64,7 +64,7 @@ pub struct Workout {
     /// Backwards-compatible alias for `normalized_type`. Request-path names
     /// are never allowed to populate this field.
     pub workout_type: String,
-    /// PaceBridge's interpretation of the record's own type evidence.
+    /// ZeppBridge's interpretation of the record's own type evidence.
     pub normalized_type: String,
     /// `numeric_mapped`, `unknown_code`, `string_field`, or `missing`.
     pub type_source: String,

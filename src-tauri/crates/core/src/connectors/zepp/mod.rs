@@ -64,7 +64,7 @@ impl ZeppConnector {
                 .chars()
                 .all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_'))
         {
-            return Err(PaceBridgeError::ConfigError("user_id 无效".into()));
+            return Err(ZeppBridgeError::ConfigError("user_id 无效".into()));
         }
 
         let mut defaults = header::HeaderMap::new();
@@ -73,8 +73,8 @@ impl ZeppConnector {
         // 一个不存在的版本，出问题时对不上任何一次发布。
         defaults.insert(
             header::USER_AGENT,
-            header::HeaderValue::from_str(concat!("PaceBridge/", env!("CARGO_PKG_VERSION")))
-                .map_err(|_| PaceBridgeError::ConfigError("User-Agent 无法构造".into()))?,
+            header::HeaderValue::from_str(concat!("ZeppBridge/", env!("CARGO_PKG_VERSION")))
+                .map_err(|_| ZeppBridgeError::ConfigError("User-Agent 无法构造".into()))?,
         );
         // Redirects are disabled so a 3xx can never forward the custom
         // `apptoken` header to a host outside the validated region. Manual,
@@ -93,7 +93,7 @@ impl ZeppConnector {
             .redirect(reqwest::redirect::Policy::none())
             .build()?;
         let base_url = Url::parse(&base)
-            .map_err(|_| PaceBridgeError::InvalidHost("主机 URL 无法解析".into()))?;
+            .map_err(|_| ZeppBridgeError::InvalidHost("主机 URL 无法解析".into()))?;
         let connector = Self {
             client,
             auth,
@@ -109,7 +109,7 @@ impl ZeppConnector {
     pub fn build_headers(&self) -> Result<header::HeaderMap> {
         let mut headers = header::HeaderMap::new();
         let token = header::HeaderValue::from_str(&self.auth.app_token)
-            .map_err(|_| PaceBridgeError::ConfigError("app_token 含有非法 header 字符".into()))?;
+            .map_err(|_| ZeppBridgeError::ConfigError("app_token 含有非法 header 字符".into()))?;
         headers.insert("apptoken", token);
         headers.insert(
             "appname",
@@ -132,9 +132,9 @@ impl ZeppConnector {
         let url = self
             .base_url
             .join(path)
-            .map_err(|_| PaceBridgeError::ConfigError("API 路径无法构造".into()))?;
+            .map_err(|_| ZeppBridgeError::ConfigError("API 路径无法构造".into()))?;
         if !same_region_origin(&url, &self.base_url) {
-            return Err(PaceBridgeError::ConfigError("非法 API 路径".into()));
+            return Err(ZeppBridgeError::ConfigError("非法 API 路径".into()));
         }
         Ok(url)
     }
@@ -152,14 +152,14 @@ impl ZeppConnector {
         let mut left = millis;
         while left > 0 {
             if self.cancel.load(Ordering::SeqCst) {
-                return Err(PaceBridgeError::Cancelled);
+                return Err(ZeppBridgeError::Cancelled);
             }
             let step = left.min(TICK_MS);
             tokio::time::sleep(Duration::from_millis(step)).await;
             left -= step;
         }
         if self.cancel.load(Ordering::SeqCst) {
-            return Err(PaceBridgeError::Cancelled);
+            return Err(ZeppBridgeError::Cancelled);
         }
         Ok(())
     }
@@ -214,10 +214,10 @@ impl ZeppConnector {
         let mut headers = self.build_headers()?;
         for (name, value) in overrides {
             if !matches!(*name, "lang" | "cv" | "vn") {
-                return Err(PaceBridgeError::ConfigError("不允许覆盖这个请求头".into()));
+                return Err(ZeppBridgeError::ConfigError("不允许覆盖这个请求头".into()));
             }
             let value = header::HeaderValue::from_str(value)
-                .map_err(|_| PaceBridgeError::ConfigError("请求头含有非法字符".into()))?;
+                .map_err(|_| ZeppBridgeError::ConfigError("请求头含有非法字符".into()))?;
             headers.insert(*name, value);
         }
         let mut last_retry_status = None;
@@ -229,7 +229,7 @@ impl ZeppConnector {
             // 覆盖掉它。
             let backoff_ms = RETRY_BACKOFF_MS.get(attempt).copied().unwrap_or(0);
             if self.cancel.load(Ordering::SeqCst) {
-                return Err(PaceBridgeError::Cancelled);
+                return Err(ZeppBridgeError::Cancelled);
             }
             let mut query = params.clone();
             query.push(("r", Self::request_id()));
@@ -250,7 +250,7 @@ impl ZeppConnector {
                 // 先看取消：两边同时就绪时优先走取消，别再把一个用户已经
                 // 放弃的响应解出来。
                 biased;
-                _ = self.cancelled() => return Err(PaceBridgeError::Cancelled),
+                _ = self.cancelled() => return Err(ZeppBridgeError::Cancelled),
                 outcome = send => outcome,
             };
             let response = match outcome {
@@ -261,7 +261,7 @@ impl ZeppConnector {
                         self.backoff(backoff_ms).await?;
                         continue;
                     }
-                    return Err(PaceBridgeError::NetworkError(error));
+                    return Err(ZeppBridgeError::NetworkError(error));
                 }
                 Err(_elapsed) => {
                     attempt += 1;
@@ -269,7 +269,7 @@ impl ZeppConnector {
                         self.backoff(backoff_ms).await?;
                         continue;
                     }
-                    return Err(PaceBridgeError::RetryExhausted {
+                    return Err(ZeppBridgeError::RetryExhausted {
                         status: 504,
                         message: "请求超时".into(),
                     });
@@ -285,7 +285,7 @@ impl ZeppConnector {
                 // 跳转记在自己的预算上，**不动 `attempt`**。
                 redirects += 1;
                 if redirects > MAX_REDIRECTS {
-                    return Err(PaceBridgeError::HttpStatus {
+                    return Err(ZeppBridgeError::HttpStatus {
                         status,
                         message: "重定向次数过多".into(),
                     });
@@ -301,14 +301,14 @@ impl ZeppConnector {
                             continue;
                         }
                         _ => {
-                            return Err(PaceBridgeError::HttpStatus {
+                            return Err(ZeppBridgeError::HttpStatus {
                                 status,
                                 message: "重定向目标不在允许的区域内".into(),
                             })
                         }
                     },
                     None => {
-                        return Err(PaceBridgeError::HttpStatus {
+                        return Err(ZeppBridgeError::HttpStatus {
                             status,
                             message: "重定向缺少目标地址".into(),
                         })
@@ -323,13 +323,13 @@ impl ZeppConnector {
                     }
                     return Ok(body);
                 }
-                Some(PaceBridgeError::NeedsReauth(message)) => {
-                    return Err(PaceBridgeError::NeedsReauth(message));
+                Some(ZeppBridgeError::NeedsReauth(message)) => {
+                    return Err(ZeppBridgeError::NeedsReauth(message));
                 }
-                Some(PaceBridgeError::Unavailable(message)) => {
-                    return Err(PaceBridgeError::Unavailable(message));
+                Some(ZeppBridgeError::Unavailable(message)) => {
+                    return Err(ZeppBridgeError::Unavailable(message));
                 }
-                Some(PaceBridgeError::RetryExhausted { .. }) => {
+                Some(ZeppBridgeError::RetryExhausted { .. }) => {
                     last_retry_status = Some(status);
                     // 服务器说了要等多久就等多久（夹在上限内）；没说才用我们
                     // 自己的指数退避。以前 429 和 503 都只等 50/150 毫秒，
@@ -342,7 +342,7 @@ impl ZeppConnector {
                         self.backoff(wait).await?;
                         continue;
                     }
-                    return Err(PaceBridgeError::RetryExhausted {
+                    return Err(ZeppBridgeError::RetryExhausted {
                         status,
                         message: "服务暂时不可用，已达到有限重试次数".into(),
                     });
@@ -351,7 +351,7 @@ impl ZeppConnector {
             }
         }
 
-        Err(PaceBridgeError::RetryExhausted {
+        Err(ZeppBridgeError::RetryExhausted {
             status: last_retry_status.unwrap_or(503),
             message: "服务暂时不可用".into(),
         })
@@ -428,7 +428,7 @@ impl ZeppConnector {
 
     /// Weight and body composition: `/users/{id}/members/{member}/weightRecords`.
     ///
-    /// **A different surface, not another event type.** PaceBridge probed
+    /// **A different surface, not another event type.** ZeppBridge probed
     /// `/v2/users/me/events?eventType=weight&subType=summary` for a year and got
     /// an empty page every time, which the UI reported — correctly, for what it
     /// was asked — as "No measurement in the last 365 days", to four people who
@@ -513,7 +513,7 @@ impl ZeppConnector {
                 .chars()
                 .all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_'))
         {
-            return Err(PaceBridgeError::ConfigError("sport 类型无效".into()));
+            return Err(ZeppBridgeError::ConfigError("sport 类型无效".into()));
         }
         let path = format!("/v1/sport/{sport}/history.json");
         self.get_json(
@@ -536,7 +536,7 @@ impl ZeppConnector {
     /// （GitHub #163，felipepmdias 实测）。
     pub async fn fetch_strength_catalog(&self, lang: &str) -> Result<Value> {
         if !crate::decoder::strength_catalog::is_valid_zepp_lang(lang) {
-            return Err(PaceBridgeError::ConfigError("语言代码无效".into()));
+            return Err(ZeppBridgeError::ConfigError("语言代码无效".into()));
         }
         use crate::decoder::strength_catalog::{STRENGTH_CATALOG_CV, STRENGTH_CATALOG_VN};
         self.get_json_with_headers(
@@ -575,7 +575,7 @@ impl ZeppConnector {
         let statistic = match statistic {
             "SPORT_LOAD" | "VO2_MAX" => statistic,
             _ => {
-                return Err(PaceBridgeError::ConfigError(
+                return Err(ZeppBridgeError::ConfigError(
                     "WatchSportStatistics 类型无效".into(),
                 ))
             }
@@ -717,15 +717,15 @@ impl ZeppConnector {
 
     pub async fn fetch_hrv(&self, start_date: &str, end_date: &str) -> Result<Value> {
         let start = chrono::NaiveDate::parse_from_str(start_date, "%Y-%m-%d")
-            .map_err(|_| PaceBridgeError::ConfigError("start_date 无效".into()))?
+            .map_err(|_| ZeppBridgeError::ConfigError("start_date 无效".into()))?
             .and_hms_opt(0, 0, 0)
-            .ok_or_else(|| PaceBridgeError::ConfigError("start_date 无效".into()))?
+            .ok_or_else(|| ZeppBridgeError::ConfigError("start_date 无效".into()))?
             .and_utc()
             .timestamp_millis();
         let end = chrono::NaiveDate::parse_from_str(end_date, "%Y-%m-%d")
-            .map_err(|_| PaceBridgeError::ConfigError("end_date 无效".into()))?
+            .map_err(|_| ZeppBridgeError::ConfigError("end_date 无效".into()))?
             .and_hms_opt(23, 59, 59)
-            .ok_or_else(|| PaceBridgeError::ConfigError("end_date 无效".into()))?
+            .ok_or_else(|| ZeppBridgeError::ConfigError("end_date 无效".into()))?
             .and_utc()
             .timestamp_millis();
         self.fetch_events("hrv_sdnn", Some("real_data"), start, end, 2000, true)

@@ -246,7 +246,7 @@ impl Database {
             }
         }
 
-        // The rolling resting heart rate PaceBridge computes itself. It is an
+        // The rolling resting heart rate ZeppBridge computes itself. It is an
         // average of measured days, not a model, so it carries the window it
         // was taken over instead of a single measurement date.
         let computed: Option<(f64, i64, Option<String>)> = self
@@ -297,7 +297,7 @@ impl Database {
         preference: &HeartRateZonePreference,
     ) -> Result<HeartRateZonePreference> {
         let encoded = serde_json::to_string(preference)
-            .map_err(|error| PaceBridgeError::ParseError(error.to_string()))?;
+            .map_err(|error| ZeppBridgeError::ParseError(error.to_string()))?;
         self.set_app_meta(HEART_RATE_ZONE_PREF_KEY, &encoded)?;
         Ok(preference.clone())
     }

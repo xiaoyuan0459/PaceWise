@@ -438,7 +438,7 @@ impl LocalApiController {
         });
         let thread_stop = stop.clone();
         match std::thread::Builder::new()
-            .name("pacebridge-local-api".to_string())
+            .name("zeppbridge-local-api".to_string())
             .spawn(move || serve(listener, context, thread_stop))
         {
             Ok(handle) => {

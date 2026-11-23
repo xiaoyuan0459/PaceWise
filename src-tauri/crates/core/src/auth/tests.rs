@@ -2,7 +2,7 @@ use super::*;
 
 #[test]
 fn credential_service_is_namespaced() {
-    assert_eq!(CREDENTIAL_SERVICE, "com.pacebridge.app");
+    assert_eq!(CREDENTIAL_SERVICE, "com.zeppbridge.app");
 }
 use std::{
     collections::HashMap,
@@ -57,7 +57,7 @@ fn temp_dir() -> PathBuf {
     static NEXT_ID: AtomicU64 = AtomicU64::new(0);
     loop {
         let path = std::env::temp_dir().join(format!(
-            "pacebridge-auth-test-{}-{}",
+            "zeppbridge-auth-test-{}-{}",
             std::process::id(),
             NEXT_ID.fetch_add(1, Ordering::Relaxed)
         ));

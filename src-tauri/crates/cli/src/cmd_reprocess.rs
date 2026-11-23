@@ -9,7 +9,7 @@ pub(super) fn open_read_only() -> Result<Database, (u8, String)> {
         return Err((
             EXIT_NOT_CONFIGURED,
             format!(
-                "No local database yet. Connect an account in the PaceBridge desktop app \
+                "No local database yet. Connect an account in the ZeppBridge desktop app \
                  and sync once first, or copy an existing zepp.db here. {}",
                 where_it_looked(&dir)
             ),
@@ -19,7 +19,7 @@ pub(super) fn open_read_only() -> Result<Database, (u8, String)> {
     Database::open_read_only(db_path).map_err(|error| match error {
         // schema 对不上是「先去升级」，不是「数据库坏了」。两种情况给调度
         // 脚本的应对完全不同，所以退出码必须分开。
-        PaceBridgeError::ConfigError(message) => (EXIT_SCHEMA, message),
+        ZeppBridgeError::ConfigError(message) => (EXIT_SCHEMA, message),
         other => {
             let (code, _) = exit_code_for(&other);
             (code, user_text(&other))
@@ -111,7 +111,7 @@ pub(super) fn announce_replay(plan: &ReplayPlan) {
 /// 锁在这里取、在这里放：同步自己还要再取一次同一把锁，嵌套会死锁。
 ///
 /// 返回 `None` = 拿到锁的时候已经没事可做了。等锁的这二十秒里，桌面应用或者
-/// 另一个 `pacebridge-cli` 完全可能刚把同一次重放做完；那时候报一句「已重放
+/// 另一个 `zeppbridge-cli` 完全可能刚把同一次重放做完；那时候报一句「已重放
 /// N 条报文，得到 0 条派生记录」，是在拿一个自相矛盾的数字糊弄人。
 pub(super) fn run_replay(
     dir: &Path,
@@ -148,7 +148,7 @@ pub(super) fn run_replay(
     }))
 }
 
-pub(super) fn replay_failure(error: &PaceBridgeError) -> (u8, &'static str, String) {
+pub(super) fn replay_failure(error: &ZeppBridgeError) -> (u8, &'static str, String) {
     let (code, kind) = exit_code_for(error);
     (code, kind, user_text(error))
 }
@@ -163,7 +163,7 @@ pub(super) fn pending_replay_notice(plan: Option<&ReplayPlan>) -> Option<String>
         return None;
     }
     Some(format!(
-        "Derived data here still comes from {}; the current parser is {}. {} stored payloads need a replay. Run `pacebridge-cli reprocess`, or let the next sync do it.",
+        "Derived data here still comes from {}; the current parser is {}. {} stored payloads need a replay. Run `zeppbridge-cli reprocess`, or let the next sync do it.",
         plan.stored_revision.as_deref().unwrap_or("an earlier revision"),
         plan.target_revision,
         plan.raw_records
@@ -180,7 +180,7 @@ pub(super) fn open_writable() -> Result<(std::path::PathBuf, Database), (u8, Str
         return Err((
             EXIT_NOT_CONFIGURED,
             format!(
-                "No local database yet. Connect an account in the PaceBridge desktop app \
+                "No local database yet. Connect an account in the ZeppBridge desktop app \
                  and sync once first, or copy an existing zepp.db here. {}",
                 where_it_looked(&dir)
             ),
@@ -285,7 +285,7 @@ pub(super) fn cmd_reprocess(args: &[String]) -> u8 {
                     "reason": "already_done",
                     "revision": NORMALIZER_REVISION,
                 }),
-                "Another PaceBridge finished this replay while we waited for the write lock",
+                "Another ZeppBridge finished this replay while we waited for the write lock",
             );
             EXIT_OK
         }

@@ -1,20 +1,20 @@
 use std::{fs, process::Command};
-use pacebridge_core::storage::{write_lock, Database};
+use zeppbridge_core::storage::{write_lock, Database};
 
 #[test]
 fn migration_lock_contention_returns_busy_and_preserves_the_database() {
     let dir = std::env::temp_dir().join(format!(
-        "pacebridge-cli-migration-busy-{}-{}",
+        "zeppbridge-cli-migration-busy-{}-{}",
         std::process::id(),
-        pacebridge_core::unique_suffix()
+        zeppbridge_core::unique_suffix()
     ));
     fs::create_dir_all(&dir).unwrap();
     let path = dir.join("zepp.db");
     drop(Database::open_migrated(&path).unwrap());
     let before = fs::read(&path).unwrap();
     let guard = write_lock::try_acquire(&dir, write_lock::WritePurpose::Sync).unwrap();
-    let output = Command::new(env!("CARGO_BIN_EXE_pacebridge-cli"))
-        .env("PACEBRIDGE_DATA_DIR", &dir)
+    let output = Command::new(env!("CARGO_BIN_EXE_zeppbridge-cli"))
+        .env("ZEPPBRIDGE_DATA_DIR", &dir)
         .args(["reprocess", "--json"])
         .output()
         .unwrap();

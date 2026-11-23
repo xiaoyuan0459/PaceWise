@@ -16,7 +16,7 @@ mod store;
 pub use client::{ClaimOutcome, OfficialClient, OfficialProfile, RefreshOutcome};
 pub use store::{current_generation, invalidate_pending_logins, OfficialMeta, OfficialStore};
 
-use crate::models::{error::Result, PaceBridgeError};
+use crate::models::{error::Result, ZeppBridgeError};
 use base64::Engine;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -106,7 +106,7 @@ pub async fn refresh_tokens(
 ) -> Result<OfficialTokens> {
     let _flight = REFRESH_FLIGHT.lock().await;
     let mut other_processes = store.refresh_flight().await;
-    let reauth = || PaceBridgeError::NeedsReauth("官方授权已失效，请重新授权".into());
+    let reauth = || ZeppBridgeError::NeedsReauth("官方授权已失效，请重新授权".into());
     match store.load()? {
         None => return Err(reauth()),
         Some(current) if !current.same_grant(used) => return Ok(current),
@@ -168,7 +168,7 @@ pub async fn fresh_tokens(
     }
     match refresh_tokens(store, client, &tokens, now).await {
         Ok(fresh) => Ok(Some(fresh)),
-        Err(error @ PaceBridgeError::NeedsReauth(_)) => Err(error),
+        Err(error @ ZeppBridgeError::NeedsReauth(_)) => Err(error),
         Err(error) if tokens.expires_at.is_some_and(|expires_at| now < expires_at) => {
             tracing::warn!("刷新官方令牌暂时失败，先用旧令牌: {error}");
             Ok(Some(tokens))
@@ -212,7 +212,7 @@ impl AuthorizationRequest {
 fn random_token() -> Result<String> {
     let mut bytes = [0u8; 32];
     getrandom::getrandom(&mut bytes)
-        .map_err(|error| PaceBridgeError::ConfigError(format!("无法生成随机数: {error}")))?;
+        .map_err(|error| ZeppBridgeError::ConfigError(format!("无法生成随机数: {error}")))?;
     Ok(base64::engine::general_purpose::URL_SAFE_NO_PAD.encode(bytes))
 }
 

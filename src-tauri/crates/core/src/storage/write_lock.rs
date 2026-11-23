@@ -100,10 +100,10 @@ impl std::fmt::Display for WriteLockError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             WriteLockError::Busy { holder: Some(who) } => {
-                write!(f, "另一个 PaceBridge 写入操作正在进行（{who}），请等它结束")
+                write!(f, "另一个 ZeppBridge 写入操作正在进行（{who}），请等它结束")
             }
             WriteLockError::Busy { holder: None } => {
-                write!(f, "另一个 PaceBridge 写入操作正在进行，请等它结束")
+                write!(f, "另一个 ZeppBridge 写入操作正在进行，请等它结束")
             }
             WriteLockError::Unavailable(error) => {
                 write!(f, "无法建立写入锁：{error}")
@@ -317,7 +317,7 @@ mod tests {
     use super::*;
 
     fn temp_dir(name: &str) -> PathBuf {
-        let dir = std::env::temp_dir().join(format!("pacebridge-write-lock-{name}"));
+        let dir = std::env::temp_dir().join(format!("zeppbridge-write-lock-{name}"));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         dir

@@ -6,7 +6,7 @@ use super::publish::classify;
 use super::v2::{clear_future_window, window_body, NumberedWorkout, WatchLocale};
 use super::window::{preview, DayChange, Window};
 use super::*;
-use crate::models::PaceBridgeError;
+use crate::models::ZeppBridgeError;
 use crate::storage::training_plan::SendOutcome;
 use serde_json::json;
 
@@ -46,7 +46,7 @@ fn plan_two_keeps_local_rest_advice_out_of_the_watch_body() {
         json!({"from":"2026-10-02","to":"2026-10-08","workouts":[easy_run("2026-10-03")]}),
     );
     let mut next = serde_json::to_value(&old).unwrap();
-    next["format"] = json!("pacebridge.plan/2");
+    next["format"] = json!("zeppbridge.plan/2");
     next["summary"] = json!("Recover first");
     next["rest"] =
         json!([{"date":"2026-10-03","bedtime":"22:30","sleepTarget":"8h30m","note":"Early night"}]);
@@ -349,7 +349,7 @@ fn success_is_only_delivery_and_doubt_is_never_success() {
         SendOutcome::Unknown { .. }
     ));
     assert!(matches!(
-        classify(Err(PaceBridgeError::TimedOut("超时".into()))),
+        classify(Err(ZeppBridgeError::TimedOut("超时".into()))),
         SendOutcome::Unknown { .. }
     ));
 }
@@ -392,9 +392,9 @@ fn focus_and_description_are_required_and_a_long_name_only_warns() {
     let mut bare = easy_run("2026-10-04");
     bare.as_object_mut().unwrap().remove("focus");
     bare.as_object_mut().unwrap().remove("description");
-    // 旧格式（pacebridge-plan/2）读得进来，校验挡住。
+    // 旧格式（zeppbridge-plan/2）读得进来，校验挡住。
     let check = check_plan(
-        &document(json!({ "format": "pacebridge-plan/2", "workouts": [bare] })),
+        &document(json!({ "format": "zeppbridge-plan/2", "workouts": [bare] })),
         context(),
     );
     assert!(!check.publishable());
@@ -514,7 +514,7 @@ fn pool_steps_go_down_to_one_length_and_swims_refuse_pace() {
             step["target"] = json!(target);
         }
         let plan = document(json!({
-            "format": "pacebridge-plan/3",
+            "format": "zeppbridge-plan/3",
             "workouts": [{
                 "date": "2026-10-03", "sport": sport, "name": "测试",
                 "focus": "实测", "description": "实测", "steps": [step]

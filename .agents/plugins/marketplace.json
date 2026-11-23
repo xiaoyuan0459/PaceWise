@@ -1,7 +1,7 @@
 {
-  "name": "pacebridge",
+  "name": "zeppbridge",
   "interface": {
-    "displayName": "PaceBridge"
+    "displayName": "ZeppBridge"
   },
   "plugins": [
     {

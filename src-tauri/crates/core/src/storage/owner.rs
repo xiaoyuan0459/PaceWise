@@ -43,7 +43,7 @@ impl Database {
         let user_id = user_id.trim();
         match self.library_owner()? {
             Some(owner) if owner == user_id => Ok(()),
-            Some(_) => Err(PaceBridgeError::AccountMismatch),
+            Some(_) => Err(ZeppBridgeError::AccountMismatch),
             None => {
                 let source = if self.has_any_raw_record()? {
                     "upgrade"
@@ -68,7 +68,7 @@ impl Database {
         let user_id = user_id.trim();
         match self.library_owner()? {
             Some(owner) if owner == user_id => Ok(()),
-            Some(_) => Err(PaceBridgeError::AccountMismatch),
+            Some(_) => Err(ZeppBridgeError::AccountMismatch),
             None if !self.has_any_raw_record()? => self.set_library_owner(user_id, "first_write"),
             None => {
                 let others = known_accounts
@@ -76,7 +76,7 @@ impl Database {
                     .map(|account| account.trim())
                     .any(|account| !account.is_empty() && account != user_id);
                 if others {
-                    return Err(PaceBridgeError::AccountMismatch);
+                    return Err(ZeppBridgeError::AccountMismatch);
                 }
                 self.set_library_owner(user_id, "upgrade")
             }

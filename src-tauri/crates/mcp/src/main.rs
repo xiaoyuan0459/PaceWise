@@ -7,13 +7,13 @@ use chrono::{Duration, Local, NaiveDate};
 
 use serde_json::{json, Value};
 
-use pacebridge_core::access::{self, AccessCategory, AccessScope, DataRequest, Permit};
+use zeppbridge_core::access::{self, AccessCategory, AccessScope, DataRequest, Permit};
 
-use pacebridge_core::contract;
+use zeppbridge_core::contract;
 
-use pacebridge_core::paths;
+use zeppbridge_core::paths;
 
-use pacebridge_core::storage::Database;
+use zeppbridge_core::storage::Database;
 
 mod actions;
 mod browse;
@@ -134,13 +134,13 @@ fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     // 桌面端靠它判断这份 sidecar 有没有跟着升级（Claude Desktop 占着旧文件时，更新换不掉它）。
     if args == ["--version"] {
-        println!("pacebridge-mcp {VERSION}");
+        println!("zeppbridge-mcp {VERSION}");
         return;
     }
     let scope = match parse_scope_args(&args) {
         Ok(scope) => scope,
         Err(message) => {
-            eprintln!("pacebridge-mcp: {message}");
+            eprintln!("zeppbridge-mcp: {message}");
             std::process::exit(2);
         }
     };
@@ -152,7 +152,7 @@ fn main() {
 /// `--scope full-readonly|task`。缺省 `full-readonly`——没有 flag 的旧配置
 /// 行为不变。任何不认识的参数、值或重复的 `--scope` 都 fail closed。
 fn parse_scope_args(args: &[String]) -> Result<AccessScope, String> {
-    const USAGE: &str = "用法：pacebridge-mcp [--scope full-readonly|task]";
+    const USAGE: &str = "用法：zeppbridge-mcp [--scope full-readonly|task]";
     let mut scope = AccessScope::FullReadOnly;
     let mut scope_seen = false;
     let mut index = 0;

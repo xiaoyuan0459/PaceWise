@@ -280,7 +280,7 @@ pub(super) const CAPABILITY_PROBES: [(&str, ProbeSurface, &str, Option<&str>, Pr
     ),
 ];
 
-/// A stream PaceBridge already reads successfully. If this comes back empty the
+/// A stream ZeppBridge already reads successfully. If this comes back empty the
 /// probe itself is broken (auth, window, transport) and no other row means
 /// anything.
 pub(super) const CONTROL_POSITIVE: &str = "control_positive";
@@ -398,7 +398,7 @@ impl DataFetcher {
     /// ("another client can read HRV, so you should be able to") with a fact
     /// about *this* account and *these* devices. A stream that answers with no
     /// items is a different fact from one that 404s, and both are different
-    /// from a stream PaceBridge has not implemented.
+    /// from a stream ZeppBridge has not implemented.
     /// `only` narrows the run to named streams. The silent check that runs
     /// during a sync uses it: nine of the twelve capabilities are already
     /// answered by stored data, so asking the server about them would spend
@@ -528,13 +528,13 @@ impl DataFetcher {
     }
 }
 
-pub(super) fn probe_failure(error: &PaceBridgeError) -> String {
+pub(super) fn probe_failure(error: &ZeppBridgeError) -> String {
     match error {
-        PaceBridgeError::HttpStatus { status, .. }
-        | PaceBridgeError::RetryExhausted { status, .. } => {
+        ZeppBridgeError::HttpStatus { status, .. }
+        | ZeppBridgeError::RetryExhausted { status, .. } => {
             format!("{}: HTTP {status}", error.code())
         }
-        PaceBridgeError::CloudRejected { code, .. } => {
+        ZeppBridgeError::CloudRejected { code, .. } => {
             format!("{}: cloud code {code}", error.code())
         }
         _ => error.code().to_string(),

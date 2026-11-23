@@ -1,6 +1,6 @@
 use crate::models::error::HeadlessProblem;
 
-use crate::models::{error::Result, AuthInfo, PaceBridgeError};
+use crate::models::{error::Result, AuthInfo, ZeppBridgeError};
 
 use chrono::Utc;
 
@@ -29,7 +29,7 @@ pub use select::*;
 /// and Secret Service respectively — so the `allow(dead_code)` that used to sit
 /// here for the platforms without a real backend is gone, as its own comment
 /// said it should be once one appeared.
-pub const CREDENTIAL_SERVICE: &str = "com.pacebridge.app";
+pub const CREDENTIAL_SERVICE: &str = "com.zeppbridge.app";
 
 /// 令牌最多能有多少个 UTF-16 码元。
 ///
@@ -214,7 +214,7 @@ impl AuthManager {
                     // 用 `HeadlessProblem` 而不是 `AuthError`，是为了让它有自己
                     // 的错误码：命令行没有 i18n 层，只有按码才出得了英文，而
                     // 撞上这一条的人多半正在一台无头 Linux 上。
-                    return Err(PaceBridgeError::Headless(HeadlessProblem::TokenNotInStore));
+                    return Err(ZeppBridgeError::Headless(HeadlessProblem::TokenNotInStore));
                 }
             }
         };
@@ -274,7 +274,7 @@ impl AuthManager {
 
         // Invalid metadata must not break the settings snapshot and hide the
         // very controls needed to replace or clear it.
-        let recoverable = |error: PaceBridgeError| AuthStatus {
+        let recoverable = |error: ZeppBridgeError| AuthStatus {
             configured: false,
             configuration_present: true,
             credential_error: Some(error.user_message()),
@@ -304,7 +304,7 @@ impl AuthManager {
             .and_then(|token| {
                 token
                     .or(legacy_token)
-                    .ok_or(PaceBridgeError::Headless(HeadlessProblem::TokenNotInStore))
+                    .ok_or(ZeppBridgeError::Headless(HeadlessProblem::TokenNotInStore))
             })
             .and_then(|token| validate_token(&token));
         let (token, error) = match token {
@@ -366,7 +366,7 @@ impl AuthManager {
         let parent = self
             .user_id_file
             .parent()
-            .ok_or_else(|| PaceBridgeError::ConfigError("认证目录无效".into()))?;
+            .ok_or_else(|| ZeppBridgeError::ConfigError("认证目录无效".into()))?;
         fs::create_dir_all(parent)?;
         let temp_path = parent.join(format!(
             ".auth.user-id.tmp-{}-{}",
@@ -387,7 +387,7 @@ impl AuthManager {
         if result.is_err() {
             let _ = fs::remove_file(&temp_path);
         }
-        result.map_err(PaceBridgeError::IoError)
+        result.map_err(ZeppBridgeError::IoError)
     }
 
     fn read_user_id_hint(&self) -> Option<String> {
@@ -399,13 +399,13 @@ impl AuthManager {
     fn read_stored(&self) -> Result<(StoredAuth, Option<String>)> {
         let content = fs::read_to_string(&self.auth_file)?;
         let value: Value = serde_json::from_str(&content)
-            .map_err(|e| PaceBridgeError::ParseError(format!("认证元数据格式无效: {e}")))?;
+            .map_err(|e| ZeppBridgeError::ParseError(format!("认证元数据格式无效: {e}")))?;
         let legacy_token = value
             .get("app_token")
             .and_then(Value::as_str)
             .map(ToOwned::to_owned);
         let stored: StoredAuth = serde_json::from_value(value)
-            .map_err(|e| PaceBridgeError::ParseError(format!("认证元数据字段无效: {e}")))?;
+            .map_err(|e| ZeppBridgeError::ParseError(format!("认证元数据字段无效: {e}")))?;
         Ok((stored, legacy_token))
     }
 
@@ -413,11 +413,11 @@ impl AuthManager {
         let parent = self
             .auth_file
             .parent()
-            .ok_or_else(|| PaceBridgeError::ConfigError("认证目录无效".to_string()))?;
+            .ok_or_else(|| ZeppBridgeError::ConfigError("认证目录无效".to_string()))?;
         fs::create_dir_all(parent)?;
 
         let json = serde_json::to_vec_pretty(stored)
-            .map_err(|e| PaceBridgeError::ParseError(e.to_string()))?;
+            .map_err(|e| ZeppBridgeError::ParseError(e.to_string()))?;
         let suffix = crate::unique_suffix();
         let temp_path = parent.join(format!(
             ".{}.tmp-{}-{}",
@@ -447,7 +447,7 @@ impl AuthManager {
         if result.is_err() {
             let _ = fs::remove_file(&temp_path);
         }
-        result.map_err(PaceBridgeError::IoError)
+        result.map_err(ZeppBridgeError::IoError)
     }
 }
 
@@ -460,11 +460,11 @@ mod credential_error_tests {
         let error = credential_error(format!("{HEADLESS_NO_STORE_MARKER}cannot talk to dbus"));
         assert!(matches!(
             error,
-            PaceBridgeError::Headless(HeadlessProblem::NoCredentialStore { .. })
+            ZeppBridgeError::Headless(HeadlessProblem::NoCredentialStore { .. })
         ));
         assert_eq!(error.code(), "err.headless.no_credential_store");
         let generic = credential_error("无法写入 Windows 凭据管理器".into());
-        assert!(matches!(generic, PaceBridgeError::CredentialStore(_)));
+        assert!(matches!(generic, ZeppBridgeError::CredentialStore(_)));
         assert_eq!(generic.code(), "err.core.credential_store");
     }
 }

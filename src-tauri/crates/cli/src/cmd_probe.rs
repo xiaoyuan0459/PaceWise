@@ -1,7 +1,7 @@
 //! Read-only cloud diagnostics. No database opened and no measured values printed.
 use super::*;
-use pacebridge_core::fetcher::{FetchWindow, FetchedRecord};
-use pacebridge_core::normalizer::{payload_is_explicitly_empty, Normalizer};
+use zeppbridge_core::fetcher::{FetchWindow, FetchedRecord};
+use zeppbridge_core::normalizer::{payload_is_explicitly_empty, Normalizer};
 
 pub(super) fn cmd_probe(args: &[String]) -> u8 {
     let json_mode = scan_json_flag(args);
@@ -216,7 +216,7 @@ fn summarize_responses(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use pacebridge_core::models::{CapabilityStatus, RawRecord, SourceScope};
+    use zeppbridge_core::models::{CapabilityStatus, RawRecord, SourceScope};
 
     #[test]
     fn direct_heart_rate_distinguishes_empty_responses_from_unreadable_records() {

@@ -8,7 +8,7 @@
 //!
 //! 联网时不拿写锁，和同步的规矩一样。
 
-use crate::models::{error::Result, PaceBridgeError};
+use crate::models::{error::Result, ZeppBridgeError};
 use crate::official::{fresh_tokens, refresh_tokens, OfficialClient, OfficialStore};
 use crate::storage::training_plan::SendOutcome;
 use chrono::Utc;
@@ -22,7 +22,7 @@ pub const WORKOUTS_VERSION: &str = "2.0.0";
 pub async fn ensure_connected(store: &OfficialStore, client: &OfficialClient) -> Result<()> {
     match fresh_tokens(store, client, Utc::now().timestamp()).await? {
         Some(_) => Ok(()),
-        None => Err(PaceBridgeError::NeedsReauth(
+        None => Err(ZeppBridgeError::NeedsReauth(
             "还没有连接 Zepp 官方授权".into(),
         )),
     }

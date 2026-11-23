@@ -9,7 +9,7 @@ use super::*;
 fn a_cloud_rejection_code_reaches_the_diagnostic_report() {
     use crate::storage::provenance::{Stage, StageErrorKind, StageOutcome};
 
-    let dir = std::env::temp_dir().join("pacebridge-cloud-rejection-code");
+    let dir = std::env::temp_dir().join("zeppbridge-cloud-rejection-code");
     let _ = std::fs::remove_dir_all(&dir);
     std::fs::create_dir_all(&dir).unwrap();
     let db = Database::open_migrated(&dir.join("zepp.db")).unwrap();
@@ -126,7 +126,7 @@ fn a_firmware_shaped_serial_does_not_poison_a_real_device() {
 #[test]
 fn a_stream_the_cloud_has_but_we_never_read_is_not_reported_as_available_data() {
     // 体重和血压只探测、不归一化。探测说「云端有 42 条」，本机一条也没有。
-    // 把这两件事混在一起，能力页会让人以为 PaceBridge 已经存着他的血压。
+    // 把这两件事混在一起，能力页会让人以为 ZeppBridge 已经存着他的血压。
     let db = Database::in_memory().unwrap();
     db.save_capability_probe(&[CapabilityProbe {
         stream: "blood_pressure".into(),

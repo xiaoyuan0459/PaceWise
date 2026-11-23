@@ -5,8 +5,8 @@ use crate::headless_official::{
     official_outcome, official_selection, run_official, save_sync_attempt, OFFICIAL_REAUTH,
 };
 use std::sync::atomic::Ordering;
-use pacebridge_core::models::{AuthInfo, UserPrefs};
-use pacebridge_core::sync::OfficialMode;
+use zeppbridge_core::models::{AuthInfo, UserPrefs};
+use zeppbridge_core::sync::OfficialMode;
 
 pub(super) fn cmd_sync(args: &[String]) -> u8 {
     let json_mode = scan_json_flag(args);
@@ -198,7 +198,7 @@ pub(super) fn cmd_sync(args: &[String]) -> u8 {
     } else {
         OfficialMode::Only
     };
-    let before = pacebridge_core::storage::content_epoch();
+    let before = zeppbridge_core::storage::content_epoch();
     let (advanced, official) = runtime.block_on(async {
         let work = async {
             let advanced = match advanced {
@@ -214,7 +214,7 @@ pub(super) fn cmd_sync(args: &[String]) -> u8 {
                 Some(Ok(())) if !cancel.load(Ordering::SeqCst) => {
                     Some(run_official(&dir, days, official_mode, cancel.clone()).await)
                 }
-                Some(Ok(())) => Some(Err(PaceBridgeError::Cancelled)),
+                Some(Ok(())) => Some(Err(ZeppBridgeError::Cancelled)),
                 Some(Err(error)) => Some(Err(error)),
                 None => None,
             };
@@ -234,7 +234,7 @@ pub(super) fn cmd_sync(args: &[String]) -> u8 {
         &dir,
         advanced.as_ref(),
         official.as_ref(),
-        before != pacebridge_core::storage::content_epoch(),
+        before != zeppbridge_core::storage::content_epoch(),
     );
     let (code, payload, human) =
         combined_sync_output(advanced.as_ref(), official.as_ref(), mode, replay.as_ref());
@@ -245,8 +245,8 @@ pub(super) fn cmd_sync(args: &[String]) -> u8 {
         .any(Result::is_ok)
     {
         // Push after the local reports have been written, without changing the sync result.
-        let credentials = pacebridge_core::auth::default_credential_backend_in(&dir);
-        runtime.block_on(pacebridge_core::push::run(&dir, credentials));
+        let credentials = zeppbridge_core::auth::default_credential_backend_in(&dir);
+        runtime.block_on(zeppbridge_core::push::run(&dir, credentials));
     }
     code
 }
@@ -256,7 +256,7 @@ fn advanced_manager(
     db: Database,
     auth: AuthInfo,
     cancel: Arc<AtomicBool>,
-) -> Result<SyncManager, PaceBridgeError> {
+) -> Result<SyncManager, ZeppBridgeError> {
     let account = auth.user_id.clone();
     let connector = ZeppConnector::with_cancel(auth, cancel.clone())?;
     Ok(SyncManager::new(DataFetcher::new(connector), db, cancel)
@@ -265,8 +265,8 @@ fn advanced_manager(
 }
 
 fn combined_sync_output(
-    advanced: Option<&Result<SyncReport, PaceBridgeError>>,
-    official: Option<&Result<SyncReport, PaceBridgeError>>,
+    advanced: Option<&Result<SyncReport, ZeppBridgeError>>,
+    official: Option<&Result<SyncReport, ZeppBridgeError>>,
     mode: &str,
     replay: Option<&ReplayOutcome>,
 ) -> (u8, serde_json::Value, String) {
@@ -426,7 +426,7 @@ fn uses_monthly_backfill(mode: &str, days: Option<i64>) -> bool {
 }
 
 fn history_backfill_output(
-    ledger: &pacebridge_core::storage::coverage::CoverageLedger,
+    ledger: &zeppbridge_core::storage::coverage::CoverageLedger,
     cancelled: bool,
     replay: Option<&ReplayOutcome>,
 ) -> (u8, serde_json::Value, String) {
@@ -457,7 +457,7 @@ mod history_tests {
             message: None,
             cleanup_failed: false,
         });
-        let official = Err(PaceBridgeError::NeedsReauth("test".into()));
+        let official = Err(ZeppBridgeError::NeedsReauth("test".into()));
         let (code, report, human) =
             combined_sync_output(Some(&advanced), Some(&official), "incremental", None);
         assert_eq!(code, EXIT_NOT_CONFIGURED);
@@ -500,7 +500,7 @@ mod history_tests {
     }
     #[test]
     fn paused_history_json_keeps_ledger_for_resume_and_returns_incomplete() {
-        let ledger = pacebridge_core::storage::coverage::CoverageLedger {
+        let ledger = zeppbridge_core::storage::coverage::CoverageLedger {
             requested_from: Some("2020-01-01".into()),
             requested_to: Some("2026-01-01".into()),
             streams: vec![],
@@ -520,7 +520,7 @@ mod history_tests {
     }
     #[test]
     fn archive_policy_covers_long_history_boundaries() {
-        let mut prefs = pacebridge_core::models::UserPrefs {
+        let mut prefs = zeppbridge_core::models::UserPrefs {
             demo_mode: false,
             ai_profile_note: String::new(),
             retention_days: 365,
@@ -539,11 +539,11 @@ mod history_tests {
 
     #[test]
     fn monthly_history_resume_survives_restart_and_skips_completed_chunks() {
-        use pacebridge_core::storage::coverage::ChunkStatus;
+        use zeppbridge_core::storage::coverage::ChunkStatus;
         let dir = std::env::temp_dir().join(format!(
-            "pacebridge-cli-history-{}-{}",
+            "zeppbridge-cli-history-{}-{}",
             std::process::id(),
-            pacebridge_core::unique_suffix()
+            zeppbridge_core::unique_suffix()
         ));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("zepp.db");

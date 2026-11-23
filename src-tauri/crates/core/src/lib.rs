@@ -1,4 +1,4 @@
-//! PaceBridge 共享核心。
+//! ZeppBridge 共享核心。
 //!
 //! 桌面应用（Tauri）、命令行、MCP server 和本机 REST API 都只是这层的适配器：
 //! 数据模型、SQLite schema 与迁移、归一化、查询语义、导出、洞察和写入协调全部

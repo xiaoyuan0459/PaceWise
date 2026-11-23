@@ -1,6 +1,6 @@
 //! User-authored calendar context, independent of cloud facts and retention.
 use super::Database;
-use crate::models::{error::Result, PaceBridgeError};
+use crate::models::{error::Result, ZeppBridgeError};
 use chrono::{NaiveDate, Utc};
 use rusqlite::params;
 use serde::{Deserialize, Serialize};
@@ -29,8 +29,8 @@ pub struct LifeEvent {
     pub updated_at: String,
 }
 
-fn invalid() -> PaceBridgeError {
-    PaceBridgeError::ConfigError("Invalid life event".into())
+fn invalid() -> ZeppBridgeError {
+    ZeppBridgeError::ConfigError("Invalid life event".into())
 }
 
 fn valid_date(value: &str) -> bool {

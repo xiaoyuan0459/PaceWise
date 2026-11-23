@@ -42,7 +42,7 @@ impl CredentialBackend for MemoryBackend {
 
 fn temp_dir() -> std::path::PathBuf {
     let dir = std::env::temp_dir().join(format!(
-        "pacebridge-official-{}-{}",
+        "zeppbridge-official-{}-{}",
         std::process::id(),
         crate::unique_suffix()
     ));
@@ -354,7 +354,7 @@ async fn a_business_error_inside_http_200_is_an_error() {
     .await;
     assert!(matches!(
         outcome,
-        Err(PaceBridgeError::CloudRejected { code: -50000, .. })
+        Err(ZeppBridgeError::CloudRejected { code: -50000, .. })
     ));
 }
 
@@ -364,7 +364,7 @@ async fn only_an_empty_items_array_means_no_data() {
     for body in [r#"{}"#, r#"{"items":null}"#, r#"{"items":{}}"#, r#"[]"#] {
         let (outcome, _) = fetch(move |_| Reply::json(200, body), "2026-09-01", "2026-09-07").await;
         assert!(
-            matches!(outcome, Err(PaceBridgeError::ParseError(_))),
+            matches!(outcome, Err(ZeppBridgeError::ParseError(_))),
             "{body} 不该被当成空数据"
         );
     }
@@ -412,7 +412,7 @@ async fn an_oversized_body_without_a_length_is_cut_off() {
     )
     .await;
     match outcome {
-        Err(PaceBridgeError::ParseError(message)) => assert!(message.contains("MB"), "{message}"),
+        Err(ZeppBridgeError::ParseError(message)) => assert!(message.contains("MB"), "{message}"),
         other => panic!("超限响应必须报错：{other:?}"),
     }
 }

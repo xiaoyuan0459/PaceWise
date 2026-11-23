@@ -467,7 +467,7 @@ impl Database {
             |row| row.get(0),
         )?;
         if hidden {
-            return Err(PaceBridgeError::DataUnavailable("运动记录不存在".into()));
+            return Err(ZeppBridgeError::DataUnavailable("运动记录不存在".into()));
         }
         let mut samples = {
             let mut stmt = self.conn.prepare(

@@ -2,10 +2,10 @@ use super::*;
 use chrono::{NaiveDate, Utc};
 use std::path::Path;
 use std::sync::atomic::Ordering;
-use pacebridge_core::models::UserPrefs;
-use pacebridge_core::official::{fetch::system_time_zone, OfficialStore};
-use pacebridge_core::storage::OfficialSyncAttempt;
-use pacebridge_core::sync::{OfficialMode, OfficialSync, StreamStatus};
+use zeppbridge_core::models::UserPrefs;
+use zeppbridge_core::official::{fetch::system_time_zone, OfficialStore};
+use zeppbridge_core::storage::OfficialSyncAttempt;
+use zeppbridge_core::sync::{OfficialMode, OfficialSync, StreamStatus};
 
 pub(super) const OFFICIAL_REAUTH: &str =
     "Official authorization is missing or no longer valid. Reauthorize in the desktop app and transfer official.json and the matching credentials.json.";
@@ -13,7 +13,7 @@ pub(super) const OFFICIAL_REAUTH: &str =
 pub(super) fn official_selection(
     dir: &Path,
     channel: Option<&str>,
-) -> Option<Result<(), PaceBridgeError>> {
+) -> Option<Result<(), ZeppBridgeError>> {
     match channel {
         Some("advanced") => None,
         Some("official") => Some(Ok(())),
@@ -30,7 +30,7 @@ pub(super) fn official_selection(
 fn open_official_sync(
     dir: &Path,
     cancel: Arc<AtomicBool>,
-) -> Result<OfficialSync, PaceBridgeError> {
+) -> Result<OfficialSync, ZeppBridgeError> {
     let db = Database::open_without_migration(dir.join("zepp.db"))?;
     let zone = db.device_time_zone()?.unwrap_or_else(system_time_zone);
     OfficialSync::new(dir, db, cancel, zone)
@@ -41,7 +41,7 @@ pub(super) async fn run_official(
     days: i64,
     mode: OfficialMode,
     cancel: Arc<AtomicBool>,
-) -> Result<SyncReport, PaceBridgeError> {
+) -> Result<SyncReport, ZeppBridgeError> {
     open_official_sync(dir, cancel)?
         .run(days, mode, &|_| {})
         .await
@@ -78,21 +78,21 @@ pub(super) fn official_outcome(report: &SyncReport) -> &'static str {
 
 pub(super) fn save_sync_attempt(
     dir: &Path,
-    advanced: Option<&Result<SyncReport, PaceBridgeError>>,
-    official: Option<&Result<SyncReport, PaceBridgeError>>,
+    advanced: Option<&Result<SyncReport, ZeppBridgeError>>,
+    official: Option<&Result<SyncReport, ZeppBridgeError>>,
     content_changed: bool,
 ) {
     let results = [advanced, official];
     if results.into_iter().flatten().all(|result| {
-        matches!(result, Err(error) if error.is_busy() || matches!(error, PaceBridgeError::AccountMismatch))
+        matches!(result, Err(error) if error.is_busy() || matches!(error, ZeppBridgeError::AccountMismatch))
     }) {
         return;
     }
     let finished_at = Utc::now();
-    let result = (|| -> Result<(), PaceBridgeError> {
+    let result = (|| -> Result<(), ZeppBridgeError> {
         let _lock =
             write_lock::acquire_with_timeout(dir, WritePurpose::Metadata, Duration::from_secs(5))
-                .map_err(|error| PaceBridgeError::Busy(error.to_string()))?;
+                .map_err(|error| ZeppBridgeError::Busy(error.to_string()))?;
         let db = Database::open_without_migration(dir.join("zepp.db"))?;
         if let Some(official) = official {
             let (outcome, error_code) = match official {

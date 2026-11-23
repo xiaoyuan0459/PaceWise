@@ -51,7 +51,7 @@ where
 /// 一条都没有才把原来的不可用错误往上抛。
 pub(super) fn conclude_slices(
     mut records: Vec<FetchedRecord>,
-    last_error: Option<PaceBridgeError>,
+    last_error: Option<ZeppBridgeError>,
     empty_message: &str,
 ) -> Result<Vec<FetchedRecord>> {
     if let Some(error) = last_error {
@@ -68,12 +68,12 @@ pub(super) fn conclude_slices(
         return Ok(records);
     }
     if records.is_empty() {
-        return Err(PaceBridgeError::Unavailable(empty_message.into()));
+        return Err(ZeppBridgeError::Unavailable(empty_message.into()));
     }
     Ok(records)
 }
 
-pub(super) fn is_abort_error(error: &PaceBridgeError) -> bool {
+pub(super) fn is_abort_error(error: &ZeppBridgeError) -> bool {
     error.is_cancelled() || error.needs_reauth()
 }
 

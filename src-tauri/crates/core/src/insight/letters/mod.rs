@@ -8,7 +8,7 @@
 //! 恢复参与分析后旧信里的那一项会回来。
 
 use super::*;
-use crate::models::error::PaceBridgeError;
+use crate::models::error::ZeppBridgeError;
 use chrono::Datelike;
 use rusqlite::{params, OptionalExtension};
 
@@ -118,8 +118,8 @@ fn same_day_years_ago(today: NaiveDate, years: i32) -> Option<NaiveDate> {
         .or_else(|| NaiveDate::from_ymd_opt(year, today.month(), 28))
 }
 
-fn invalid(message: &str) -> PaceBridgeError {
-    PaceBridgeError::ConfigError(message.into())
+fn invalid(message: &str) -> ZeppBridgeError {
+    ZeppBridgeError::ConfigError(message.into())
 }
 
 impl Database {

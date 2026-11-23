@@ -4,7 +4,7 @@ use crate::storage::write_lock::{self, WritePurpose};
 use chrono::TimeZone;
 
 fn temp_dir(name: &str) -> PathBuf {
-    let dir = std::env::temp_dir().join(format!("pacebridge-backup-{name}"));
+    let dir = std::env::temp_dir().join(format!("zeppbridge-backup-{name}"));
     let _ = std::fs::remove_dir_all(&dir);
     std::fs::create_dir_all(&dir).unwrap();
     dir
@@ -562,7 +562,7 @@ fn pruning_keeps_five_migration_backups_and_never_deletes_pinned_or_manual_ones(
 
 /// 另一个进程里的写者：只在父测试用环境变量叫它时才干活（单独 `--ignored` 跑它什么都不做）。
 /// 拿到写锁后打一行暗号，然后一直攥着，等父进程把它杀掉。
-const LOCK_CHILD_DIR: &str = "PACEBRIDGE_TEST_LOCK_CHILD_DIR";
+const LOCK_CHILD_DIR: &str = "ZEPPBRIDGE_TEST_LOCK_CHILD_DIR";
 const LOCK_CHILD_HELD: &str = "ZB-LOCK-HELD";
 
 #[test]

@@ -1,15 +1,15 @@
 {
-  "name": "pacebridge",
-  "description": "Plugins that go with the PaceBridge desktop app",
+  "name": "zeppbridge",
+  "description": "Plugins that go with the ZeppBridge desktop app",
   "owner": {
-    "name": "PaceBridge",
+    "name": "ZeppBridge",
     "url": "https://github.com/lingcang728/ZeppBridge"
   },
   "plugins": [
     {
       "name": "zepp-coach",
       "source": "./packaging/ai-plugins/zepp-coach",
-      "description": "Endurance coaching on your own Amazfit / Zepp data through the PaceBridge MCP server"
+      "description": "Endurance coaching on your own Amazfit / Zepp data through the ZeppBridge MCP server"
     }
   ]
 }

@@ -140,7 +140,7 @@ pub(super) fn cmd_export(args: &[String]) -> u8 {
         records::query_records(&db, &records_query(&options.selection)).and_then(|set| {
             serde_json::to_string_pretty(&set.value)
                 .map(|text| (text, set.record_count))
-                .map_err(|error| PaceBridgeError::ParseError(error.to_string()))
+                .map_err(|error| ZeppBridgeError::ParseError(error.to_string()))
         })
     } else {
         db.build_ai_export(&options.selection)
@@ -203,7 +203,7 @@ pub(super) fn cmd_export(args: &[String]) -> u8 {
         }
         None => {
             // 没有 --out 时正文独占 stdout，条数提示走 stderr，
-            // 这样 `pacebridge-cli export > a.csv` 得到的是干净的文件。
+            // 这样 `zeppbridge-cli export > a.csv` 得到的是干净的文件。
             print!("{body}");
             eprintln!("Exported {count} records ({format})");
         }

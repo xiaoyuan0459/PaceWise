@@ -11,7 +11,7 @@
 use super::export::WindowGather;
 use super::model::{AiTaskCategory, AiTaskCategoryRange, AiTaskCoverage};
 use super::AiTaskError;
-use crate::models::error::{Result, PaceBridgeError};
+use crate::models::error::{Result, ZeppBridgeError};
 use crate::models::{HeartRateZoneBucket, Workout};
 use crate::storage::{
     local_day_range_utc_bounds, series_metric_spec, Database, MetricSource, WorkoutDetailExtras,
@@ -36,7 +36,7 @@ pub(crate) struct AnchorWorkout {
 pub(crate) fn parse_rfc3339_utc(value: &str, field: &str) -> Result<DateTime<Utc>> {
     DateTime::parse_from_rfc3339(value)
         .map(|dt| dt.with_timezone(&Utc))
-        .map_err(|error| PaceBridgeError::ParseError(format!("{field} 无效: {error}")))
+        .map_err(|error| ZeppBridgeError::ParseError(format!("{field} 无效: {error}")))
 }
 
 impl Database {
@@ -713,11 +713,11 @@ mod tests {
             .unwrap();
         assert!(matches!(
             db.get_workout_detail("w-bad"),
-            Err(PaceBridgeError::ParseError(_))
+            Err(ZeppBridgeError::ParseError(_))
         ));
         assert!(matches!(
             db.resolve_ai_task_anchors(&["w-bad".to_string()]),
-            Err(PaceBridgeError::ParseError(_))
+            Err(ZeppBridgeError::ParseError(_))
         ));
     }
 }

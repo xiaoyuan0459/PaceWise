@@ -1,4 +1,4 @@
-//! 主观层（批次 7「让数据留在 PaceBridge」）：跑鞋、每次运动的感受、伤病、比赛、PB。
+//! 主观层（批次 7「让数据留在 ZeppBridge」）：跑鞋、每次运动的感受、伤病、比赛、PB。
 //!
 //! 身体数据来自云端，留不住；这里存的是**用户自己产生的判断**——穿哪双鞋、这次多累、哪儿酸、
 //! 哪天比赛、跑出了什么成绩。全是用户写的（PB 是从本地采样算出来的），和打分、教练档案一样：
@@ -19,12 +19,12 @@ pub mod races;
 pub mod records;
 pub mod shoes;
 
-use crate::models::{error::Result, PaceBridgeError};
+use crate::models::{error::Result, ZeppBridgeError};
 use chrono::NaiveDate;
 
 /// 校验不过：调用方（命令层）按自己的码报给界面，这里的中文只给日志和 CLI。
-pub(crate) fn invalid(message: &str) -> PaceBridgeError {
-    PaceBridgeError::ConfigError(message.into())
+pub(crate) fn invalid(message: &str) -> ZeppBridgeError {
+    ZeppBridgeError::ConfigError(message.into())
 }
 
 /// `YYYY-MM-DD`，而且是真实存在的日子。

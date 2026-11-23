@@ -29,7 +29,7 @@ async fn empty_heart_rate_page_is_kept_without_a_second_request() {
         std::future::ready(if calls == 1 {
             Ok(original.clone())
         } else {
-            Err(PaceBridgeError::Unavailable("unexpected retry".into()))
+            Err(ZeppBridgeError::Unavailable("unexpected retry".into()))
         })
     })
     .await
@@ -53,7 +53,7 @@ async fn paginated_heart_rate_keeps_each_original_response_and_cursor() {
         std::future::ready(
             pending
                 .pop_front()
-                .ok_or_else(|| PaceBridgeError::Unknown("unexpected request".into())),
+                .ok_or_else(|| ZeppBridgeError::Unknown("unexpected request".into())),
         )
     })
     .await
@@ -263,7 +263,7 @@ fn odi_dates_use_device_zone_and_exclusive_end() {
 fn partial_fetch_retains_original_error() {
     let records = conclude_slices(
         vec![sample_fetched()],
-        Some(PaceBridgeError::HttpStatus {
+        Some(ZeppBridgeError::HttpStatus {
             status: 400,
             message: "Bad request".into(),
         }),
@@ -299,7 +299,7 @@ async fn daily_summary_history_keeps_good_months_and_marks_bad_month_for_retry()
     let records = fetch_daily_summary_slices_with(window, |slice| {
         slices.push(slice);
         std::future::ready(if slices.len() == 2 {
-            Err(PaceBridgeError::ParseError(
+            Err(ZeppBridgeError::ParseError(
                 "bad historical response".into(),
             ))
         } else {
@@ -337,7 +337,7 @@ async fn daily_summary_primary_failure_still_fetches_other_endpoints_with_date_c
     let records = fetch_daily_statistics_slice_with(window, |event, subtype| {
         called.push((event, subtype));
         std::future::ready(if event == "DailyHealth" {
-            Err(PaceBridgeError::HttpStatus {
+            Err(ZeppBridgeError::HttpStatus {
                 status: 500,
                 message: "test failure".into(),
             })
@@ -367,7 +367,7 @@ async fn daily_summary_slice_stops_immediately_on_expired_auth() {
     let mut calls = 0;
     let result = fetch_daily_statistics_slice_with(FetchWindow::days(30).unwrap(), |_, _| {
         calls += 1;
-        std::future::ready(Err(PaceBridgeError::NeedsReauth("test".into())))
+        std::future::ready(Err(ZeppBridgeError::NeedsReauth("test".into())))
     })
     .await;
     assert!(result.unwrap_err().needs_reauth());
@@ -382,11 +382,11 @@ async fn daily_summary_auth_failure_stops_after_the_failing_slice() {
         std::future::ready(if calls == 1 {
             Ok(vec![sample_fetched()])
         } else {
-            Err(PaceBridgeError::NeedsReauth("expired".into()))
+            Err(ZeppBridgeError::NeedsReauth("expired".into()))
         })
     })
     .await;
-    assert!(matches!(result, Err(PaceBridgeError::NeedsReauth(_))));
+    assert!(matches!(result, Err(ZeppBridgeError::NeedsReauth(_))));
     assert_eq!(calls, 2);
 }
 
@@ -397,7 +397,7 @@ async fn sleep_failure_keeps_successful_slices_and_still_requests_latest() {
     let records = fetch_sleep_slices_with(window, |_| {
         calls += 1;
         std::future::ready(if calls == 2 {
-            Err(PaceBridgeError::RetryExhausted {
+            Err(ZeppBridgeError::RetryExhausted {
                 status: 503,
                 message: "test".into(),
             })
@@ -415,8 +415,8 @@ async fn sleep_failure_keeps_successful_slices_and_still_requests_latest() {
 #[tokio::test]
 async fn sleep_auth_and_cancel_abort_without_requesting_more_slices() {
     for error in [
-        PaceBridgeError::Cancelled,
-        PaceBridgeError::NeedsReauth("test".into()),
+        ZeppBridgeError::Cancelled,
+        ZeppBridgeError::NeedsReauth("test".into()),
     ] {
         let mut error = Some(error);
         let mut calls = 0;
@@ -440,19 +440,19 @@ async fn sleep_all_failed_preserves_request_error_over_later_unavailable() {
     let error = fetch_sleep_slices_with(FetchWindow::days(14).unwrap(), |_| {
         calls += 1;
         std::future::ready(Err(if calls == 1 {
-            PaceBridgeError::RetryExhausted {
+            ZeppBridgeError::RetryExhausted {
                 status: 503,
                 message: "test".into(),
             }
         } else {
-            PaceBridgeError::Unavailable("test".into())
+            ZeppBridgeError::Unavailable("test".into())
         }))
     })
     .await
     .unwrap_err();
     assert!(matches!(
         error,
-        PaceBridgeError::RetryExhausted { status: 503, .. }
+        ZeppBridgeError::RetryExhausted { status: 503, .. }
     ));
     assert_eq!(calls, 2);
 }
@@ -461,19 +461,19 @@ async fn sleep_all_failed_preserves_request_error_over_later_unavailable() {
 fn cancelled_slice_is_not_swallowed_when_other_records_exist() {
     let error = conclude_slices(
         vec![sample_fetched()],
-        Some(PaceBridgeError::Cancelled),
+        Some(ZeppBridgeError::Cancelled),
         "empty",
     )
     .unwrap_err();
     assert!(error.is_cancelled());
-    assert!(!matches!(error, PaceBridgeError::ConfigError(_)));
+    assert!(!matches!(error, ZeppBridgeError::ConfigError(_)));
 }
 
 #[test]
 fn needs_reauth_slice_is_not_swallowed_when_other_records_exist() {
     let error = conclude_slices(
         vec![sample_fetched()],
-        Some(PaceBridgeError::NeedsReauth("expired".into())),
+        Some(ZeppBridgeError::NeedsReauth("expired".into())),
         "empty",
     )
     .unwrap_err();
@@ -484,7 +484,7 @@ fn needs_reauth_slice_is_not_swallowed_when_other_records_exist() {
 fn a_404_inner_slice_marks_the_window_incomplete() {
     let records = conclude_slices(
         vec![sample_fetched()],
-        Some(PaceBridgeError::Unavailable("HTTP 404".into())),
+        Some(ZeppBridgeError::Unavailable("HTTP 404".into())),
         "empty",
     )
     .unwrap();
@@ -495,7 +495,7 @@ fn a_404_inner_slice_marks_the_window_incomplete() {
 fn an_all_404_window_stays_unavailable() {
     let error = conclude_slices(
         Vec::new(),
-        Some(PaceBridgeError::Unavailable("HTTP 404".into())),
+        Some(ZeppBridgeError::Unavailable("HTTP 404".into())),
         "empty",
     )
     .unwrap_err();
@@ -580,7 +580,7 @@ fn cancelled_is_still_not_swallowed_by_a_truncated_page() {
         0,
     );
     let error =
-        conclude_slices(vec![truncated], Some(PaceBridgeError::Cancelled), "empty").unwrap_err();
+        conclude_slices(vec![truncated], Some(ZeppBridgeError::Cancelled), "empty").unwrap_err();
     assert!(error.is_cancelled());
 }
 
@@ -708,7 +708,7 @@ async fn a_failed_continuation_keeps_the_slice_incomplete() {
         .collect::<Vec<_>>()});
     let (pages, gaps) =
         continue_capped_page_with(&first, from, to, WELLNESS_PAGE_LIMIT, |_, _| async {
-            Err(PaceBridgeError::HttpStatus {
+            Err(ZeppBridgeError::HttpStatus {
                 status: 502,
                 message: String::new(),
             })

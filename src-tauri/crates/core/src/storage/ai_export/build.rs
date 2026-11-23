@@ -7,7 +7,7 @@ impl Database {
     pub fn build_ai_export(&self, selection: &ExportSelection) -> Result<(String, usize)> {
         let (export, record_count) = self.build_ai_export_value(selection)?;
         let encoded = serde_json::to_string_pretty(&export)
-            .map_err(|error| PaceBridgeError::ParseError(error.to_string()))?;
+            .map_err(|error| ZeppBridgeError::ParseError(error.to_string()))?;
         Ok((encoded, record_count))
     }
 
@@ -35,7 +35,7 @@ impl Database {
     ) -> Result<(serde_json::Value, usize)> {
         let scope = selection
             .resolve_scope()
-            .map_err(PaceBridgeError::ConfigError)?;
+            .map_err(ZeppBridgeError::ConfigError)?;
         // 「单条运动」就是这一条运动，不是这条运动当天。
         //
         // 早先的实现把它解析成「那条运动所在的那一天」，于是用户从运动详情点
@@ -48,9 +48,9 @@ impl Database {
         let (start, end, workout_filter, workout_window) = match &scope {
             ExportScope::DateRange { start, end } => (
                 NaiveDate::parse_from_str(start, "%Y-%m-%d")
-                    .map_err(|_| PaceBridgeError::ConfigError("导出开始日期无效".into()))?,
+                    .map_err(|_| ZeppBridgeError::ConfigError("导出开始日期无效".into()))?,
                 NaiveDate::parse_from_str(end, "%Y-%m-%d")
-                    .map_err(|_| PaceBridgeError::ConfigError("导出结束日期无效".into()))?,
+                    .map_err(|_| ZeppBridgeError::ConfigError("导出结束日期无效".into()))?,
                 None,
                 None,
             ),
@@ -65,10 +65,10 @@ impl Database {
                     )
                     .optional()?
                     .ok_or_else(|| {
-                        PaceBridgeError::DataUnavailable("本地库里没有这条运动记录".into())
+                        ZeppBridgeError::DataUnavailable("本地库里没有这条运动记录".into())
                     })?;
                 let day = NaiveDate::parse_from_str(&day, "%Y-%m-%d")
-                    .map_err(|_| PaceBridgeError::ParseError("运动记录日期无效".into()))?;
+                    .map_err(|_| ZeppBridgeError::ParseError("运动记录日期无效".into()))?;
                 (
                     day,
                     day,
@@ -86,7 +86,7 @@ impl Database {
             .filter(|value| allowed.contains(value.as_str()))
             .collect();
         if selected.is_empty() {
-            return Err(PaceBridgeError::ConfigError(
+            return Err(ZeppBridgeError::ConfigError(
                 "请至少选择一种导出数据".into(),
             ));
         }
@@ -629,16 +629,16 @@ impl Database {
                 });
                 if let Some(strength) = series.strength {
                     let strength_val = serde_json::to_value(strength)
-                        .map_err(|error| PaceBridgeError::ParseError(error.to_string()))?;
+                        .map_err(|error| ZeppBridgeError::ParseError(error.to_string()))?;
                     if let Some(object) = workout.as_object_mut() {
                         object.insert("strength".into(), strength_val);
                     }
                 }
                 if full {
                     let samples = serde_json::to_value(series.samples)
-                        .map_err(|error| PaceBridgeError::ParseError(error.to_string()))?;
+                        .map_err(|error| ZeppBridgeError::ParseError(error.to_string()))?;
                     let route = serde_json::to_value(series.route)
-                        .map_err(|error| PaceBridgeError::ParseError(error.to_string()))?;
+                        .map_err(|error| ZeppBridgeError::ParseError(error.to_string()))?;
                     if let Some(object) = workout.as_object_mut() {
                         object.insert("samples".into(), samples);
                         object.insert("route".into(), route);
@@ -790,7 +790,7 @@ impl Database {
             }),
         };
         let export = serde_json::json!({
-            "schema_version": "pacebridge.ai.v2",
+            "schema_version": "zeppbridge.ai.v2",
             "generated_at": Utc::now().to_rfc3339(),
             "scope": scope_note,
             "date_range": { "start": start_text, "end": end_text, "timezone": "system_local" },
@@ -801,7 +801,7 @@ impl Database {
             "devices": device_entries,
             "analysis": analysis,
             "provenance": {
-                "source": "PaceBridge local SQLite",
+                "source": "ZeppBridge local SQLite",
                 "normalized": true,
                 "raw_payloads_included": false,
                 "note": "Missing fields are omitted or null; values are never fabricated. source_scope preserves user_fused, device, or unknown provenance. device_label is a per-export alias and is not a device identifier.",

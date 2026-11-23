@@ -35,7 +35,7 @@ impl SyncManager {
             let prefs = db.user_prefs()?;
             let requested_days = (Utc::now().date_naive() - from).num_days().max(0);
             if prefs.backfill_would_be_cleaned_up(requested_days) {
-                return Err(PaceBridgeError::ConfigError(format!(
+                return Err(ZeppBridgeError::ConfigError(format!(
                     "这次补拉要取回 {requested_days} 天的历史，但本机只保留最近 {} 天，下一次成功同步就会把刚拿回来的数据删掉。请先打开「长期归档」，或者把保留期调长。",
                     prefs.retention_days
                 )));
@@ -140,9 +140,9 @@ impl SyncManager {
         time_zone: &str,
     ) -> Result<(ChunkStatus, i64, Option<(&'static str, String)>)> {
         let start = chrono::NaiveDate::parse_from_str(&chunk.chunk_start, "%Y-%m-%d")
-            .map_err(|_| PaceBridgeError::ParseError("覆盖账本里的日期无效".into()))?;
+            .map_err(|_| ZeppBridgeError::ParseError("覆盖账本里的日期无效".into()))?;
         let end = chrono::NaiveDate::parse_from_str(&chunk.chunk_end, "%Y-%m-%d")
-            .map_err(|_| PaceBridgeError::ParseError("覆盖账本里的日期无效".into()))?;
+            .map_err(|_| ZeppBridgeError::ParseError("覆盖账本里的日期无效".into()))?;
         // 当月那一块的结束日在未来；未来的日子 Zepp 按天的事件接口直接回 HTTP 400，
         // 整块就被记成「部分写入」、重试也消不掉。只问到此刻为止。
         let window_end = coverage::to_utc(end).min(Utc::now());
@@ -160,7 +160,7 @@ impl SyncManager {
             "wellness" => self.fetcher.fetch_wellness_records(window, time_zone).await,
             "weight" => self.fetcher.fetch_weight_records(window).await,
             other => {
-                return Err(PaceBridgeError::ConfigError(format!(
+                return Err(ZeppBridgeError::ConfigError(format!(
                     "未知的补拉数据流: {other}"
                 )))
             }

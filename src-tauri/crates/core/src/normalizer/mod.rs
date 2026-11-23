@@ -63,7 +63,7 @@ impl<T> NormalizedBatch<T> {
             } else {
                 diagnostics.join("; ")
             };
-            return Err(PaceBridgeError::DataUnavailable(format!(
+            return Err(ZeppBridgeError::DataUnavailable(format!(
                 "{stream}: {detail}"
             )));
         }

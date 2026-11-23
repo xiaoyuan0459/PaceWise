@@ -373,7 +373,7 @@ pub fn to_gpx(export: &Value) -> Result<(String, usize), String> {
     let generated_at = text(export.get("generated_at"));
     let mut gpx = String::from("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     gpx.push_str(
-        "<gpx version=\"1.1\" creator=\"PaceBridge\" \
+        "<gpx version=\"1.1\" creator=\"ZeppBridge\" \
 xmlns=\"http://www.topografix.com/GPX/1/1\" \
 xmlns:gpxtpx=\"http://www.garmin.com/xmlschemas/TrackPointExtension/v1\">\n",
     );

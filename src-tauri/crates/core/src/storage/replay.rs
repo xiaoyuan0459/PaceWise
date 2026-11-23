@@ -295,7 +295,7 @@ impl Database {
                             *id,
                             stream,
                             source_key,
-                            &PaceBridgeError::ParseError(error.to_string()),
+                            &ZeppBridgeError::ParseError(error.to_string()),
                             None,
                         )?;
                         continue;

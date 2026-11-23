@@ -3,7 +3,7 @@
 //! 官方接口是 `POST /users/-/workouts?version=2.0.0`（2026-09-30 实测跑通）。它有
 //! 四个脾气，决定了这个模块的形状：
 //!
-//! 1. **7 天窗口不可拆**：`endDate = startDate + 6`，每次推送整体替换 PaceBridge
+//! 1. **7 天窗口不可拆**：`endDate = startDate + 6`，每次推送整体替换 ZeppBridge
 //!    名下这 7 天；改一天也要交整窗。见 [`window`]。
 //! 2. **没有读取接口**（GET 回 405）：「手表上现在有什么」只能靠我们自己的发布账本
 //!    （`storage::training_plan`）。所以每次推送**先写账本再发**。
@@ -138,7 +138,7 @@ pub struct PlanWorkout {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub variant: Option<String>,
     pub name: String,
-    /// 训练目的（短词，例如「强化耐力」）。pacebridge-plan/3 起必填；旧格式读得进来，
+    /// 训练目的（短词，例如「强化耐力」）。zeppbridge-plan/3 起必填；旧格式读得进来，
     /// 校验报 `missing_focus`。
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub focus: Option<String>,

@@ -171,7 +171,7 @@ async fn incomplete_fetch_persists_data_but_keeps_sync_retryable() {
 #[tokio::test]
 async fn failure_report_preserves_records_written() {
     let dir = std::env::temp_dir().join(format!(
-        "pacebridge-sync-test-{}-{}",
+        "zeppbridge-sync-test-{}-{}",
         std::process::id(),
         crate::unique_suffix()
     ));
@@ -198,7 +198,7 @@ async fn failure_report_preserves_records_written() {
     let fetcher = DataFetcher::new(connector);
     let manager = SyncManager::new(fetcher, db, Arc::new(AtomicBool::new(false)));
 
-    let error = PaceBridgeError::HttpStatus {
+    let error = ZeppBridgeError::HttpStatus {
         status: 500,
         message: "boom".into(),
     };
@@ -207,7 +207,7 @@ async fn failure_report_preserves_records_written() {
     let report = manager.heart_rate_fetch_error(&error).await.unwrap();
     assert_eq!(report.status, StreamStatus::Failed);
     let report = manager
-        .heart_rate_fetch_error(&PaceBridgeError::DataUnavailable("响应 items 为空".into()))
+        .heart_rate_fetch_error(&ZeppBridgeError::DataUnavailable("响应 items 为空".into()))
         .await
         .unwrap();
     assert_eq!(report.status, StreamStatus::Unavailable);
@@ -237,7 +237,7 @@ fn cancel_is_cancelled_not_a_config_error() {
     let error = manager.abort_if_cancelled().unwrap_err();
     assert!(error.is_cancelled(), "{error:?}");
     assert_eq!(error.code(), "err.core.cancelled");
-    assert!(!matches!(error, PaceBridgeError::ConfigError(_)));
+    assert!(!matches!(error, ZeppBridgeError::ConfigError(_)));
 }
 
 #[test]
@@ -296,7 +296,7 @@ fn true_all_success_is_persisted() {
 #[tokio::test]
 async fn cancel_and_wait_sets_the_flag_and_returns_when_idle() {
     let dir = std::env::temp_dir().join(format!(
-        "pacebridge-sync-cancel-{}-{}",
+        "zeppbridge-sync-cancel-{}-{}",
         std::process::id(),
         crate::unique_suffix()
     ));
@@ -367,13 +367,13 @@ fn unverified_notices_can_fold_into_success_when_nothing_failed() {
 
 #[test]
 fn pending_details_all_failed_is_an_error() {
-    let http = PaceBridgeError::HttpStatus {
+    let http = ZeppBridgeError::HttpStatus {
         status: 500,
         message: "boom".into(),
     };
     assert!(pending_details_outcome(Vec::<StreamReport>::new(), Some(http)).is_err());
 
-    let unavailable = PaceBridgeError::DataUnavailable("gone".into());
+    let unavailable = ZeppBridgeError::DataUnavailable("gone".into());
     assert!(pending_details_outcome(Vec::<StreamReport>::new(), Some(unavailable)).is_err());
 
     assert!(pending_details_outcome(Vec::<StreamReport>::new(), None)
@@ -399,7 +399,7 @@ fn cleanup_old_data_rejects_out_of_range_days() {
 #[tokio::test]
 async fn empty_pending_details_clears_a_stale_failed_status() {
     let dir = std::env::temp_dir().join(format!(
-        "pacebridge-sync-empty-pending-{}-{}",
+        "zeppbridge-sync-empty-pending-{}-{}",
         std::process::id(),
         crate::unique_suffix()
     ));
@@ -545,7 +545,7 @@ async fn a_failed_older_chunk_keeps_committed_data_but_fails_the_stream() {
                 let result = if calls == 1 {
                     Ok(heart_rate_chunk(chunk))
                 } else {
-                    Err(PaceBridgeError::ConfigError("offline".into()))
+                    Err(ZeppBridgeError::ConfigError("offline".into()))
                 };
                 async move { result }
             },
@@ -572,7 +572,7 @@ async fn a_stream_with_no_committed_chunk_hands_the_error_back() {
             FetchWindow::days(14).unwrap(),
             7,
             OnChunkError::Continue,
-            |_| async { Err(PaceBridgeError::Unavailable("404".into())) },
+            |_| async { Err(ZeppBridgeError::Unavailable("404".into())) },
             || {},
         )
         .await
@@ -601,7 +601,7 @@ async fn a_sync_for_another_account_stops_before_writing_anything() {
         .begin_run(write_lock::WritePurpose::Sync)
         .await
         .unwrap_err();
-    assert!(matches!(error, PaceBridgeError::AccountMismatch));
+    assert!(matches!(error, ZeppBridgeError::AccountMismatch));
     let db = manager.db.lock().await;
     assert_eq!(
         db.library_owner().unwrap().as_deref(),

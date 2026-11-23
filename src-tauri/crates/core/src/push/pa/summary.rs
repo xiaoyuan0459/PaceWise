@@ -1,5 +1,5 @@
 //! `summary.json`：给个人助手读的近 N 天每日摘要。移植自
-//! `PaceBridge-Cloud/uploader/lib/summary.mjs`，字段和规则一一对应：
+//! `ZeppBridge-Cloud/uploader/lib/summary.mjs`，字段和规则一一对应：
 //!
 //! - 日期是本机本地日（导出的 `date_range.timezone = system_local`）；
 //! - 每个指标带单位（顶层 `units`），缺失一律 null，不补零、不插值；
@@ -260,7 +260,7 @@ pub fn build_summary(
         .collect();
 
     json!({
-        "schema": "pacebridge-cloud.summary/1",
+        "schema": "zeppbridge-cloud.summary/1",
         "generated_at": generated_at,
         "time_zone": time_zone,
         "from": days.first(),

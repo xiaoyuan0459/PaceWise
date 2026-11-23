@@ -86,7 +86,7 @@ pub enum StageErrorKind {
     NotAvailable,
     /// 报文拿回来了，但当前 normalizer 不认识它的结构。
     UnrecognizedPayload,
-    /// HTTP 200，但报文自己写着「不成功」。见 `PaceBridgeError::CloudRejected`。
+    /// HTTP 200，但报文自己写着「不成功」。见 `ZeppBridgeError::CloudRejected`。
     ///
     /// 带着 code：它是整个系统里唯一能告诉我们「凭据失效到底长什么样」
     /// 的数字，而这一点目前只能从用户那里拿（本地那 1075 条留存报文
@@ -126,9 +126,9 @@ impl StageErrorKind {
     /// 这里做的是「用户下一步该干什么」的分类，不是错误文本的转写：
     /// `auth` 要去重新连接，`network` 值得重试，`not_available` 只说明这个
     /// 接口没给可用数据，不能判断设备有没有测量或其他接口是否有数据。
-    pub fn classify(error: &crate::models::PaceBridgeError) -> Self {
+    pub fn classify(error: &crate::models::ZeppBridgeError) -> Self {
         use crate::models::error::HeadlessProblem;
-        use crate::models::PaceBridgeError as E;
+        use crate::models::ZeppBridgeError as E;
         match error {
             E::Cancelled => StageErrorKind::Cancelled,
             E::NeedsReauth(_) | E::AuthError(_) | E::CredentialStore(_) => StageErrorKind::Auth,

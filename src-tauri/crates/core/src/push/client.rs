@@ -33,7 +33,7 @@ pub fn http_allowed(host: &str) -> bool {
     lower == "localhost" || lower.ends_with(".local")
 }
 
-/// PA 站点地址：照搬 `PaceBridge-Cloud/uploader/lib/site.mjs::normalizeSite`。
+/// PA 站点地址：照搬 `ZeppBridge-Cloud/uploader/lib/site.mjs::normalizeSite`。
 ///
 /// - `example.com` → `https://health.example.com`；已带 `health.` 不再加；
 /// - 完整网址照用，去掉尾斜杠和旧版带的 `/v1`；

@@ -1,7 +1,7 @@
 //! 7 天窗口与「这次推送会改什么」的逐日预览。
 //!
 //! 官方：`startDate`、`endDate` 都含在内，`endDate` 必须正好是 `startDate + 6`；
-//! 窗口不可拆，改一天也要把 7 天整个交上去，交上去的 7 天整体替换 PaceBridge 名下
+//! 窗口不可拆，改一天也要把 7 天整个交上去，交上去的 7 天整体替换 ZeppBridge 名下
 //! 原有的这 7 天。
 
 use super::{Workout, WINDOW_DAYS};

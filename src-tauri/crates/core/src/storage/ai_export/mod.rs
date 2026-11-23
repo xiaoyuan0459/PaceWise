@@ -427,7 +427,7 @@ impl Database {
                 return Ok(analysis);
             };
             let end_date = NaiveDate::parse_from_str(end_text, "%Y-%m-%d")
-                .map_err(|_| PaceBridgeError::ConfigError("导出结束日期无效".into()))?;
+                .map_err(|_| ZeppBridgeError::ConfigError("导出结束日期无效".into()))?;
             // Same computation the training screen shows, so a chart and an
             // exported file can never quote different ratios for one day.
             let balance = self.training_load_balance(range_start, end_date)?;

@@ -1,4 +1,4 @@
-//! 无头版的常驻只读服务（`pacebridge-cli serve`）。
+//! 无头版的常驻只读服务（`zeppbridge-cli serve`）。
 //!
 //! 和桌面端的 [`LocalApiController`] 共用同一套 HTTP 处理和路由，区别只在三处：
 //!
@@ -16,10 +16,10 @@ use super::*;
 use std::net::SocketAddr;
 
 /// 监听地址的环境变量，例如 `0.0.0.0:43921`。不设 = `127.0.0.1:43921`。
-pub const LISTEN_ENV: &str = "PACEBRIDGE_LISTEN";
+pub const LISTEN_ENV: &str = "ZEPPBRIDGE_LISTEN";
 
 /// 直接给出拉取 token 的环境变量（Docker 里最顺手：和 Sparky 的配置写在同一个 .env）。
-pub const PULL_TOKEN_ENV: &str = "PACEBRIDGE_PULL_TOKEN";
+pub const PULL_TOKEN_ENV: &str = "ZEPPBRIDGE_PULL_TOKEN";
 
 /// 凭据存储里拉取 token 的账号名。和本机 token（[`LOCAL_API_CREDENTIAL_ACCOUNT`]）分开。
 pub const PULL_CREDENTIAL_ACCOUNT: &str = "local-api-pull-token";
@@ -40,7 +40,7 @@ const TOKEN_REFRESH: Duration = Duration::from_secs(5);
 pub enum PullTokenSource {
     /// 环境变量里的固定值。换掉它要重启服务。
     Env(String),
-    /// 凭据存储（`pacebridge-cli pull-token` 管理）。服务运行中会定期重读。
+    /// 凭据存储（`zeppbridge-cli pull-token` 管理）。服务运行中会定期重读。
     Store(Arc<dyn CredentialBackend>),
 }
 
@@ -82,7 +82,7 @@ impl HeadlessError {
             ),
             Self::NeedsToken => format!(
                 "Refusing to listen beyond this machine without a pull token. Set {PULL_TOKEN_ENV} \
-                 (at least {MIN_PULL_TOKEN_CHARS} characters) or create one with `pacebridge-cli pull-token rotate`."
+                 (at least {MIN_PULL_TOKEN_CHARS} characters) or create one with `zeppbridge-cli pull-token rotate`."
             ),
             Self::WeakToken => format!(
                 "{PULL_TOKEN_ENV} is shorter than {MIN_PULL_TOKEN_CHARS} characters; use a long random value"
@@ -219,7 +219,7 @@ pub fn start_headless(
     });
     let thread_stop = stop.clone();
     let handle = std::thread::Builder::new()
-        .name("pacebridge-serve".to_string())
+        .name("zeppbridge-serve".to_string())
         .spawn(move || serve(listener, context, thread_stop))
         .map_err(HeadlessError::Bind)?;
     Ok(HeadlessServer {
@@ -236,7 +236,7 @@ fn spawn_token_refresher(
     stop: Arc<AtomicBool>,
 ) {
     let _ = std::thread::Builder::new()
-        .name("pacebridge-serve-token".to_string())
+        .name("zeppbridge-serve-token".to_string())
         .spawn(move || {
             let mut waited = Duration::ZERO;
             while !stop.load(Ordering::SeqCst) {

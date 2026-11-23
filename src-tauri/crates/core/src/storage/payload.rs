@@ -28,10 +28,10 @@ pub(super) fn compress_payload(payload: &str) -> Result<Vec<u8>> {
     let mut encoder = ZlibEncoder::new(Vec::new(), Compression::default());
     encoder
         .write_all(payload.as_bytes())
-        .map_err(|error| PaceBridgeError::ParseError(format!("压缩原始报文失败: {error}")))?;
+        .map_err(|error| ZeppBridgeError::ParseError(format!("压缩原始报文失败: {error}")))?;
     encoder
         .finish()
-        .map_err(|error| PaceBridgeError::ParseError(format!("压缩原始报文失败: {error}")))
+        .map_err(|error| ZeppBridgeError::ParseError(format!("压缩原始报文失败: {error}")))
 }
 
 pub(super) fn decompress_payload(bytes: &[u8]) -> Result<String> {
@@ -43,14 +43,14 @@ pub(super) fn decompress_payload(bytes: &[u8]) -> Result<String> {
     let mut out = Vec::new();
     limited
         .read_to_end(&mut out)
-        .map_err(|error| PaceBridgeError::ParseError(format!("解压原始报文失败: {error}")))?;
+        .map_err(|error| ZeppBridgeError::ParseError(format!("解压原始报文失败: {error}")))?;
     if out.len() as u64 > MAX_DECOMPRESSED_PAYLOAD_BYTES {
-        return Err(PaceBridgeError::ParseError(
+        return Err(ZeppBridgeError::ParseError(
             "解压原始报文超过 32 MiB 上限".into(),
         ));
     }
     String::from_utf8(out)
-        .map_err(|error| PaceBridgeError::ParseError(format!("解压原始报文失败: {error}")))
+        .map_err(|error| ZeppBridgeError::ParseError(format!("解压原始报文失败: {error}")))
 }
 
 /// 取出一条原始报文。

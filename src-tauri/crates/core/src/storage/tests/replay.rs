@@ -753,7 +753,7 @@ fn persist_keeps_raw_when_normalization_fails() {
     assert!(
         matches!(
             error,
-            PaceBridgeError::ParseError(_) | PaceBridgeError::DataUnavailable(_)
+            ZeppBridgeError::ParseError(_) | ZeppBridgeError::DataUnavailable(_)
         ),
         "{error}"
     );
@@ -939,13 +939,13 @@ fn decompress_payload_rejects_output_over_32_mib() {
     let zipped = compress_payload(&oversized).unwrap();
     drop(oversized);
     let error = decompress_payload(&zipped).expect_err("超过上限必须是 Err");
-    assert!(matches!(error, PaceBridgeError::ParseError(_)), "{error}");
+    assert!(matches!(error, ZeppBridgeError::ParseError(_)), "{error}");
 }
 
 #[test]
 fn decompress_payload_rejects_corrupt_bytes_without_panic() {
     let error = decompress_payload(&[0xff, 0x00, 0x01, 0x02]).expect_err("损坏字节必须是 Err");
-    assert!(matches!(error, PaceBridgeError::ParseError(_)), "{error}");
+    assert!(matches!(error, ZeppBridgeError::ParseError(_)), "{error}");
 }
 
 #[test]

@@ -7,7 +7,7 @@ use std::net::TcpStream as ClientStream;
 const TOKEN: &str = "zbk_0123456789abcdef";
 
 /// 生命周期用例绑定的是临时端口而不是 43921：开发机上常常正好有一份
-/// PaceBridge 在跑，用真实端口测出来的失败是环境冲突，不是产品行为。
+/// ZeppBridge 在跑，用真实端口测出来的失败是环境冲突，不是产品行为。
 /// 端口已经放出来了：能重新绑上它，或者连过去被拒绝。
 ///
 /// 只看「连不上」会误报：Linux 上对刚释放的临时端口发起连接，偶尔内核把源端口也挑成
@@ -106,7 +106,7 @@ fn controller_at(dir: &Path, address: String) -> LocalApiController {
 }
 
 fn temp_dir(name: &str) -> PathBuf {
-    let dir = std::env::temp_dir().join(format!("pacebridge-local-api-{name}"));
+    let dir = std::env::temp_dir().join(format!("zeppbridge-local-api-{name}"));
     let _ = std::fs::remove_dir_all(&dir);
     std::fs::create_dir_all(&dir).unwrap();
     dir

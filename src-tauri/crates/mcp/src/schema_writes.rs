@@ -3,7 +3,7 @@
 
 use super::*;
 
-const UNDO: &str = "每次写入都记进改动账本，用户在 PaceBridge「设置 → 本地 AI → AI 最近的改动」里能逐条撤销。没有删除。";
+const UNDO: &str = "每次写入都记进改动账本，用户在 ZeppBridge「设置 → 本地 AI → AI 最近的改动」里能逐条撤销。没有删除。";
 
 fn writer() -> Value {
     json!({ "readOnlyHint": false, "destructiveHint": false, "idempotentHint": false, "openWorldHint": false })
@@ -150,7 +150,7 @@ pub(super) fn write_tool_definitions() -> Vec<Value> {
         }),
         json!({
             "name": "sync_now",
-            "description": "让 PaceBridge 从 Zepp 云端拉一次新数据（和计划任务里的 pacebridge-cli sync 同一条路径）。\
+            "description": "让 ZeppBridge 从 Zepp 云端拉一次新数据（和计划任务里的 zeppbridge-cli sync 同一条路径）。\
                  state：done / running（还在后台跑，稍后用 get_data_health 看）/ deferred（本机在整理数据，不是失败）/\
                  busy（桌面端正在同步）/ not_configured / cloud_error / incomplete / failed。\
                  云端没有新东西是正常的——手表要先把数据传到 Zepp App。别反复触发。不改用户写的记录，不进改动账本。",
@@ -160,10 +160,10 @@ pub(super) fn write_tool_definitions() -> Vec<Value> {
         json!({
             "name": "export_data",
             "description": format!(
-                "把一段日子（最多 366 天）导出成 JSON 文件，写进用户本机 PaceBridge 数据目录的 exports 文件夹，\
+                "把一段日子（最多 366 天）导出成 JSON 文件，写进用户本机 ZeppBridge 数据目录的 exports 文件夹，\
                  返回文件名（相对数据目录）和条数。摘要口径，不含运动轨迹。types 默认 workouts、daily_activity、sleep，\
                  可选 {}。只在用户要一份文件时用；要看数据请直接用读工具。不进改动账本。",
-                pacebridge_core::storage::EXPORT_DATA_TYPES.join("、")
+                zeppbridge_core::storage::EXPORT_DATA_TYPES.join("、")
             ),
             "inputSchema": {
                 "type": "object",

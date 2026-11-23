@@ -25,7 +25,7 @@ impl SyncManager {
                 continue;
             }
             if self.cancel.load(Ordering::SeqCst) {
-                return Err(PaceBridgeError::Cancelled);
+                return Err(ZeppBridgeError::Cancelled);
             }
             if Instant::now() >= deadline {
                 break;
@@ -279,7 +279,7 @@ impl SyncManager {
                 )?;
             }
             Err(error)
-                if matches!(error, PaceBridgeError::DataUnavailable(_))
+                if matches!(error, ZeppBridgeError::DataUnavailable(_))
                     && matches!(stream.as_str(), "heart_rate" | "daily_summary") =>
             {
                 report.status = StreamStatus::Failed;
@@ -346,7 +346,7 @@ impl SyncManager {
     pub(super) async fn timed_out_report(&self, stream: &str) -> Result<StreamReport> {
         self.failure_report(
             stream,
-            &PaceBridgeError::TimedOut("这一轮同步用完了时间，这条流下次接着做".into()),
+            &ZeppBridgeError::TimedOut("这一轮同步用完了时间，这条流下次接着做".into()),
         )
         .await
     }
@@ -354,7 +354,7 @@ impl SyncManager {
     pub(super) async fn failure_report(
         &self,
         stream: &str,
-        error: &PaceBridgeError,
+        error: &ZeppBridgeError,
     ) -> Result<StreamReport> {
         let previous = self.previous_records_written(stream).await?;
         let report = StreamReport {
@@ -390,7 +390,7 @@ impl SyncManager {
 
     pub(super) async fn heart_rate_fetch_error(
         &self,
-        error: &PaceBridgeError,
+        error: &ZeppBridgeError,
     ) -> Result<StreamReport> {
         // The independent HR endpoint can be absent while wellness supplies HR.
         // Keep that absence visible, but never turn network/auth failures neutral.
@@ -404,7 +404,7 @@ impl SyncManager {
     pub(super) async fn unavailable_report(
         &self,
         stream: &str,
-        error: &PaceBridgeError,
+        error: &ZeppBridgeError,
     ) -> Result<StreamReport> {
         let previous = self.previous_records_written(stream).await?;
         let report = StreamReport {

@@ -30,15 +30,15 @@ impl Database {
     /// 整份替换收集箱。日期必须是 `YYYY-MM-DD`，重复的只留一张，按（项, 天）排好。
     pub fn set_card_collection(&self, picks: &[CardPick]) -> Result<Vec<CardPick>> {
         if picks.len() > MAX_CARD_PICKS {
-            return Err(PaceBridgeError::ConfigError("收集箱里的牌太多了".into()));
+            return Err(ZeppBridgeError::ConfigError("收集箱里的牌太多了".into()));
         }
         let mut clean = BTreeSet::new();
         for pick in picks {
             let date = NaiveDate::parse_from_str(pick.date.trim(), "%Y-%m-%d")
-                .map_err(|_| PaceBridgeError::ConfigError("收集箱里的日期无效".into()))?;
+                .map_err(|_| ZeppBridgeError::ConfigError("收集箱里的日期无效".into()))?;
             let key = pick.key.trim();
             if key.is_empty() || key.chars().count() > 64 {
-                return Err(PaceBridgeError::ConfigError("收集箱里的指标名无效".into()));
+                return Err(ZeppBridgeError::ConfigError("收集箱里的指标名无效".into()));
             }
             clean.insert(CardPick {
                 key: key.to_string(),
@@ -48,7 +48,7 @@ impl Database {
         }
         let picks: Vec<CardPick> = clean.into_iter().collect();
         let encoded = serde_json::to_string(&picks)
-            .map_err(|error| PaceBridgeError::ParseError(error.to_string()))?;
+            .map_err(|error| ZeppBridgeError::ParseError(error.to_string()))?;
         self.set_app_meta(CARD_COLLECTION_KEY, &encoded)?;
         Ok(picks)
     }

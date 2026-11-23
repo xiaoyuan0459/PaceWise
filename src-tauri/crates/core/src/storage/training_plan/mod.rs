@@ -22,7 +22,7 @@ pub use history::{HistoryWorkout, PlanHistoryEntry};
 pub use publish::PLACEHOLDER_ID_BASE;
 
 use super::Database;
-use crate::models::{error::Result, PaceBridgeError};
+use crate::models::{error::Result, ZeppBridgeError};
 use crate::training_plan::v2::NumberedWorkout;
 use crate::training_plan::window::{preview, DayPreview, Window};
 use crate::training_plan::{check_plan, PlanCheck, PlanContext, PlanDocument, Workout};
@@ -31,7 +31,7 @@ use rusqlite::{params, OptionalExtension};
 use serde::Serialize;
 use serde_json::Value;
 
-/// 「允许 AI 直接发布」开关，默认关：AI 只能起草，用户在 PaceBridge 里确认后才发。
+/// 「允许 AI 直接发布」开关，默认关：AI 只能起草，用户在 ZeppBridge 里确认后才发。
 const AI_PUBLISH_KEY: &str = "training_plan_ai_publish";
 
 /// 草稿从哪来。界面据此说「AI 起草的」还是「你写的」。
@@ -242,8 +242,8 @@ struct UndoTarget {
     deactivated: Vec<i64>,
 }
 
-fn plan_error(code: &'static str, message: &str) -> PaceBridgeError {
-    PaceBridgeError::TrainingPlan {
+fn plan_error(code: &'static str, message: &str) -> ZeppBridgeError {
+    ZeppBridgeError::TrainingPlan {
         code,
         message: message.into(),
     }

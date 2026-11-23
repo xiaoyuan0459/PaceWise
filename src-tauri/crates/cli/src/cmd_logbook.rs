@@ -10,8 +10,8 @@
 
 use std::io::Read;
 
-use pacebridge_core::storage::logbook::races::RaceInput;
-use pacebridge_core::storage::logbook::shoes::ShoeInput;
+use zeppbridge_core::storage::logbook::races::RaceInput;
+use zeppbridge_core::storage::logbook::shoes::ShoeInput;
 
 use super::*;
 

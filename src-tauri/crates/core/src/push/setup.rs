@@ -1,7 +1,7 @@
 //! 推送目标的设置（2026-11-18，桌面设置「推送到你自己的服务器」用）。
 //!
 //! 读写 `push/targets.json`、存取密钥、解析用户贴进来的连接码、读上一轮结果，
-//! 以及从本机装过的 PaceBridge Cloud 组件把站点和密钥接过来（只读组件的东西，不删）。
+//! 以及从本机装过的 ZeppBridge Cloud 组件把站点和密钥接过来（只读组件的东西，不删）。
 //! 规矩和 `mod.rs` 一样：配置文件里没有密钥；密钥只进系统凭据库；错误只带码。
 
 use super::{
@@ -163,12 +163,12 @@ pub fn last_push(data_dir: &Path, id: &str) -> Option<LastPush> {
     serde_json::from_slice(&bytes).ok()
 }
 
-/// 本机 PaceBridge Cloud 组件存在凭据管理器里的上传密钥（`PaceBridgeCloud:<主机>:upload`，
+/// 本机 ZeppBridge Cloud 组件存在凭据管理器里的上传密钥（`ZeppBridgeCloud:<主机>:upload`，
 /// 内容是 `{tenant, dk, writeKey}`）。只在 Windows 上有这个组件。
 #[cfg(windows)]
 pub fn companion_upload_secret(host: &str) -> Option<String> {
-    let target = format!("PaceBridgeCloud:{host}:upload");
-    let entry = keyring::Entry::new_with_target(&target, "PaceBridgeCloud", "").ok()?;
+    let target = format!("ZeppBridgeCloud:{host}:upload");
+    let entry = keyring::Entry::new_with_target(&target, "ZeppBridgeCloud", "").ok()?;
     let bytes = entry.get_secret().ok()?;
     String::from_utf8(bytes).ok()
 }

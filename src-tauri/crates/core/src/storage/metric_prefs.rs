@@ -39,7 +39,7 @@ impl Database {
                 .chars()
                 .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_')
         {
-            return Err(PaceBridgeError::ConfigError(format!(
+            return Err(ZeppBridgeError::ConfigError(format!(
                 "不认识的指标名：{metric}"
             )));
         }
@@ -112,7 +112,7 @@ fn strip(value: &mut serde_json::Value, keys: &[String]) -> bool {
 }
 
 /// 交给 AI 的话：排除是用户的选择，不是缺数据。
-pub const EXCLUSION_NOTE: &str = "用户在 PaceBridge 里选择让这些指标不参与分析（比如觉得手表估算值不可信）。相关字段已从这份数据里去掉：这不是缺数据，不要据此推断，也不要追问用户补这些数据。";
+pub const EXCLUSION_NOTE: &str = "用户在 ZeppBridge 里选择让这些指标不参与分析（比如觉得手表估算值不可信）。相关字段已从这份数据里去掉：这不是缺数据，不要据此推断，也不要追问用户补这些数据。";
 
 /// 去掉被排除的指标；去掉了东西就在顶层写明 `excludedByUser`。
 pub fn apply_exclusions(value: &mut serde_json::Value, excluded: &[String]) {

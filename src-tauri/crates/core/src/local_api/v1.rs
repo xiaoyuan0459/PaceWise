@@ -436,7 +436,7 @@ pub fn v1_index() -> HttpResponse {
         200,
         "OK",
         json!({
-            "service": "PaceBridge read-only API",
+            "service": "ZeppBridge read-only API",
             "version": env!("CARGO_PKG_VERSION"),
             "records_version": RECORDS_VERSION,
             "authentication": "Authorization: Bearer <token>",

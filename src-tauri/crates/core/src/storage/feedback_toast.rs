@@ -1,6 +1,6 @@
 //! 跑后打分的系统通知（批次 7）：Windows 通知上直接带五档按钮，不开应用也能打分。
 //!
-//! 按钮是一条本机链接 `pacebridge://feedback?t=<令牌>&r=<1–5>`，系统点了就用它启动本程序，
+//! 按钮是一条本机链接 `zeppbridge://feedback?t=<令牌>&r=<1–5>`，系统点了就用它启动本程序，
 //! 程序写下打分就退出（`src-tauri/src/feedback_toast.rs`）。这个链接网页也能调起，所以带一次性
 //! 令牌：发通知时随机生成、只记最近的一条，对上了才写、写完就作废，运动结束 48 小时后也作废。
 //! 一条运动只发一次通知。
@@ -97,10 +97,10 @@ impl Database {
     }
 }
 
-/// 解析通知按钮的链接：`pacebridge://feedback?t=<令牌>&r=<1–5>`。别的链接是 `None`。
+/// 解析通知按钮的链接：`zeppbridge://feedback?t=<令牌>&r=<1–5>`。别的链接是 `None`。
 pub fn parse_feedback_link(link: &str) -> Option<(String, u8)> {
     let query = link
-        .strip_prefix("pacebridge://feedback")?
+        .strip_prefix("zeppbridge://feedback")?
         .trim_start_matches('/')
         .strip_prefix('?')?;
     let mut token = None;

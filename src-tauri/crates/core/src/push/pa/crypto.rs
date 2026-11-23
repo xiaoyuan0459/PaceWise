@@ -1,9 +1,9 @@
-//! `PaceBridge-Cloud/shared/crypto.mjs` 里电脑端用到的那一半，用 Rust 重写。
+//! `ZeppBridge-Cloud/shared/crypto.mjs` 里电脑端用到的那一半，用 Rust 重写。
 //!
 //! **和 Worker 字节兼容是硬门禁**：对象密文的布局、AAD、密钥格式一个字节都不能差，
 //! 否则站点上的读者解不开。双向验证在两边各有一条：
 //! - 这里的 `tests` 解开 node（crypto.mjs）生成的密文；
-//! - PaceBridge-Cloud 的 `tests/rust-compat.test.mjs` 用 crypto.mjs 解开这里生成的密文。
+//! - ZeppBridge-Cloud 的 `tests/rust-compat.test.mjs` 用 crypto.mjs 解开这里生成的密文。
 //!
 //! 布局（`FORMAT_VERSION = 1`）：`[1] | nonce(12) | AES-256-GCM 密文 + tag(16)`，
 //! AAD = `object:<R2 完整路径>`，路径 = `t/<租户>/<相对路径>.gz.enc`。
@@ -196,13 +196,13 @@ pub fn find_coordinate_field(json_text: &str) -> Option<&'static str> {
 mod tests {
     use super::*;
 
-    /// 由 PaceBridge-Cloud 的 crypto.mjs 生成（`tests/rust-compat.test.mjs` 里的
+    /// 由 ZeppBridge-Cloud 的 crypto.mjs 生成（`tests/rust-compat.test.mjs` 里的
     /// `NODE_VECTOR` 同一份）：DK 全是 0x07，租户 `abcdefghij`，相对路径 `days/2024-03-10.json`，
-    /// 明文 `{"hello":"pacebridge"}`（没压缩：这里只验加密层）。
+    /// 明文 `{"hello":"zeppbridge"}`（没压缩：这里只验加密层）。
     const NODE_DK_BYTE: u8 = 7;
     const NODE_TENANT: &str = "abcdefghij";
     const NODE_REL: &str = "days/2024-03-10.json";
-    const NODE_PLAIN: &str = "{\"hello\":\"pacebridge\"}";
+    const NODE_PLAIN: &str = "{\"hello\":\"zeppbridge\"}";
     const NODE_SEALED: &str = include_str!("node_vector.txt");
 
     #[test]

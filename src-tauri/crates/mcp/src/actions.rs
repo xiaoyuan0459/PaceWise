@@ -2,7 +2,7 @@
 //!
 //! 它们不改用户写的记录，所以不进改动账本。
 //!
-//! - **同步**和计划任务里的 `pacebridge-cli sync` 是同一条路径：直接启动旁边那份 CLI，
+//! - **同步**和计划任务里的 `zeppbridge-cli sync` 是同一条路径：直接启动旁边那份 CLI，
 //!   写锁、同步租约、取消、云端探测全由它管，MCP 不加网络和异步运行时。本地还欠着重解析时
 //!   回 `deferred`（让桌面端先把派生数据对齐），不算失败。客户端的工具超时常见是 60 秒，
 //!   所以最多等 [`SYNC_WAIT`]，还没完就回 `running`，CLI 自己接着跑完。
@@ -12,7 +12,7 @@
 use super::*;
 use std::process::{Child, Command, Stdio};
 use std::time::{Duration as StdDuration, Instant};
-use pacebridge_core::models::{ExportDetail, ExportScope, ExportSelection};
+use zeppbridge_core::models::{ExportDetail, ExportScope, ExportSelection};
 
 pub(super) const ACTION_TOOLS: [&str; 2] = ["sync_now", "export_data"];
 
@@ -22,7 +22,7 @@ fn cli_path() -> Option<std::path::PathBuf> {
     let exe = std::env::current_exe().ok()?;
     let path = exe
         .parent()?
-        .join(format!("pacebridge-cli{}", std::env::consts::EXE_SUFFIX));
+        .join(format!("zeppbridge-cli{}", std::env::consts::EXE_SUFFIX));
     path.is_file().then_some(path)
 }
 
@@ -48,13 +48,13 @@ pub(super) fn run_sync(db: &Database) -> Result<Value, CallFailure> {
     {
         return Ok(json!({
             "state": "deferred",
-            "note": "本机还欠着一次重解析（解析器升级后要把本地报文重算一遍）。请让用户打开一次 PaceBridge，等它整理完再同步；这不是失败。",
+            "note": "本机还欠着一次重解析（解析器升级后要把本地报文重算一遍）。请让用户打开一次 ZeppBridge，等它整理完再同步；这不是失败。",
         }));
     }
     let Some(cli) = cli_path() else {
         return Err(CallFailure::coded(
             "err.mcp.cli_missing",
-            "这份 pacebridge-mcp 旁边没有 pacebridge-cli，无法触发同步。请让用户在 PaceBridge 里点同步。".into(),
+            "这份 zeppbridge-mcp 旁边没有 zeppbridge-cli，无法触发同步。请让用户在 ZeppBridge 里点同步。".into(),
         ));
     };
     let mut command = Command::new(cli);
@@ -71,7 +71,7 @@ pub(super) fn run_sync(db: &Database) -> Result<Value, CallFailure> {
     }
     let child = command
         .spawn()
-        .map_err(|error| CallFailure::plain(format!("启动 pacebridge-cli 失败：{error}")))?;
+        .map_err(|error| CallFailure::plain(format!("启动 zeppbridge-cli 失败：{error}")))?;
     wait_for_sync(child, SYNC_WAIT)
 }
 
@@ -150,12 +150,12 @@ pub(super) fn run_export(db: &Database, args: &Value) -> Result<Value, CallFailu
     let unknown: Vec<&str> = types
         .iter()
         .map(String::as_str)
-        .filter(|kind| !pacebridge_core::storage::EXPORT_DATA_TYPES.contains(kind))
+        .filter(|kind| !zeppbridge_core::storage::EXPORT_DATA_TYPES.contains(kind))
         .collect();
     if types.is_empty() || !unknown.is_empty() {
         return Err(CallFailure::plain(format!(
             "types 只能从这些里选：{}",
-            pacebridge_core::storage::EXPORT_DATA_TYPES.join(", ")
+            zeppbridge_core::storage::EXPORT_DATA_TYPES.join(", ")
         )));
     }
     let selection = ExportSelection {
@@ -175,7 +175,7 @@ pub(super) fn run_export(db: &Database, args: &Value) -> Result<Value, CallFailu
     std::fs::create_dir_all(&dir)
         .map_err(|error| CallFailure::plain(format!("无法创建导出目录：{error}")))?;
     let stamp = Local::now().format("%Y%m%d-%H%M%S");
-    let name = format!("pacebridge-{start}_{end}-{stamp}.json");
+    let name = format!("zeppbridge-{start}_{end}-{stamp}.json");
     paths::write_file_atomically(&dir.join(&name), text.as_bytes())
         .map_err(|error| CallFailure::plain(format!("写出导出文件失败：{error}")))?;
     // 契约：不返回本机绝对路径。只给数据目录里的相对位置，用户在桌面端打开数据目录就能看到。
@@ -185,7 +185,7 @@ pub(super) fn run_export(db: &Database, args: &Value) -> Result<Value, CallFailu
         "bytes": text.len(),
         "types": types,
         "range": { "start": start, "end": end },
-        "note": "文件在用户本机 PaceBridge 数据目录的 exports 文件夹里（桌面端设置里能打开数据目录）。这是摘要导出（不含运动轨迹）。要具体数据请直接用读工具，不必读这个文件。",
+        "note": "文件在用户本机 ZeppBridge 数据目录的 exports 文件夹里（桌面端设置里能打开数据目录）。这是摘要导出（不含运动轨迹）。要具体数据请直接用读工具，不必读这个文件。",
     }))
 }
 
@@ -193,7 +193,7 @@ pub(super) fn run_export(db: &Database, args: &Value) -> Result<Value, CallFailu
 mod tests {
     use super::*;
 
-    const OUTPUT_MARKER: &str = "PACEBRIDGE_SYNC_FIXTURE_MARKER";
+    const OUTPUT_MARKER: &str = "ZEPPBRIDGE_SYNC_FIXTURE_MARKER";
 
     #[test]
     #[ignore = "spawned by the sync pipe regression test"]
@@ -214,7 +214,7 @@ mod tests {
             let marker = std::env::temp_dir().join(format!(
                 "zb-sync-{}-{}",
                 std::process::id(),
-                pacebridge_core::unique_suffix(),
+                zeppbridge_core::unique_suffix(),
             ));
             let child = Command::new(std::env::current_exe().unwrap())
                 .args([

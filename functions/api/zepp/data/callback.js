@@ -8,7 +8,7 @@ export function onRequest({ request }) {
     // Deliberately leave the body unread; no health data is parsed or persisted.
     return callbackResponse(request, {
       error: 'data_ingestion_not_enabled',
-      message: 'PaceBridge data ingestion is not enabled yet. No data was accepted.',
+      message: 'ZeppBridge data ingestion is not enabled yet. No data was accepted.',
     }, 503, { 'Retry-After': '3600' });
   }
 
@@ -19,7 +19,7 @@ export function onRequest({ request }) {
   }
 
   return callbackResponse(request, {
-    service: 'PaceBridge',
+    service: 'ZeppBridge',
     endpoint: 'data_callback',
     status: 'registration_only',
     dataIngestionEnabled: false,

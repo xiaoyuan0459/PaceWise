@@ -69,11 +69,11 @@ fn absent_or_empty_override_keeps_default_discovery_and_invalid_override_fails_c
 
 #[test]
 fn app_bundle_takes_priority_even_under_a_build_cache() {
-    let path = Path::new("/tmp/target/release/bundle/PaceBridge.app/Contents/MacOS");
+    let path = Path::new("/tmp/target/release/bundle/ZeppBridge.app/Contents/MacOS");
     assert!(is_build_artifact_dir(path));
     assert!(is_inside_app_bundle(path));
     assert!(is_inside_app_bundle(Path::new(
-        "/Applications/PaceBridge.APP/Contents/MacOS"
+        "/Applications/ZeppBridge.APP/Contents/MacOS"
     )));
     assert!(!is_inside_app_bundle(Path::new(
         "/Applications/Contents/MacOS"
@@ -87,9 +87,9 @@ fn replacing_the_bundle_preserves_migrated_account_devices_and_library() {
         std::process::id(),
         crate::unique_suffix()
     ));
-    let bundle = root.join("PaceBridge.app");
+    let bundle = root.join("ZeppBridge.app");
     let source = bundle.join("Contents/MacOS/data");
-    let executable = bundle.join("Contents/MacOS/pacebridge");
+    let executable = bundle.join("Contents/MacOS/zeppbridge");
     let destination = root.join("Application Support/data");
     fs::create_dir_all(&source).unwrap();
     fs::write(&executable, b"old executable").unwrap();
@@ -132,7 +132,7 @@ fn replacing_the_bundle_preserves_migrated_account_devices_and_library() {
 #[test]
 fn updater_rejects_a_data_symlink_into_the_bundle() {
     let root = std::env::temp_dir().join(format!("bundle-update-symlink-{}", std::process::id()));
-    let executable = root.join("PaceBridge.app/Contents/MacOS/pacebridge");
+    let executable = root.join("ZeppBridge.app/Contents/MacOS/zeppbridge");
     let data = executable.parent().unwrap().join("data");
     fs::create_dir_all(&data).unwrap();
     fs::write(&executable, b"exe").unwrap();
@@ -149,7 +149,7 @@ fn bundle_migration_copies_live_wal_and_preserves_existing_library() {
         std::process::id(),
         crate::unique_suffix()
     ));
-    let source = root.join("PaceBridge.app/Contents/MacOS/data");
+    let source = root.join("ZeppBridge.app/Contents/MacOS/data");
     let destination = root.join("support/data");
     fs::create_dir_all(&source).unwrap();
     let db = rusqlite::Connection::open(source.join("zepp.db")).unwrap();
@@ -216,7 +216,7 @@ fn bundle_migration_tolerates_finder_junk_and_leftover_logs() {
     fs::create_dir_all(&destination).unwrap();
     fs::write(destination.join(".DS_Store"), b"junk").unwrap();
     fs::create_dir_all(destination.join("logs")).unwrap();
-    fs::write(destination.join("logs/pacebridge.log"), b"last crash log").unwrap();
+    fs::write(destination.join("logs/zeppbridge.log"), b"last crash log").unwrap();
     fs::create_dir_all(destination.join("webview")).unwrap();
     fs::create_dir_all(root.join(".bundle-migration-999-0")).unwrap();
     migrate_bundle_data(&source, &destination).unwrap();
@@ -234,7 +234,7 @@ fn bundle_migration_tolerates_finder_junk_and_leftover_logs() {
         .collect();
     assert_eq!(aside.len(), 1, "旧目标应当整体挪到旁边而不是被删");
     assert_eq!(
-        fs::read(aside[0].path().join("logs/pacebridge.log")).unwrap(),
+        fs::read(aside[0].path().join("logs/zeppbridge.log")).unwrap(),
         b"last crash log"
     );
     assert!(
@@ -311,7 +311,7 @@ fn an_app_suffixed_directory_without_contents_is_not_a_bundle() {
     let exe_dir = root.join("tools.app").join("release");
     let data = exe_dir.join("data");
     fs::create_dir_all(&data).unwrap();
-    let executable = exe_dir.join("pacebridge.exe");
+    let executable = exe_dir.join("zeppbridge.exe");
     fs::write(&executable, b"exe").unwrap();
     fs::write(data.join("zepp.db"), b"db").unwrap();
     validate_update_data_location(&data, &executable)
@@ -324,7 +324,7 @@ fn a_blocked_empty_data_dir_falls_back_instead_of_failing() {
     // 安装目录旁边写不进去、而那里又没有库（.msi 装进 Program Files
     // 的新装机器就是这个样子）——必须退到用户目录，而不是把错误
     // 往上抛给 `setup()` 的 `?` 变成一次静默退出。
-    let blocked = std::env::temp_dir().join("pacebridge-blocked-empty");
+    let blocked = std::env::temp_dir().join("zeppbridge-blocked-empty");
     let _ = fs::remove_dir_all(&blocked);
     let resolved = fall_back_to_user_data_dir(
         &blocked,
@@ -340,7 +340,7 @@ fn a_blocked_data_dir_that_already_holds_a_library_reports_instead_of_moving() {
     // 反过来：里面已经有库了。静静换一个空目录，用户看到的是
     // 「我的数据全没了」——那比报错更坏。错误文本里必须有路径和
     // 环境变量名，启动对话框靠它告诉用户下一步做什么。
-    let blocked = std::env::temp_dir().join("pacebridge-blocked-with-db");
+    let blocked = std::env::temp_dir().join("zeppbridge-blocked-with-db");
     fs::create_dir_all(&blocked).unwrap();
     fs::write(blocked.join(SQLITE_GROUP[0]), b"not really sqlite").unwrap();
     let error = fall_back_to_user_data_dir(
@@ -367,7 +367,7 @@ fn an_explicit_data_dir_must_be_absolute() {
 #[test]
 fn an_unset_or_empty_data_dir_falls_through() {
     assert!(super::data_dir_from_env_value(None).unwrap().is_none());
-    // 空值当作没设。docker-compose 里 `PACEBRIDGE_DATA_DIR=` 是一句
+    // 空值当作没设。docker-compose 里 `ZEPPBRIDGE_DATA_DIR=` 是一句
     // 「用默认」，不是一句「用根目录」。
     assert!(
         super::data_dir_from_env_value(Some(std::ffi::OsString::new()))
@@ -393,14 +393,14 @@ fn packaged_linux_prefixes_do_not_own_user_data() {
     assert!(is_shared_prefix_dir(Path::new("/usr/bin")));
     assert!(is_shared_prefix_dir(Path::new("/usr")));
     assert!(is_shared_prefix_dir(Path::new("/app/bin")));
-    assert!(is_shared_prefix_dir(Path::new("/opt/pacebridge")));
+    assert!(is_shared_prefix_dir(Path::new("/opt/zeppbridge")));
     assert!(is_shared_prefix_dir(Path::new(
-        "/snap/pacebridge/current/bin"
+        "/snap/zeppbridge/current/bin"
     )));
 
     // AppImage 的挂载点和解包出来的 tarball 属于用户，保持安装目录布局。
     assert!(!is_shared_prefix_dir(Path::new("/tmp/.mount_ZeppBrXXXXXX")));
-    assert!(!is_shared_prefix_dir(Path::new("/home/alice/pacebridge")));
+    assert!(!is_shared_prefix_dir(Path::new("/home/alice/zeppbridge")));
     assert!(!is_shared_prefix_dir(Path::new("/data")));
     // 前缀匹配是按整段目录名比的，`/usrlocal` 不是 `/usr` 下面的东西。
     assert!(!is_shared_prefix_dir(Path::new("/usrlocal/bin")));
@@ -418,15 +418,15 @@ fn build_cache_dirs_are_detected() {
         r"C:\proj\src-tauri\target\debug"
     )));
     assert!(!is_build_artifact_dir(Path::new(
-        r"C:\Users\example\Apps\PaceBridge\release"
+        r"C:\Users\example\Apps\ZeppBridge\release"
     )));
-    assert!(!is_build_artifact_dir(Path::new(r"D:\PaceBridge")));
+    assert!(!is_build_artifact_dir(Path::new(r"D:\ZeppBridge")));
 }
 
 #[test]
 fn relocates_sqlite_group_without_overwriting() {
     let root = std::env::temp_dir().join(format!(
-        "pacebridge-path-test-{}-{}",
+        "zeppbridge-path-test-{}-{}",
         std::process::id(),
         crate::unique_suffix()
     ));
@@ -472,7 +472,7 @@ fn relocates_sqlite_group_without_overwriting() {
 #[test]
 fn does_not_attach_foreign_wal_to_existing_destination_db() {
     let root = std::env::temp_dir().join(format!(
-        "pacebridge-path-wal-{}-{}",
+        "zeppbridge-path-wal-{}-{}",
         std::process::id(),
         crate::unique_suffix()
     ));
@@ -492,12 +492,12 @@ fn does_not_attach_foreign_wal_to_existing_destination_db() {
     let _ = fs::remove_dir_all(root);
 }
 
-/// `PACEBRIDGE_DATA_DIR` 或开发版指到别处时，装好的应用那份库原地不动。
+/// `ZEPPBRIDGE_DATA_DIR` 或开发版指到别处时，装好的应用那份库原地不动。
 #[test]
 fn the_live_library_is_never_relocated_into_another_data_dir() {
-    let flat = PathBuf::from("/Users/a/Library/Application Support/com.pacebridge.PaceBridge");
+    let flat = PathBuf::from("/Users/a/Library/Application Support/com.zeppbridge.ZeppBridge");
     let live = flat.join("data");
-    let custom = PathBuf::from("/tmp/pacebridge-custom");
+    let custom = PathBuf::from("/tmp/zeppbridge-custom");
     let candidates = vec![flat.clone(), live.clone()];
 
     assert_eq!(
@@ -518,7 +518,7 @@ fn the_live_library_is_never_relocated_into_another_data_dir() {
 #[test]
 fn atomic_write_replaces_an_existing_file() {
     let dir = std::env::temp_dir().join(format!(
-        "pacebridge-atomic-{}-{}",
+        "zeppbridge-atomic-{}-{}",
         std::process::id(),
         crate::unique_suffix()
     ));
@@ -545,23 +545,23 @@ fn atomic_write_replaces_an_existing_file() {
 fn masked_paths_never_carry_the_user_name() {
     if let Some(dirs) = directories::BaseDirs::new() {
         let home = dirs.home_dir().to_path_buf();
-        let shown = mask_user_path(&home.join("PaceBridge").join("data"));
+        let shown = mask_user_path(&home.join("ZeppBridge").join("data"));
         let placeholder = if cfg!(windows) { "%USERPROFILE%" } else { "~" };
         assert!(shown.starts_with(placeholder), "{shown}");
         assert!(shown.ends_with("data"), "{shown}");
     }
     // 不在主目录下（别的盘、别的账号）时，按常见形状把名字那一段打码。
     assert_eq!(
-        mask_user_segment(r"D:\Users\alice\PaceBridge\data"),
-        r"D:\Users\***\PaceBridge\data"
+        mask_user_segment(r"D:\Users\alice\ZeppBridge\data"),
+        r"D:\Users\***\ZeppBridge\data"
     );
     assert_eq!(
-        mask_user_segment("/home/bob/.local/share/pacebridge/data"),
-        "/home/***/.local/share/pacebridge/data"
+        mask_user_segment("/home/bob/.local/share/zeppbridge/data"),
+        "/home/***/.local/share/zeppbridge/data"
     );
     assert_eq!(
-        mask_user_segment(r"E:\PaceBridge\data"),
-        r"E:\PaceBridge\data"
+        mask_user_segment(r"E:\ZeppBridge\data"),
+        r"E:\ZeppBridge\data"
     );
     assert_eq!(strip_home_prefix(r"C:\Users\al2\x", r"C:\Users\al"), None);
 }

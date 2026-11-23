@@ -135,7 +135,7 @@ pub(super) fn sleep_from_flat_object(object: &Map<String, Value>) -> Option<Slee
 ///
 /// 认不出来的返回 `unknown`，**不再返回 `awake`**。原来的写法（`_ =>
 /// Some("awake")`，理由是「避免阶段条出现空洞」）意味着：Zepp 以后新增一个
-/// mode，或者某款新表产生一个我们还不认识的 mode，PaceBridge 会明确告诉用户
+/// mode，或者某款新表产生一个我们还不认识的 mode，ZeppBridge 会明确告诉用户
 /// 「你那段时间醒着」。那是替用户编了一个事实，和这个项目「缺失就是缺失，
 /// 不生成假零值」的原则直接冲突。
 pub(super) fn sleep_stage_name(mode: i64) -> &'static str {

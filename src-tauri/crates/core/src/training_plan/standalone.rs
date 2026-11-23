@@ -6,13 +6,13 @@
 //!
 //! 和桌面不同的两条，都是刻意的：
 //!
-//! - **永远不清空窗口**（`confirm_clear` 恒为 false）。清空只能由用户在 PaceBridge 里
+//! - **永远不清空窗口**（`confirm_clear` 恒为 false）。清空只能由用户在 ZeppBridge 里
 //!   确认；会清空的草稿回 `NeedsClearConfirmation`，什么都不改。
 //! - 同步入口：调用方（MCP）是同步代码，这里自建一个单线程运行时跑联网那段。
 
 use super::publish::{ensure_connected, send_window};
 use super::{check_plan, PlanCheck, PlanContext, PlanDocument};
-use crate::models::{error::Result, PaceBridgeError};
+use crate::models::{error::Result, ZeppBridgeError};
 use crate::official::{OfficialClient, OfficialStore};
 use crate::storage::training_plan::{
     DraftOrigin, DraftPreview, Prepared, PublishRecord, PublishRequest, SendOutcome,
@@ -30,14 +30,14 @@ const LOCK_WAIT: Duration = Duration::from_secs(5);
 /// 拿写锁、开一条可写连接、做一件事、全部放掉。
 pub fn write_once<T>(data_dir: &Path, mutation: impl FnOnce(&Database) -> Result<T>) -> Result<T> {
     let _guard = write_lock::acquire_with_timeout(data_dir, WritePurpose::Metadata, LOCK_WAIT)
-        .map_err(|error| PaceBridgeError::Busy(error.to_string()))?;
+        .map_err(|error| ZeppBridgeError::Busy(error.to_string()))?;
     let db = Database::open_without_migration(data_dir.join("zepp.db"))?;
     let version: i64 = db
         .conn
         .query_row("PRAGMA user_version", [], |row| row.get(0))?;
     if version != CURRENT_SCHEMA_VERSION {
-        return Err(PaceBridgeError::Busy(format!(
-            "本地库版本是 v{version}，这个程序需要 v{CURRENT_SCHEMA_VERSION}；打开一次 PaceBridge 完成升级后再试"
+        return Err(ZeppBridgeError::Busy(format!(
+            "本地库版本是 v{version}，这个程序需要 v{CURRENT_SCHEMA_VERSION}；打开一次 ZeppBridge 完成升级后再试"
         )));
     }
     mutation(&db)
@@ -133,7 +133,7 @@ pub fn publish_draft_blocking(
     let runtime = tokio::runtime::Builder::new_current_thread()
         .enable_all()
         .build()
-        .map_err(|error| PaceBridgeError::ConfigError(format!("无法启动网络运行时：{error}")))?;
+        .map_err(|error| ZeppBridgeError::ConfigError(format!("无法启动网络运行时：{error}")))?;
     runtime.block_on(publish_draft(data_dir, request, today))
 }
 
@@ -174,8 +174,8 @@ async fn publish_draft(
         })?;
     }
     if abort.is_some() {
-        return Err(PaceBridgeError::NeedsReauth(
-            "认证已失效，请在 PaceBridge 里重新连接 Zepp".into(),
+        return Err(ZeppBridgeError::NeedsReauth(
+            "认证已失效，请在 ZeppBridge 里重新连接 Zepp".into(),
         ));
     }
     write_once(data_dir, |db| finished(db, prepared.clone()))

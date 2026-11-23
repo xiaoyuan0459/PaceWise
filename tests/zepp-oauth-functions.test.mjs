@@ -30,7 +30,7 @@ test('Italian regional language tags reach translated authorization and result p
   const request = new Request('https://example.test', { headers: { 'Accept-Language': 'it-IT,it;q=0.9,en;q=0.8' } });
   assert.equal(pageLanguage(request), 'it');
   const pages = [
-    [startPage(request, 'https://example.test/authorize'), 'Autorizza PaceBridge con il tuo account Zepp'],
+    [startPage(request, 'https://example.test/authorize'), 'Autorizza ZeppBridge con il tuo account Zepp'],
     [resultPage('ready', 200, request), 'Autorizzazione completata'],
     [resultPage('denied', 200, request), 'Autorizzazione annullata'],
     [resultPage('expired', 200, request), 'Questa autorizzazione è scaduta'],
@@ -190,7 +190,7 @@ test('the full flow hands the tokens to the desktop exactly once, and never to t
   assert.ok(location.startsWith('https://user.zepp.com/oauth2/index.html#/login?'));
   assert.match(location, new RegExp(`client_id=${CLIENT_ID}`));
   assert.match(location, /response_type=code/);
-  assert.match(location, /redirect_uri=https%3A%2F%2Fpacebridge\.pages\.dev%2Fapi%2Fzepp%2Foauth%2Fcallback/);
+  assert.match(location, /redirect_uri=https%3A%2F%2Fzeppbridge\.pages\.dev%2Fapi%2Fzepp%2Foauth%2Fcallback/);
   assert.match(location, /token=%5B%22access%22,%22refresh%22%5D/);
   assert.doesNotMatch(location, new RegExp(SECRET));
   assert.doesNotMatch(location, new RegExp(claimHash));

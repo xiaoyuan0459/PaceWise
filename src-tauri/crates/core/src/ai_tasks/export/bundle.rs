@@ -124,7 +124,7 @@ impl Database {
         sections: Vec<(AiTaskCategory, Vec<WindowGather>)>,
     ) -> Result<Value> {
         let mut document = Map::new();
-        document.insert("schema".into(), json!("pacebridge.ai_task"));
+        document.insert("schema".into(), json!("zeppbridge.ai_task"));
         document.insert("schema_version".into(), json!(AI_TASK_SCHEMA_VERSION));
         document.insert("generated_at".into(), json!(Utc::now().to_rfc3339()));
 

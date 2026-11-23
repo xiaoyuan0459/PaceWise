@@ -230,7 +230,7 @@ impl Database {
     ) -> Result<StorageEstimate> {
         // 这里用补拉的取值范围（最长十年），而不是保留期的 1–365；
         // 「补三年要多大」是这个估算存在的主要原因。
-        let days = UserPrefs::clamp_history_days(days).map_err(PaceBridgeError::ConfigError)?;
+        let days = UserPrefs::clamp_history_days(days).map_err(ZeppBridgeError::ConfigError)?;
         let database_bytes = std::fs::metadata(data_dir.join("zepp.db"))
             .map(|meta| meta.len())
             .unwrap_or(0);

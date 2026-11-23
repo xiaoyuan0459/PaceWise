@@ -4,7 +4,7 @@ use chrono::{TimeZone, Utc};
 
 use std::path::PathBuf;
 
-use pacebridge_core::models::{DailyMetric, SleepSession, SleepStageSlice, SourceScope, Workout};
+use zeppbridge_core::models::{DailyMetric, SleepSession, SleepStageSlice, SourceScope, Workout};
 
 struct TestLibrary(PathBuf);
 
@@ -15,9 +15,9 @@ impl TestLibrary {
         // `open_migrated` 里报「无法建立写入锁：No such file or directory」。
         static COUNTER: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
         let serial = COUNTER.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-        let nonce = pacebridge_core::unique_suffix();
+        let nonce = zeppbridge_core::unique_suffix();
         let dir = std::env::temp_dir().join(format!(
-            "pacebridge-mcp-test-{}-{nonce}-{serial}",
+            "zeppbridge-mcp-test-{}-{nonce}-{serial}",
             std::process::id()
         ));
         std::fs::create_dir_all(&dir).unwrap();

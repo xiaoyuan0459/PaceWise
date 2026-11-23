@@ -2,7 +2,7 @@ use super::write_lock::{self, WritePurpose};
 
 use super::{Database, CURRENT_SCHEMA_VERSION, NORMALIZER_REVISION};
 
-use crate::models::{error::Result, PaceBridgeError};
+use crate::models::{error::Result, ZeppBridgeError};
 
 use chrono::Utc;
 
@@ -122,7 +122,7 @@ pub enum RestoreCompatibility {
     SameSchema,
     /// 比当前旧，恢复后会正向迁移。
     OlderSchemaWillMigrate,
-    /// 比当前新：这份快照来自更新版本的 PaceBridge。降级打开会静默丢字段，
+    /// 比当前新：这份快照来自更新版本的 ZeppBridge。降级打开会静默丢字段，
     /// 所以直接拒绝，并且完全不碰当前库。
     FutureSchemaRefused,
 }
@@ -183,7 +183,7 @@ fn validate_backup_id(id: &str) -> Result<()> {
     if ok {
         Ok(())
     } else {
-        Err(PaceBridgeError::ConfigError("备份 ID 无效".into()))
+        Err(ZeppBridgeError::ConfigError("备份 ID 无效".into()))
     }
 }
 
@@ -210,7 +210,7 @@ pub fn create_backup(
 ) -> Result<BackupManifest> {
     let source_path = database_path(data_dir);
     if !source_path.exists() {
-        return Err(PaceBridgeError::DataUnavailable(
+        return Err(ZeppBridgeError::DataUnavailable(
             "本机还没有数据库，没有可备份的内容".into(),
         ));
     }
@@ -242,7 +242,7 @@ pub fn create_backup(
             .query_row("PRAGMA integrity_check(1)", [], |row| row.get(0))?;
         let integrity_ok = first.eq_ignore_ascii_case("ok");
         if !integrity_ok {
-            return Err(PaceBridgeError::DataUnavailable(format!(
+            return Err(ZeppBridgeError::DataUnavailable(format!(
                 "生成的备份没有通过完整性检查：{first}"
             )));
         }
@@ -318,7 +318,7 @@ pub fn create_backup(
 fn write_manifest(data_dir: &Path, manifest: &BackupManifest) -> Result<()> {
     validate_backup_id(&manifest.id)?;
     let encoded = serde_json::to_vec_pretty(manifest)
-        .map_err(|error| PaceBridgeError::ParseError(format!("无法生成备份清单: {error}")))?;
+        .map_err(|error| ZeppBridgeError::ParseError(format!("无法生成备份清单: {error}")))?;
     std::fs::write(manifest_path(data_dir, &manifest.id), encoded)?;
     Ok(())
 }
@@ -372,10 +372,10 @@ pub fn load_manifest(data_dir: &Path, id: &str) -> Result<BackupManifest> {
     validate_backup_id(id)?;
     let text = std::fs::read_to_string(manifest_path(data_dir, id))?;
     let manifest: BackupManifest = serde_json::from_str(&text)
-        .map_err(|error| PaceBridgeError::ParseError(format!("备份清单无法解析: {error}")))?;
+        .map_err(|error| ZeppBridgeError::ParseError(format!("备份清单无法解析: {error}")))?;
     validate_backup_id(&manifest.id)?;
     if manifest.id != id {
-        return Err(PaceBridgeError::ConfigError("备份 ID 无效".into()));
+        return Err(ZeppBridgeError::ConfigError("备份 ID 无效".into()));
     }
     Ok(manifest)
 }
@@ -398,10 +398,10 @@ pub fn set_pinned_unlocked(data_dir: &Path, id: &str, pinned: bool) -> Result<Ba
     Ok(manifest)
 }
 
-fn map_write_lock(error: write_lock::WriteLockError) -> PaceBridgeError {
+fn map_write_lock(error: write_lock::WriteLockError) -> ZeppBridgeError {
     match error {
-        write_lock::WriteLockError::Busy { .. } => PaceBridgeError::Busy(error.to_string()),
-        other => PaceBridgeError::ConfigError(other.to_string()),
+        write_lock::WriteLockError::Busy { .. } => ZeppBridgeError::Busy(error.to_string()),
+        other => ZeppBridgeError::ConfigError(other.to_string()),
     }
 }
 

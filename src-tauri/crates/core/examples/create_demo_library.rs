@@ -6,7 +6,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         return Err("destination database already exists".into());
     }
     std::fs::create_dir_all(&root)?;
-    let _db = pacebridge_core::storage::Database::open_migrated(&path)?;
+    let _db = zeppbridge_core::storage::Database::open_migrated(&path)?;
     std::fs::write(
         root.join(".demo-library"),
         "Isolated synthetic data. No credentials or watch requests.\n",

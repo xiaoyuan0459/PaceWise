@@ -209,7 +209,7 @@ fn named_store() -> Arc<Store> {
 
 fn temp_dir(name: &str) -> PathBuf {
     let dir = std::env::temp_dir().join(format!(
-        "pacebridge-serve-{name}-{}-{}",
+        "zeppbridge-serve-{name}-{}-{}",
         std::process::id(),
         crate::unique_suffix()
     ));

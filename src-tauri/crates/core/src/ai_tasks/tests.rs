@@ -5,14 +5,14 @@ use super::export::stat_task_attachments;
 use super::model::*;
 use super::store::normalize_task;
 use crate::access::{granted_windows, shared_task_grants, AccessCategory};
-use crate::models::error::PaceBridgeError;
+use crate::models::error::ZeppBridgeError;
 use crate::models::{DailyMetric, MetricSample, SleepSession, SourceScope, Workout};
 use crate::storage::{Database, CURRENT_SCHEMA_VERSION};
 use chrono::{DateTime, Duration, Local, NaiveDate, TimeZone, Utc};
 
 // ---------- 小工具 ----------
 
-fn err_code(error: &PaceBridgeError) -> &str {
+fn err_code(error: &ZeppBridgeError) -> &str {
     error.code()
 }
 
@@ -540,7 +540,7 @@ fn missing_workout_is_a_coded_error() {
     t.workout_ids = vec!["ghost-1".into(), "ghost-2".into()];
     let error = db.ai_task_preview(&t).unwrap_err();
     assert_eq!(err_code(&error), "err.ai_task.workout_not_found");
-    if let PaceBridgeError::AiTask(inner) = &error {
+    if let ZeppBridgeError::AiTask(inner) = &error {
         let params = inner.params().unwrap();
         assert_eq!(params["workout_ids"].as_array().unwrap().len(), 2);
     } else {

@@ -1,4 +1,4 @@
-//! 「带走我的一切」：用户自己在 PaceBridge 里写下、判断、整理的东西，
+//! 「带走我的一切」：用户自己在 ZeppBridge 里写下、判断、整理的东西，
 //! 一份 JSON 全部带走——打分、批注、跑鞋、比赛、伤病、纪元、教练档案、AI 任务与提示词历史、
 //! 交给 AI 的记录、训练计划草稿与发布账本、信匣里的信、手动指认、导入批次。
 //!
@@ -40,7 +40,7 @@ pub const MY_RECORD_TABLES: [&str; 22] = [
     "workout_fit_overrides",
 ];
 
-pub const MY_RECORDS_FORMAT: &str = "pacebridge-my-records";
+pub const MY_RECORDS_FORMAT: &str = "zeppbridge-my-records";
 
 impl Database {
     pub fn export_my_records(&self, now: DateTime<Utc>) -> Result<Value> {

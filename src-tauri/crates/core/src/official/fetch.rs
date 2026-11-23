@@ -13,7 +13,7 @@
 //! 是哪个时区的几点。报文自己说清楚，重放时就不用猜。
 
 use super::OfficialClient;
-use crate::models::{error::Result, CapabilityStatus, RawRecord, SourceScope, PaceBridgeError};
+use crate::models::{error::Result, CapabilityStatus, RawRecord, SourceScope, ZeppBridgeError};
 use chrono::{DateTime, Datelike, Duration, NaiveDate, Utc};
 use serde_json::{json, Value};
 use std::collections::BTreeMap;
@@ -323,7 +323,7 @@ pub fn raw_record(
 /// - 没有 `items`、`items` 是 null 或不是数组、顶层不是对象，都是认不出的响应。
 fn items_of(body: Value) -> Result<Vec<Value>> {
     let Value::Object(mut map) = body else {
-        return Err(PaceBridgeError::ParseError(
+        return Err(ZeppBridgeError::ParseError(
             "官方响应不是对象，认不出来".into(),
         ));
     };
@@ -337,14 +337,14 @@ fn items_of(body: Value) -> Result<Vec<Value>> {
             .and_then(Value::as_str)
             .unwrap_or("(云端没有给出说明)")
             .to_string();
-        return Err(PaceBridgeError::CloudRejected { code, message });
+        return Err(ZeppBridgeError::CloudRejected { code, message });
     }
     match map.remove("items") {
         Some(Value::Array(items)) => Ok(items),
-        Some(_) => Err(PaceBridgeError::ParseError(
+        Some(_) => Err(ZeppBridgeError::ParseError(
             "官方响应的 items 不是数组".into(),
         )),
-        None => Err(PaceBridgeError::ParseError(
+        None => Err(ZeppBridgeError::ParseError(
             "官方响应里没有 items，认不出来".into(),
         )),
     }
@@ -458,7 +458,7 @@ impl OfficialFetcher<'_> {
             )
             .await?;
         if !body.is_object() {
-            return Err(PaceBridgeError::ParseError("官方运动明细不是对象".into()));
+            return Err(ZeppBridgeError::ParseError("官方运动明细不是对象".into()));
         }
         Ok(raw_record(
             OfficialKind::SportDetail,

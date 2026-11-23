@@ -1523,55 +1523,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pacebridge-cli"
-version = "3.2.1"
-dependencies = [
- "chrono",
- "pacebridge-core",
- "serde_json",
- "tokio",
-]
-
-[[package]]
-name = "pacebridge-core"
-version = "3.2.1"
-dependencies = [
- "base64",
- "chrono",
- "directories",
- "embedded-io-adapters",
- "flate2",
- "getrandom 0.2.17",
- "hex",
- "jiff",
- "keyring",
- "libc",
- "quick-xml",
- "reqwest",
- "ring",
- "rusqlite",
- "rustyfit",
- "serde",
- "serde_json",
- "sha2",
- "thiserror 1.0.69",
- "tokio",
- "tracing",
- "windows-sys 0.61.2",
- "zip",
-]
-
-[[package]]
-name = "pacebridge-mcp"
-version = "3.2.1"
-dependencies = [
- "chrono",
- "pacebridge-core",
- "rusqlite",
- "serde_json",
-]
-
-[[package]]
 name = "parking"
 version = "2.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3024,6 +2975,55 @@ dependencies = [
  "serde",
  "static_assertions",
  "zvariant",
+]
+
+[[package]]
+name = "zeppbridge-cli"
+version = "3.2.1"
+dependencies = [
+ "chrono",
+ "serde_json",
+ "tokio",
+ "zeppbridge-core",
+]
+
+[[package]]
+name = "zeppbridge-core"
+version = "3.2.1"
+dependencies = [
+ "base64",
+ "chrono",
+ "directories",
+ "embedded-io-adapters",
+ "flate2",
+ "getrandom 0.2.17",
+ "hex",
+ "jiff",
+ "keyring",
+ "libc",
+ "quick-xml",
+ "reqwest",
+ "ring",
+ "rusqlite",
+ "rustyfit",
+ "serde",
+ "serde_json",
+ "sha2",
+ "thiserror 1.0.69",
+ "tokio",
+ "tracing",
+ "windows-sys 0.61.2",
+ "zip",
+]
+
+[[package]]
+name = "zeppbridge-mcp"
+version = "3.2.1"
+dependencies = [
+ "chrono",
+ "rusqlite",
+ "serde_json",
+ "zeppbridge-core",
 ]
 
 [[package]]

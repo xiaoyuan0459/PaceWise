@@ -7,11 +7,11 @@ fn cli_error_fallback_redacts_request_urls() {
         "http://localhost/users/private-user?token=private-token",
     ] {
         for error in [
-            PaceBridgeError::ConfigError(format!("request failed ({url})")),
-            PaceBridgeError::AuthError(format!("request failed ({url})")),
-            PaceBridgeError::DataUnavailable(format!("request failed ({url})")),
-            PaceBridgeError::Unknown(format!("request failed ({url})")),
-            PaceBridgeError::HttpStatus {
+            ZeppBridgeError::ConfigError(format!("request failed ({url})")),
+            ZeppBridgeError::AuthError(format!("request failed ({url})")),
+            ZeppBridgeError::DataUnavailable(format!("request failed ({url})")),
+            ZeppBridgeError::Unknown(format!("request failed ({url})")),
+            ZeppBridgeError::HttpStatus {
                 status: 503,
                 message: url.into(),
             },
@@ -27,8 +27,8 @@ fn cli_error_fallback_redacts_request_urls() {
 
 #[test]
 fn sync_report_output_reports_failed_streams_without_discarding_results() {
-    use pacebridge_core::models::CapabilityStatus;
-    use pacebridge_core::sync::{StreamReport, StreamStatus};
+    use zeppbridge_core::models::CapabilityStatus;
+    use zeppbridge_core::sync::{StreamReport, StreamStatus};
     for status in [
         StreamStatus::Failed,
         StreamStatus::Unavailable,
@@ -92,11 +92,11 @@ fn args(values: &[&str]) -> Vec<String> {
 fn every_error_renders_and_terminates() {
     // 卡死时这个用例会挂住而不是失败，那也是信号：CI 超时即回归。
     let cases = vec![
-        PaceBridgeError::ConfigError("请至少选择一种导出数据".into()),
-        PaceBridgeError::AuthError("令牌读不出来".into()),
-        PaceBridgeError::DataUnavailable("本地库里没有这条运动记录".into()),
-        PaceBridgeError::Cancelled,
-        PaceBridgeError::HttpStatus {
+        ZeppBridgeError::ConfigError("请至少选择一种导出数据".into()),
+        ZeppBridgeError::AuthError("令牌读不出来".into()),
+        ZeppBridgeError::DataUnavailable("本地库里没有这条运动记录".into()),
+        ZeppBridgeError::Cancelled,
+        ZeppBridgeError::HttpStatus {
             status: 503,
             message: "维护中".into(),
         },
@@ -311,23 +311,23 @@ fn help_text_documents_every_exit_code_the_binary_can_return() {
 }
 /// issue #40 的整整两个小时，就卡在这一句上。
 ///
-/// 那位用户在 `~/PaceBridge/src-tauri/target/release/` 下跑 CLI，把 data
+/// 那位用户在 `~/ZeppBridge/src-tauri/target/release/` 下跑 CLI，把 data
 /// 文件夹放在了 exe 旁边，而程序去仓库根的 `data/` 找——两边都没说话，他
 /// 只看到「没有本地数据库」。这里钉的就是「报错必须说出它去哪儿找了」。
 #[test]
 fn a_not_found_message_always_names_the_directory_it_looked_in() {
-    let dir = std::path::Path::new("/home/x/PaceBridge/data");
+    let dir = std::path::Path::new("/home/x/ZeppBridge/data");
     let text = where_it_looked_from(dir, None);
-    assert!(text.contains("/home/x/PaceBridge/data"), "{text}");
+    assert!(text.contains("/home/x/ZeppBridge/data"), "{text}");
     // 用户唯一能拿来固定落点的东西，也要出现。
-    assert!(text.contains("PACEBRIDGE_DATA_DIR"), "{text}");
+    assert!(text.contains("ZEPPBRIDGE_DATA_DIR"), "{text}");
 }
 
 /// 从构建目录里跑的时候，还要说明数据为什么不在 exe 旁边。
 #[test]
 fn running_from_a_build_directory_explains_why_data_is_elsewhere() {
-    let dir = std::path::Path::new("/home/x/PaceBridge/data");
-    let exe_dir = std::path::Path::new("/home/x/PaceBridge/src-tauri/target/release");
+    let dir = std::path::Path::new("/home/x/ZeppBridge/data");
+    let exe_dir = std::path::Path::new("/home/x/ZeppBridge/src-tauri/target/release");
     let text = where_it_looked_from(dir, Some(exe_dir));
     assert!(text.contains("build"), "要点明这是构建目录：{text}");
     assert!(text.contains("data/"), "要指向仓库的 data/ 目录：{text}");
@@ -339,12 +339,12 @@ fn running_from_a_build_directory_explains_why_data_is_elsewhere() {
 
 /// 缺 `auth.json` 和缺令牌是两件事，不能给同一句话。
 ///
-/// 以前无论缺哪一样都印「请设 PACEBRIDGE_CREDENTIAL_STORE=env 并提供
-/// PACEBRIDGE_APP_TOKEN」——而 issue #40 那位用户两个都设了，缺的是
+/// 以前无论缺哪一样都印「请设 ZEPPBRIDGE_CREDENTIAL_STORE=env 并提供
+/// ZEPPBRIDGE_APP_TOKEN」——而 issue #40 那位用户两个都设了，缺的是
 /// `auth.json`。程序把他刚做过的事又叫他做一遍，来回四轮。
 #[test]
 fn a_missing_auth_file_is_reported_as_such_not_as_a_missing_token() {
-    let dir = std::env::temp_dir().join("pacebridge-cli-not-connected-test");
+    let dir = std::env::temp_dir().join("zeppbridge-cli-not-connected-test");
     let _ = std::fs::remove_dir_all(&dir);
     std::fs::create_dir_all(&dir).unwrap();
 
@@ -358,7 +358,7 @@ fn a_missing_auth_file_is_reported_as_such_not_as_a_missing_token() {
         "要说清它不存在，而不是叫人再设一遍环境变量：{missing}"
     );
     // 令牌那一半仍然要讲：库能跨机器拷，令牌不能——这是最容易踩的坑。
-    assert!(missing.contains("PACEBRIDGE_APP_TOKEN"), "{missing}");
+    assert!(missing.contains("ZEPPBRIDGE_APP_TOKEN"), "{missing}");
 
     // auth.json 在了，缺的就是令牌，这时才印原来那句。
     std::fs::write(dir.join("auth.json"), "{}").unwrap();
@@ -368,7 +368,7 @@ fn a_missing_auth_file_is_reported_as_such_not_as_a_missing_token() {
         "文件在的时候不该再说它不存在：{token_missing}"
     );
     assert!(
-        token_missing.contains("PACEBRIDGE_CREDENTIAL_STORE"),
+        token_missing.contains("ZEPPBRIDGE_CREDENTIAL_STORE"),
         "{token_missing}"
     );
     // 两句都要带上目录。
@@ -386,7 +386,7 @@ fn a_missing_auth_file_is_reported_as_such_not_as_a_missing_token() {
 /// 的文案换成了英文，但从核心冒上来的 `user_message()` 还是中文。
 #[test]
 fn headless_failures_are_reported_in_english() {
-    use pacebridge_core::models::error::HeadlessProblem;
+    use zeppbridge_core::models::error::HeadlessProblem;
 
     let cases = [
         HeadlessProblem::NoCredentialStore {
@@ -400,12 +400,12 @@ fn headless_failures_are_reported_in_english() {
         HeadlessProblem::ProgramOutdated {
             found: 47,
             supported: 41,
-            program: "%USERPROFILE%\\AppData\\Local\\PaceBridge\\pacebridge-mcp.exe".into(),
+            program: "%USERPROFILE%\\AppData\\Local\\ZeppBridge\\zeppbridge-mcp.exe".into(),
             version: "3.0.4".into(),
         },
     ];
     for problem in cases {
-        let error = PaceBridgeError::Headless(problem);
+        let error = ZeppBridgeError::Headless(problem);
         let text = user_text(&error);
         assert!(
             !text
@@ -426,20 +426,20 @@ fn headless_failures_are_reported_in_english() {
 /// 前者重试多少次都没用，得先跑一次 reprocess；后者要人把凭据交进来。
 #[test]
 fn a_schema_upgrade_and_a_missing_token_do_not_share_an_exit_code() {
-    use pacebridge_core::models::error::HeadlessProblem;
+    use zeppbridge_core::models::error::HeadlessProblem;
 
-    let (schema, _) = exit_code_for(&PaceBridgeError::Headless(
+    let (schema, _) = exit_code_for(&ZeppBridgeError::Headless(
         HeadlessProblem::SchemaUpgradeRequired {
             found: 19,
             required: 21,
         },
     ));
-    let (token, _) = exit_code_for(&PaceBridgeError::Headless(HeadlessProblem::TokenNotInStore));
+    let (token, _) = exit_code_for(&ZeppBridgeError::Headless(HeadlessProblem::TokenNotInStore));
     assert_eq!(schema, EXIT_SCHEMA);
     assert_eq!(token, EXIT_NOT_CONFIGURED);
     assert_ne!(schema, token);
 
-    let (no_store, kind) = exit_code_for(&PaceBridgeError::Headless(
+    let (no_store, kind) = exit_code_for(&ZeppBridgeError::Headless(
         HeadlessProblem::NoCredentialStore {
             detail: "no dbus".into(),
         },
@@ -454,28 +454,28 @@ fn a_schema_upgrade_and_a_missing_token_do_not_share_an_exit_code() {
 #[test]
 fn cli_errors_never_print_chinese() {
     let cases = vec![
-        PaceBridgeError::ConfigError("请至少选择一种导出数据".into()),
-        PaceBridgeError::AuthError("令牌读不出来".into()),
-        PaceBridgeError::CredentialStore("凭据管理器拒绝写入".into()),
-        PaceBridgeError::InvalidHost("不在白名单里".into()),
-        PaceBridgeError::DataUnavailable("本地库里没有这条运动记录".into()),
-        PaceBridgeError::Unavailable("这个区域没有该接口".into()),
-        PaceBridgeError::Busy("桌面应用正在同步".into()),
-        PaceBridgeError::TimedOut("本轮同步超时".into()),
-        PaceBridgeError::NeedsReauth("令牌过期".into()),
-        PaceBridgeError::ParseError("JSON 处理失败".into()),
-        PaceBridgeError::Unknown("未知".into()),
-        PaceBridgeError::Cancelled,
-        PaceBridgeError::AccountMismatch,
-        PaceBridgeError::TrainingPlan {
+        ZeppBridgeError::ConfigError("请至少选择一种导出数据".into()),
+        ZeppBridgeError::AuthError("令牌读不出来".into()),
+        ZeppBridgeError::CredentialStore("凭据管理器拒绝写入".into()),
+        ZeppBridgeError::InvalidHost("不在白名单里".into()),
+        ZeppBridgeError::DataUnavailable("本地库里没有这条运动记录".into()),
+        ZeppBridgeError::Unavailable("这个区域没有该接口".into()),
+        ZeppBridgeError::Busy("桌面应用正在同步".into()),
+        ZeppBridgeError::TimedOut("本轮同步超时".into()),
+        ZeppBridgeError::NeedsReauth("令牌过期".into()),
+        ZeppBridgeError::ParseError("JSON 处理失败".into()),
+        ZeppBridgeError::Unknown("未知".into()),
+        ZeppBridgeError::Cancelled,
+        ZeppBridgeError::AccountMismatch,
+        ZeppBridgeError::TrainingPlan {
             code: "err.training_plan.draft_not_found",
             message: "草稿不存在".into(),
         },
-        PaceBridgeError::CloudRejected {
+        ZeppBridgeError::CloudRejected {
             code: 401,
             message: "登录已过期".into(),
         },
-        PaceBridgeError::RetryExhausted {
+        ZeppBridgeError::RetryExhausted {
             status: 503,
             message: "维护中".into(),
         },
@@ -485,12 +485,12 @@ fn cli_errors_never_print_chinese() {
         assert!(!text.chars().any(is_cjk), "{error:?} -> {text}");
     }
     // 原话是中文时，错误码替它留在输出里，反馈里能搜到。
-    let text = user_text(&PaceBridgeError::ConfigError(
+    let text = user_text(&ZeppBridgeError::ConfigError(
         "请至少选择一种导出数据".into(),
     ));
     assert!(text.contains("err.core.config"), "{text}");
     // 原话是 ASCII 时照样带上，地址仍然隐藏、占位符也是英文。
-    let text = user_text(&PaceBridgeError::ConfigError(
+    let text = user_text(&ZeppBridgeError::ConfigError(
         "unknown data type 'food' (https://api-mifit.huami.com/x)".into(),
     ));
     assert!(text.contains("unknown data type 'food'"), "{text}");

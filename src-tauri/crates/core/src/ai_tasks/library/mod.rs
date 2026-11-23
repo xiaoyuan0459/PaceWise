@@ -9,7 +9,7 @@
 
 use super::model::*;
 use super::AiTaskError;
-use crate::models::error::{Result, PaceBridgeError};
+use crate::models::error::{Result, ZeppBridgeError};
 use crate::storage::Database;
 use chrono::Utc;
 use rusqlite::params;
@@ -48,8 +48,8 @@ pub struct ZbPrompt {
     pub categories: Vec<AiTaskCategoryRange>,
 }
 
-fn bad_file(message: &str) -> PaceBridgeError {
-    PaceBridgeError::AiTask(AiTaskError::Invalid {
+fn bad_file(message: &str) -> ZeppBridgeError {
+    ZeppBridgeError::AiTask(AiTaskError::Invalid {
         code: "err.ai_task.bad_prompt_file",
         message: message.into(),
     })

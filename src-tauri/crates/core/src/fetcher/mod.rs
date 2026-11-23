@@ -27,7 +27,7 @@ impl FetchWindow {
     /// 想要更早的历史请走历史补拉，它按月分块并且可以断点续传。
     pub fn days(days: i64) -> Result<Self> {
         if !(1..=365).contains(&days) {
-            return Err(PaceBridgeError::ConfigError(
+            return Err(ZeppBridgeError::ConfigError(
                 "同步窗口天数必须在 1..=365".into(),
             ));
         }
@@ -42,7 +42,7 @@ impl FetchWindow {
     /// 区间方向正确。
     pub fn between(start_utc: DateTime<Utc>, end_utc: DateTime<Utc>) -> Result<Self> {
         if end_utc <= start_utc {
-            return Err(PaceBridgeError::ConfigError(
+            return Err(ZeppBridgeError::ConfigError(
                 "抓取窗口的结束时间必须晚于开始时间".into(),
             ));
         }
@@ -77,15 +77,15 @@ impl FetchWindow {
     /// Use the zone's rules at each endpoint, including historical DST changes.
     fn local_days(&self, time_zone: &str) -> Result<(NaiveDate, NaiveDate)> {
         let zone = jiff::tz::TimeZone::get(time_zone)
-            .map_err(|error| PaceBridgeError::ConfigError(error.to_string()))?;
+            .map_err(|error| ZeppBridgeError::ConfigError(error.to_string()))?;
         let date = |instant: DateTime<Utc>| -> Result<NaiveDate> {
             let timestamp = jiff::Timestamp::from_second(instant.timestamp())
-                .map_err(|error| PaceBridgeError::ConfigError(error.to_string()))?;
+                .map_err(|error| ZeppBridgeError::ConfigError(error.to_string()))?;
             NaiveDate::parse_from_str(
                 &timestamp.to_zoned(zone.clone()).date().to_string(),
                 "%Y-%m-%d",
             )
-            .map_err(|error| PaceBridgeError::ConfigError(error.to_string()))
+            .map_err(|error| ZeppBridgeError::ConfigError(error.to_string()))
         };
         Ok((
             date(self.start_utc)?,
@@ -337,7 +337,7 @@ impl DataFetcher {
         }
         if records.is_empty() {
             return Err(last_optional_error.unwrap_or_else(|| {
-                PaceBridgeError::Unavailable("sport history 没有可用种类".into())
+                ZeppBridgeError::Unavailable("sport history 没有可用种类".into())
             }));
         }
         Ok(records)

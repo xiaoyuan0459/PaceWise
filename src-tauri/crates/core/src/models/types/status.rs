@@ -196,7 +196,7 @@ pub struct CapabilityItem {
     pub note: Option<String>,
     /// `derived` when read from stored data, `probed` when it took a request.
     pub source: String,
-    /// PaceBridge 是否真的把这条流读进了本机库。
+    /// ZeppBridge 是否真的把这条流读进了本机库。
     ///
     /// 探测说「云端有 42 条」并不等于本机有。候选接口可能返回尚未识别的
     /// 格式；只有本机实际存在可用读数时，才把这项设为 true。
@@ -221,7 +221,7 @@ pub struct CapabilityOverview {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CapabilityProbe {
-    /// The PaceBridge stream this candidate would feed, e.g. `spo2`.
+    /// The ZeppBridge stream this candidate would feed, e.g. `spo2`.
     pub stream: String,
     /// Which event surface answered: `v2_events`, `user_events` or
     /// `user_events_day`. The same event name behaves differently on each.

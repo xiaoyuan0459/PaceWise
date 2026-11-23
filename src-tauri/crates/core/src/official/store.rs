@@ -6,7 +6,7 @@
 
 use super::OfficialTokens;
 use crate::auth::{default_credential_backend_in, CredentialBackend};
-use crate::models::{error::Result, PaceBridgeError};
+use crate::models::{error::Result, ZeppBridgeError};
 use crate::storage::write_lock::{
     acquire_official, ExclusiveWriteGuard, OfficialLock, WriteLockError,
 };
@@ -47,7 +47,7 @@ fn in_process() -> MutexGuard<'static, ()> {
         .unwrap_or_else(|poisoned| poisoned.into_inner())
 }
 
-/// 持有期间，本机任何 PaceBridge 进程都不能改这个数据目录的官方授权状态。
+/// 持有期间，本机任何 ZeppBridge 进程都不能改这个数据目录的官方授权状态。
 struct CommitGuard {
     // 先放文件锁再放进程内锁（字段按声明顺序 drop）。
     _file: ExclusiveWriteGuard,
@@ -109,8 +109,8 @@ impl OfficialStore {
         let local = in_process();
         let file =
             acquire_official(&self.dir, OfficialLock::Commit, COMMIT_WAIT).map_err(|error| {
-                PaceBridgeError::CredentialStore(format!(
-                    "官方授权正被另一个 PaceBridge 进程更新：{error}"
+                ZeppBridgeError::CredentialStore(format!(
+                    "官方授权正被另一个 ZeppBridge 进程更新：{error}"
                 ))
             })?;
         Ok(CommitGuard {
@@ -149,14 +149,14 @@ impl OfficialStore {
         }
         let text = std::fs::read_to_string(&path)?;
         serde_json::from_str(&text).map(Some).map_err(|error| {
-            PaceBridgeError::ParseError(format!("official.json 无法解析: {error}"))
+            ZeppBridgeError::ParseError(format!("official.json 无法解析: {error}"))
         })
     }
 
     fn write_meta(&self, meta: &OfficialMeta) -> Result<()> {
         std::fs::create_dir_all(&self.dir)?;
         let text = serde_json::to_string_pretty(meta)
-            .map_err(|error| PaceBridgeError::ParseError(error.to_string()))?;
+            .map_err(|error| ZeppBridgeError::ParseError(error.to_string()))?;
         // 临时文件名每次不同：两个写者共用一个固定名字会互相覆盖半截内容。
         let nonce = crate::unique_suffix();
         let temp = self
@@ -232,7 +232,7 @@ impl OfficialStore {
     /// 不拿提交锁：生产路径走上面几个带核对的入口。
     pub(crate) fn save(&self, tokens: &OfficialTokens, connected_at: i64) -> Result<()> {
         if !self.backend.supports_named_entries() {
-            return Err(PaceBridgeError::CredentialStore(
+            return Err(ZeppBridgeError::CredentialStore(
                 "当前凭据存储只能放一个旧通道令牌，存不下官方授权".into(),
             ));
         }
@@ -244,7 +244,7 @@ impl OfficialStore {
                     tokens.refresh_token.as_deref(),
                 ),
             ])
-            .map_err(PaceBridgeError::CredentialStore)?;
+            .map_err(ZeppBridgeError::CredentialStore)?;
         let before = self.meta()?;
         let replaced_user = before
             .as_ref()
@@ -319,7 +319,7 @@ impl OfficialStore {
         let Some(access_token) = self
             .backend
             .get(&access_key(&meta.user_id))
-            .map_err(PaceBridgeError::CredentialStore)?
+            .map_err(ZeppBridgeError::CredentialStore)?
             .filter(|token| !token.trim().is_empty())
         else {
             return Ok(None);
@@ -327,7 +327,7 @@ impl OfficialStore {
         let refresh_token = self
             .backend
             .get(&refresh_key(&meta.user_id))
-            .map_err(PaceBridgeError::CredentialStore)?
+            .map_err(ZeppBridgeError::CredentialStore)?
             .filter(|token| !token.trim().is_empty());
         Ok(Some(OfficialTokens {
             access_token,
@@ -373,6 +373,6 @@ impl OfficialStore {
         }
         self.backend
             .update_entries(&[(&access_key(user_id), None), (&refresh_key(user_id), None)])
-            .map_err(PaceBridgeError::CredentialStore)
+            .map_err(ZeppBridgeError::CredentialStore)
     }
 }

@@ -1,8 +1,8 @@
 {
   "name": "zepp-coach",
-  "description": "Endurance coaching on your own Amazfit / Zepp data. Needs the PaceBridge MCP server; connect it from PaceBridge Settings > AI tools.",
+  "description": "Endurance coaching on your own Amazfit / Zepp data. Needs the ZeppBridge MCP server; connect it from ZeppBridge Settings > AI tools.",
   "author": {
-    "name": "PaceBridge",
+    "name": "ZeppBridge",
     "url": "https://github.com/lingcang728/ZeppBridge"
   },
   "homepage": "https://github.com/lingcang728/ZeppBridge",

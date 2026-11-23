@@ -19,7 +19,7 @@ use super::logbook::injuries::InjuryInput;
 use super::logbook::races::RaceInput;
 use super::logbook::shoes::ShoeInput;
 use super::Database;
-use crate::models::{error::Result, PaceBridgeError};
+use crate::models::{error::Result, ZeppBridgeError};
 use chrono::Utc;
 use rusqlite::{params, OptionalExtension};
 use serde::{Deserialize, Serialize};
@@ -88,11 +88,11 @@ pub enum UndoOutcome {
 }
 
 fn encode<T: Serialize>(value: &T) -> Result<Value> {
-    serde_json::to_value(value).map_err(|error| PaceBridgeError::ParseError(error.to_string()))
+    serde_json::to_value(value).map_err(|error| ZeppBridgeError::ParseError(error.to_string()))
 }
 
 fn decode<T: serde::de::DeserializeOwned>(value: Value) -> Result<T> {
-    serde_json::from_value(value).map_err(|error| PaceBridgeError::ParseError(error.to_string()))
+    serde_json::from_value(value).map_err(|error| ZeppBridgeError::ParseError(error.to_string()))
 }
 
 type ShoeDefaults = BTreeMap<String, Vec<i64>>;
@@ -200,7 +200,7 @@ impl Database {
                     .unwrap_or("proposed"),
             ),
             ("coach_note", None) => self.set_coach_note_state(id, "rejected"),
-            _ => Err(PaceBridgeError::ConfigError("未知的改动类型".into())),
+            _ => Err(ZeppBridgeError::ConfigError("未知的改动类型".into())),
         }
     }
 
@@ -293,7 +293,7 @@ impl Database {
             None => None,
         };
         if target.is_some() && before_value.is_none() {
-            return Err(PaceBridgeError::DataUnavailable(
+            return Err(ZeppBridgeError::DataUnavailable(
                 "找不到要改的这条记录".into(),
             ));
         }
@@ -390,7 +390,7 @@ impl Database {
         let existing: Option<ShoeInput> = match input.id {
             Some(id) => Some(decode(
                 self.mcp_snapshot("shoe", &id.to_string())?.ok_or_else(|| {
-                    PaceBridgeError::DataUnavailable("找不到要改的这条记录".into())
+                    ZeppBridgeError::DataUnavailable("找不到要改的这条记录".into())
                 })?,
             )?),
             None => None,
@@ -401,7 +401,7 @@ impl Database {
         let target_id = self.save_shoe(input)?.to_string();
         let mut after = self
             .mcp_snapshot("shoe", &target_id)?
-            .ok_or_else(|| PaceBridgeError::DataUnavailable("找不到刚保存的跑鞋".into()))?;
+            .ok_or_else(|| ZeppBridgeError::DataUnavailable("找不到刚保存的跑鞋".into()))?;
         let before = existing.as_ref().map(encode).transpose()?;
         let new_defaults = self.shoe_defaults(defaults.keys())?;
         let action = match (
@@ -584,7 +584,7 @@ impl Database {
         }
         let parse = |text: &str| {
             serde_json::from_str::<Value>(text)
-                .map_err(|error| PaceBridgeError::ParseError(error.to_string()))
+                .map_err(|error| ZeppBridgeError::ParseError(error.to_string()))
         };
         let after = parse(&after)?;
         if kind == "workout_type" {
@@ -594,7 +594,7 @@ impl Database {
                 .unwrap_or_default();
             match self.undo_workout_edit_in_transaction(edit_id) {
                 Ok(_) => {}
-                Err(PaceBridgeError::ConfigError(_) | PaceBridgeError::DataUnavailable(_)) => {
+                Err(ZeppBridgeError::ConfigError(_) | ZeppBridgeError::DataUnavailable(_)) => {
                     return Ok((UndoOutcome::Stale, false))
                 }
                 Err(error) => return Err(error),

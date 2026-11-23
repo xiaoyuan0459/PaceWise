@@ -1,15 +1,15 @@
 [package]
-name = "pacebridge-cli"
+name = "zeppbridge-cli"
 version = "3.2.1"
-description = "PaceBridge 命令行：给 Task Scheduler / cron / agent 用的无交互入口"
+description = "ZeppBridge 命令行：给 Task Scheduler / cron / agent 用的无交互入口"
 edition = "2021"
 
 [[bin]]
-name = "pacebridge-cli"
+name = "zeppbridge-cli"
 path = "src/main.rs"
 
 [dependencies]
-pacebridge-core = { workspace = true }
+zeppbridge-core = { workspace = true }
 serde_json = { workspace = true }
 chrono = { workspace = true }
 tokio = { workspace = true }

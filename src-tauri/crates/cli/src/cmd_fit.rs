@@ -5,8 +5,8 @@
 //! 要在每台上各做一遍——运动编号来自 Zepp，几台上是同一个，所以写成脚本就行。
 
 use super::*;
-use pacebridge_core::export_fit::{decode_fit_file, FitImportError, MAX_FIT_IMPORT_BYTES};
-use pacebridge_core::storage::{
+use zeppbridge_core::export_fit::{decode_fit_file, FitImportError, MAX_FIT_IMPORT_BYTES};
+use zeppbridge_core::storage::{
     FitOverrideOutcome, WorkoutFitOverride, FIT_START_TOLERANCE_SECONDS,
 };
 
@@ -160,7 +160,7 @@ enum Action<'a> {
 type LoadedFit = (
     Option<String>,
     Vec<u8>,
-    pacebridge_core::export_fit::ImportedFit,
+    zeppbridge_core::export_fit::ImportedFit,
 );
 
 /// 和桌面端同样的三道检查：扩展名、大小、内容里有没有运动。
@@ -193,7 +193,7 @@ fn load_fit(path: &Path) -> Result<LoadedFit, (&'static str, String)> {
         FitImportError::TooLarge => too_large(),
         FitImportError::NotFit => (
             "not_fit",
-            "This is not a .fit file PaceBridge can read".into(),
+            "This is not a .fit file ZeppBridge can read".into(),
         ),
         FitImportError::MultipleActivities => (
             "multiple_activities",
