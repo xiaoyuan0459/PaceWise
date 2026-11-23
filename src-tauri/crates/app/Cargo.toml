@@ -1,0 +1,15 @@
+[package]
+name = "zeppbridge-app"
+version = "3.2.1"
+description = "ZeppBridge 的 App 门面：给 Flutter / flutter_rust_bridge 用的窄接口"
+edition = "2021"
+
+[lib]
+name = "zeppbridge_app"
+path = "src/lib.rs"
+
+[dependencies]
+zeppbridge-core = { workspace = true }
+serde = { workspace = true }
+chrono = { workspace = true }
+tokio = { workspace = true }

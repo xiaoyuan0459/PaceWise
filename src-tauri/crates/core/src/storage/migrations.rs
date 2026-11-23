@@ -1647,6 +1647,43 @@ impl Database {
             "INSERT OR IGNORE INTO schema_migrations(version, applied_at) VALUES(54, ?1)",
             [Utc::now().to_rfc3339()],
         )?;
+        // v55：训练分析派生表。跑力、TRIMP、恢复分与 Banister 指数都从这里读，
+        // 页面不再临时扫描逐秒采样。`analysis_rev` 记录算法版本，参数变化时整表回放。
+        if version < 55 {
+            self.conn.execute_batch(
+                "CREATE TABLE IF NOT EXISTS workout_analytics (
+                    workout_id TEXT PRIMARY KEY,
+                    instant_power REAL,
+                    gap_pace_sec_km REAL,
+                    aerobic_efficiency REAL,
+                    trimp REAL,
+                    stable_seconds INTEGER NOT NULL DEFAULT 0,
+                    confidence TEXT NOT NULL DEFAULT 'low'
+                        CHECK(confidence IN ('high', 'medium', 'low')),
+                    analysis_rev TEXT NOT NULL,
+                    computed_at TEXT NOT NULL,
+                    FOREIGN KEY(workout_id) REFERENCES workouts(workout_id) ON DELETE CASCADE
+                 );
+                 CREATE TABLE IF NOT EXISTS daily_performance (
+                    date TEXT PRIMARY KEY,
+                    current_power REAL,
+                    trimp_total REAL,
+                    fitness REAL,
+                    fatigue REAL,
+                    form REAL,
+                    recovery_score INTEGER,
+                    fully_recovered INTEGER
+                        CHECK(fully_recovered IN (0, 1) OR fully_recovered IS NULL),
+                    analysis_rev TEXT NOT NULL,
+                    computed_at TEXT NOT NULL
+                 );",
+            )?;
+        }
+        self.conn.execute_batch("PRAGMA user_version = 55;")?;
+        self.conn.execute(
+            "INSERT OR IGNORE INTO schema_migrations(version, applied_at) VALUES(55, ?1)",
+            [Utc::now().to_rfc3339()],
+        )?;
         self.ensure_cloud_sync_metadata()?;
         Ok(())
     }

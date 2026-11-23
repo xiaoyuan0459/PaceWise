@@ -2978,6 +2978,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "zeppbridge-app"
+version = "3.2.1"
+dependencies = [
+ "chrono",
+ "serde",
+ "tokio",
+ "zeppbridge-core",
+]
+
+[[package]]
 name = "zeppbridge-cli"
 version = "3.2.1"
 dependencies = [

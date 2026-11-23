@@ -6,6 +6,7 @@
 
 pub mod access;
 pub mod ai_tasks;
+pub mod analytics;
 pub mod auth;
 pub mod connectors;
 pub mod contract;
