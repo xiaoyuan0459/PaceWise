@@ -32,5 +32,247 @@
   "settingsPrivacy": "Privacy",
   "settingsAbout": "About",
   "raceEmpty": "No race plans yet",
-  "raceAdd": "Add race"
+  "raceAdd": "Add race",
+  "retry": "Retry",
+  "close": "Close",
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  "save": "Save",
+  "delete": "Delete",
+  "edit": "Edit",
+  "last30Days": "Last 30 days",
+  "vsPrevious": "vs previous",
+  "powerTrend": "Power trend",
+  "viewComparison": "View comparison",
+  "recentTraining": "Recent training",
+  "recentTrainingNote": "Latest synced workouts",
+  "workoutTypeRun": "Run",
+  "workoutTypeTrailRun": "Trail run",
+  "workoutTypeTreadmill": "Treadmill",
+  "workoutTypeWalk": "Walk",
+  "workoutTypeRide": "Ride",
+  "workoutTypeSwim": "Swim",
+  "workoutTypeStrength": "Strength",
+  "workoutTypeHike": "Hike",
+  "workoutsCount": "{count} workouts",
+  "@workoutsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "privacyTitle": "Your data stays on this device",
+  "privacyBody": "Training data is stored locally. Watch data is read from the official Zepp API only when you tap sync — never in the background, and raw health data is never uploaded.",
+  "privacyOk": "Got it",
+  "privacySectionTitle": "Privacy",
+  "privacySectionBody": "Training data stays on this device. Sync reads incremental data from the official Zepp API only when you start it; nothing is uploaded in the background.",
+  "syncNotAuthorized": "Connect your Zepp account before syncing",
+  "syncWindowFirst": "First sync: last 365 days",
+  "syncWindowLater": "Sync last 180 days",
+  "syncWindow180Short": "Last 180 days",
+  "lastSyncAt": "Last sync {time}",
+  "@lastSyncAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "neverSynced": "Not synced yet",
+  "metricPower": "Power",
+  "metricDistance": "Distance",
+  "metricPace": "Average pace",
+  "metricLoad": "Training load",
+  "metricRecovery": "Recovery",
+  "metricPowerInfo": "Instant power estimated from pace and grade. Higher means more output per unit time.",
+  "metricDistanceInfo": "Total running distance (road, trail and treadmill) in the selected window.",
+  "metricPaceInfo": "Distance-weighted average pace from moving time. Lower is better.",
+  "metricLoadInfo": "TRIMP accumulated from heart rate and duration; the weekly average is mapped to 0–1000.",
+  "metricRecoveryInfo": "Share of days with a fully recovered score in the selected window.",
+  "metricInfoAction": "Metric details",
+  "thisPeriod": "This period",
+  "previousPeriod": "Previous period",
+  "deltaUp": "up {value}",
+  "@deltaUp": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "deltaDown": "down {value}",
+  "@deltaDown": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "deltaMore": "{value} more",
+  "@deltaMore": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "deltaLess": "{value} less",
+  "@deltaLess": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "deltaFaster": "{value}s faster",
+  "@deltaFaster": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "deltaSlower": "{value}s slower",
+  "@deltaSlower": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "deltaFlat": "flat",
+  "deltaUnknown": "not comparable",
+  "insightTitle": "Smart insight",
+  "insightPower": "Power {value}, {change} vs the previous period.",
+  "@insightPower": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "insightDistance": "Distance {value} km, {change} vs the previous period.",
+  "@insightDistance": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "insightPace": "Average pace {value}/km, {change} vs the previous period.",
+  "@insightPace": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "insightRace": "{days} days until {name}; target pace {pace}/km.",
+  "@insightRace": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      },
+      "pace": {
+        "type": "String"
+      }
+    }
+  },
+  "insightNoRace": "No upcoming race yet. Add one to connect training with a goal.",
+  "insightEmpty": "Sync your training data to see this period compared with the last.",
+  "expand": "Expand",
+  "collapse": "Collapse",
+  "dataIncomplete": "Incomplete data",
+  "calibratedUnits": "Units are normalized before comparison.",
+  "weeklyAverage": "Weekly avg",
+  "fullyRecovered": "Fully recovered",
+  "loadEasy": "Easy",
+  "loadModerate": "Moderate",
+  "loadHard": "Hard",
+  "raceName": "Race name",
+  "raceDate": "Race date",
+  "raceDistance": "Distance",
+  "raceTargetPace": "Target pace",
+  "raceNameHint": "e.g. City Marathon",
+  "raceDistanceHint": "e.g. 42.195",
+  "racePaceHint": "e.g. 4:30",
+  "raceNewTitle": "New race plan",
+  "raceEditTitle": "Edit race plan",
+  "raceSaved": "Race plan saved",
+  "raceDeleted": "Race plan deleted",
+  "raceDeleteTitle": "Delete this race plan?",
+  "raceDeleteBody": "This cannot be undone.",
+  "raceEnded": "Finished",
+  "raceToday": "Today",
+  "raceDaysLeft": "{days} days to go",
+  "@raceDaysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "raceReview": "Review",
+  "raceReviewTitle": "Race review",
+  "raceReviewTargetPace": "Target pace",
+  "raceReviewActualPace": "Race-day pace",
+  "raceReviewActualDistance": "Race-day distance",
+  "raceReviewNoRecord": "No workout found on race day.",
+  "raceReviewFaster": "{value}s faster than target",
+  "@raceReviewFaster": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "raceReviewSlower": "{value}s slower than target",
+  "@raceReviewSlower": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "raceReviewEven": "Matched the target",
+  "raceNameInvalid": "Enter a name of 1–30 characters.",
+  "raceDateInvalid": "The date cannot be earlier than today.",
+  "raceDistanceInvalid": "Enter a distance between 0.1 and 100 km.",
+  "racePaceInvalid": "Use X:XX, for example 4:30.",
+  "accountConnectedAs": "Connected as {name}",
+  "@accountConnectedAs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "accountNeedsReauth": "Authorization expired — reconnect",
+  "accountDisconnect": "Disconnect",
+  "accountDisconnected": "Disconnected",
+  "authStartFailed": "Could not start authorization. Try again.",
+  "accountDisconnectTitle": "Disconnect Zepp account?",
+  "accountDisconnectBody": "You can no longer sync training data. Existing data stays on this device.",
+  "authWaiting": "Waiting for browser authorization…",
+  "authHint": "Complete authorization in the browser, then return to the app.",
+  "authOpenFailed": "Could not open the browser. Copy the link and open it manually.",
+  "authCopyLink": "Copy link",
+  "authLinkCopied": "Link copied",
+  "authSuccess": "Account connected",
+  "authDenied": "Authorization was denied",
+  "authExpired": "Authorization expired. Try again.",
+  "authFailed": "Authorization failed. Try again."
 }

@@ -295,6 +295,696 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add race'**
   String get raceAdd;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @last30Days.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 30 days'**
+  String get last30Days;
+
+  /// No description provided for @vsPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'vs previous'**
+  String get vsPrevious;
+
+  /// No description provided for @powerTrend.
+  ///
+  /// In en, this message translates to:
+  /// **'Power trend'**
+  String get powerTrend;
+
+  /// No description provided for @viewComparison.
+  ///
+  /// In en, this message translates to:
+  /// **'View comparison'**
+  String get viewComparison;
+
+  /// No description provided for @recentTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent training'**
+  String get recentTraining;
+
+  /// No description provided for @recentTrainingNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest synced workouts'**
+  String get recentTrainingNote;
+
+  /// No description provided for @workoutTypeRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Run'**
+  String get workoutTypeRun;
+
+  /// No description provided for @workoutTypeTrailRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Trail run'**
+  String get workoutTypeTrailRun;
+
+  /// No description provided for @workoutTypeTreadmill.
+  ///
+  /// In en, this message translates to:
+  /// **'Treadmill'**
+  String get workoutTypeTreadmill;
+
+  /// No description provided for @workoutTypeWalk.
+  ///
+  /// In en, this message translates to:
+  /// **'Walk'**
+  String get workoutTypeWalk;
+
+  /// No description provided for @workoutTypeRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride'**
+  String get workoutTypeRide;
+
+  /// No description provided for @workoutTypeSwim.
+  ///
+  /// In en, this message translates to:
+  /// **'Swim'**
+  String get workoutTypeSwim;
+
+  /// No description provided for @workoutTypeStrength.
+  ///
+  /// In en, this message translates to:
+  /// **'Strength'**
+  String get workoutTypeStrength;
+
+  /// No description provided for @workoutTypeHike.
+  ///
+  /// In en, this message translates to:
+  /// **'Hike'**
+  String get workoutTypeHike;
+
+  /// No description provided for @workoutsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} workouts'**
+  String workoutsCount(int count);
+
+  /// No description provided for @privacyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data stays on this device'**
+  String get privacyTitle;
+
+  /// No description provided for @privacyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Training data is stored locally. Watch data is read from the official Zepp API only when you tap sync — never in the background, and raw health data is never uploaded.'**
+  String get privacyBody;
+
+  /// No description provided for @privacyOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get privacyOk;
+
+  /// No description provided for @privacySectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy'**
+  String get privacySectionTitle;
+
+  /// No description provided for @privacySectionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Training data stays on this device. Sync reads incremental data from the official Zepp API only when you start it; nothing is uploaded in the background.'**
+  String get privacySectionBody;
+
+  /// No description provided for @syncNotAuthorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect your Zepp account before syncing'**
+  String get syncNotAuthorized;
+
+  /// No description provided for @syncWindowFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'First sync: last 365 days'**
+  String get syncWindowFirst;
+
+  /// No description provided for @syncWindowLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync last 180 days'**
+  String get syncWindowLater;
+
+  /// No description provided for @syncWindow180Short.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 180 days'**
+  String get syncWindow180Short;
+
+  /// No description provided for @lastSyncAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Last sync {time}'**
+  String lastSyncAt(String time);
+
+  /// No description provided for @neverSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Not synced yet'**
+  String get neverSynced;
+
+  /// No description provided for @metricPower.
+  ///
+  /// In en, this message translates to:
+  /// **'Power'**
+  String get metricPower;
+
+  /// No description provided for @metricDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance'**
+  String get metricDistance;
+
+  /// No description provided for @metricPace.
+  ///
+  /// In en, this message translates to:
+  /// **'Average pace'**
+  String get metricPace;
+
+  /// No description provided for @metricLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Training load'**
+  String get metricLoad;
+
+  /// No description provided for @metricRecovery.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery'**
+  String get metricRecovery;
+
+  /// No description provided for @metricPowerInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Instant power estimated from pace and grade. Higher means more output per unit time.'**
+  String get metricPowerInfo;
+
+  /// No description provided for @metricDistanceInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Total running distance (road, trail and treadmill) in the selected window.'**
+  String get metricDistanceInfo;
+
+  /// No description provided for @metricPaceInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance-weighted average pace from moving time. Lower is better.'**
+  String get metricPaceInfo;
+
+  /// No description provided for @metricLoadInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'TRIMP accumulated from heart rate and duration; the weekly average is mapped to 0–1000.'**
+  String get metricLoadInfo;
+
+  /// No description provided for @metricRecoveryInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Share of days with a fully recovered score in the selected window.'**
+  String get metricRecoveryInfo;
+
+  /// No description provided for @metricInfoAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Metric details'**
+  String get metricInfoAction;
+
+  /// No description provided for @thisPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'This period'**
+  String get thisPeriod;
+
+  /// No description provided for @previousPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous period'**
+  String get previousPeriod;
+
+  /// No description provided for @deltaUp.
+  ///
+  /// In en, this message translates to:
+  /// **'up {value}'**
+  String deltaUp(String value);
+
+  /// No description provided for @deltaDown.
+  ///
+  /// In en, this message translates to:
+  /// **'down {value}'**
+  String deltaDown(String value);
+
+  /// No description provided for @deltaMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} more'**
+  String deltaMore(String value);
+
+  /// No description provided for @deltaLess.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} less'**
+  String deltaLess(String value);
+
+  /// No description provided for @deltaFaster.
+  ///
+  /// In en, this message translates to:
+  /// **'{value}s faster'**
+  String deltaFaster(String value);
+
+  /// No description provided for @deltaSlower.
+  ///
+  /// In en, this message translates to:
+  /// **'{value}s slower'**
+  String deltaSlower(String value);
+
+  /// No description provided for @deltaFlat.
+  ///
+  /// In en, this message translates to:
+  /// **'flat'**
+  String get deltaFlat;
+
+  /// No description provided for @deltaUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'not comparable'**
+  String get deltaUnknown;
+
+  /// No description provided for @insightTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart insight'**
+  String get insightTitle;
+
+  /// No description provided for @insightPower.
+  ///
+  /// In en, this message translates to:
+  /// **'Power {value}, {change} vs the previous period.'**
+  String insightPower(String value, String change);
+
+  /// No description provided for @insightDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance {value} km, {change} vs the previous period.'**
+  String insightDistance(String value, String change);
+
+  /// No description provided for @insightPace.
+  ///
+  /// In en, this message translates to:
+  /// **'Average pace {value}/km, {change} vs the previous period.'**
+  String insightPace(String value, String change);
+
+  /// No description provided for @insightRace.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days until {name}; target pace {pace}/km.'**
+  String insightRace(int days, String name, String pace);
+
+  /// No description provided for @insightNoRace.
+  ///
+  /// In en, this message translates to:
+  /// **'No upcoming race yet. Add one to connect training with a goal.'**
+  String get insightNoRace;
+
+  /// No description provided for @insightEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync your training data to see this period compared with the last.'**
+  String get insightEmpty;
+
+  /// No description provided for @expand.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand'**
+  String get expand;
+
+  /// No description provided for @collapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse'**
+  String get collapse;
+
+  /// No description provided for @dataIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Incomplete data'**
+  String get dataIncomplete;
+
+  /// No description provided for @calibratedUnits.
+  ///
+  /// In en, this message translates to:
+  /// **'Units are normalized before comparison.'**
+  String get calibratedUnits;
+
+  /// No description provided for @weeklyAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly avg'**
+  String get weeklyAverage;
+
+  /// No description provided for @fullyRecovered.
+  ///
+  /// In en, this message translates to:
+  /// **'Fully recovered'**
+  String get fullyRecovered;
+
+  /// No description provided for @loadEasy.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy'**
+  String get loadEasy;
+
+  /// No description provided for @loadModerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate'**
+  String get loadModerate;
+
+  /// No description provided for @loadHard.
+  ///
+  /// In en, this message translates to:
+  /// **'Hard'**
+  String get loadHard;
+
+  /// No description provided for @raceName.
+  ///
+  /// In en, this message translates to:
+  /// **'Race name'**
+  String get raceName;
+
+  /// No description provided for @raceDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Race date'**
+  String get raceDate;
+
+  /// No description provided for @raceDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance'**
+  String get raceDistance;
+
+  /// No description provided for @raceTargetPace.
+  ///
+  /// In en, this message translates to:
+  /// **'Target pace'**
+  String get raceTargetPace;
+
+  /// No description provided for @raceNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. City Marathon'**
+  String get raceNameHint;
+
+  /// No description provided for @raceDistanceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 42.195'**
+  String get raceDistanceHint;
+
+  /// No description provided for @racePaceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 4:30'**
+  String get racePaceHint;
+
+  /// No description provided for @raceNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New race plan'**
+  String get raceNewTitle;
+
+  /// No description provided for @raceEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit race plan'**
+  String get raceEditTitle;
+
+  /// No description provided for @raceSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Race plan saved'**
+  String get raceSaved;
+
+  /// No description provided for @raceDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Race plan deleted'**
+  String get raceDeleted;
+
+  /// No description provided for @raceDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this race plan?'**
+  String get raceDeleteTitle;
+
+  /// No description provided for @raceDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This cannot be undone.'**
+  String get raceDeleteBody;
+
+  /// No description provided for @raceEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished'**
+  String get raceEnded;
+
+  /// No description provided for @raceToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get raceToday;
+
+  /// No description provided for @raceDaysLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days to go'**
+  String raceDaysLeft(int days);
+
+  /// No description provided for @raceReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get raceReview;
+
+  /// No description provided for @raceReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Race review'**
+  String get raceReviewTitle;
+
+  /// No description provided for @raceReviewTargetPace.
+  ///
+  /// In en, this message translates to:
+  /// **'Target pace'**
+  String get raceReviewTargetPace;
+
+  /// No description provided for @raceReviewActualPace.
+  ///
+  /// In en, this message translates to:
+  /// **'Race-day pace'**
+  String get raceReviewActualPace;
+
+  /// No description provided for @raceReviewActualDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'Race-day distance'**
+  String get raceReviewActualDistance;
+
+  /// No description provided for @raceReviewNoRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'No workout found on race day.'**
+  String get raceReviewNoRecord;
+
+  /// No description provided for @raceReviewFaster.
+  ///
+  /// In en, this message translates to:
+  /// **'{value}s faster than target'**
+  String raceReviewFaster(String value);
+
+  /// No description provided for @raceReviewSlower.
+  ///
+  /// In en, this message translates to:
+  /// **'{value}s slower than target'**
+  String raceReviewSlower(String value);
+
+  /// No description provided for @raceReviewEven.
+  ///
+  /// In en, this message translates to:
+  /// **'Matched the target'**
+  String get raceReviewEven;
+
+  /// No description provided for @raceNameInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name of 1–30 characters.'**
+  String get raceNameInvalid;
+
+  /// No description provided for @raceDateInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'The date cannot be earlier than today.'**
+  String get raceDateInvalid;
+
+  /// No description provided for @raceDistanceInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a distance between 0.1 and 100 km.'**
+  String get raceDistanceInvalid;
+
+  /// No description provided for @racePaceInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Use X:XX, for example 4:30.'**
+  String get racePaceInvalid;
+
+  /// No description provided for @accountConnectedAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected as {name}'**
+  String accountConnectedAs(String name);
+
+  /// No description provided for @accountNeedsReauth.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorization expired — reconnect'**
+  String get accountNeedsReauth;
+
+  /// No description provided for @accountDisconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get accountDisconnect;
+
+  /// No description provided for @accountDisconnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnected'**
+  String get accountDisconnected;
+
+  /// No description provided for @authStartFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not start authorization. Try again.'**
+  String get authStartFailed;
+
+  /// No description provided for @accountDisconnectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect Zepp account?'**
+  String get accountDisconnectTitle;
+
+  /// No description provided for @accountDisconnectBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can no longer sync training data. Existing data stays on this device.'**
+  String get accountDisconnectBody;
+
+  /// No description provided for @authWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for browser authorization…'**
+  String get authWaiting;
+
+  /// No description provided for @authHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete authorization in the browser, then return to the app.'**
+  String get authHint;
+
+  /// No description provided for @authOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the browser. Copy the link and open it manually.'**
+  String get authOpenFailed;
+
+  /// No description provided for @authCopyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy link'**
+  String get authCopyLink;
+
+  /// No description provided for @authLinkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied'**
+  String get authLinkCopied;
+
+  /// No description provided for @authSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Account connected'**
+  String get authSuccess;
+
+  /// No description provided for @authDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorization was denied'**
+  String get authDenied;
+
+  /// No description provided for @authExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorization expired. Try again.'**
+  String get authExpired;
+
+  /// No description provided for @authFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorization failed. Try again.'**
+  String get authFailed;
 }
 
 class _AppLocalizationsDelegate

@@ -14,6 +14,7 @@ use chrono::Utc;
 use serde::Serialize;
 
 use zeppbridge_core::models::error::ZeppBridgeError;
+pub use zeppbridge_core::models::Workout;
 use zeppbridge_core::official::fetch::system_time_zone;
 use zeppbridge_core::official::{
     current_generation, invalidate_pending_logins, AuthorizationRequest, ClaimOutcome,
@@ -288,6 +289,12 @@ impl AppCore {
 
     pub fn recovery_days(&self, window_days: i64) -> Result<Vec<RecoveryDay>, AppError> {
         Ok(self.lock().recovery_days(window_days)?)
+    }
+
+    /// 最近 `limit` 条运动记录，开始时间倒序。
+    pub fn recent_workouts(&self, limit: i64) -> Result<Vec<Workout>, AppError> {
+        let limit = usize::try_from(limit).unwrap_or(0).min(50);
+        Ok(self.lock().get_recent_workouts(limit)?)
     }
 
     fn lock(&self) -> std::sync::MutexGuard<'_, Database> {

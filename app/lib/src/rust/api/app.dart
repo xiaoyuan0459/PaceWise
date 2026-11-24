@@ -8,7 +8,7 @@ import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 // These functions are ignored because they are not marked as `pub`: `core`, `status`, `to_anyhow`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`
 
 AppInfo open({required String dataDir}) =>
     RustLib.instance.api.crateApiAppOpen(dataDir: dataDir);
@@ -54,6 +54,10 @@ List<LoadDayDto> loadDistribution({required PlatformInt64 windowDays}) =>
 
 List<RecoveryDayDto> recoveryDays({required PlatformInt64 windowDays}) =>
     RustLib.instance.api.crateApiAppRecoveryDays(windowDays: windowDays);
+
+/// 最近 `limit` 条训练，开始时间倒序。
+List<WorkoutSummaryDto> recentWorkouts({required PlatformInt64 limit}) =>
+    RustLib.instance.api.crateApiAppRecentWorkouts(limit: limit);
 
 class AppInfo {
   final String dataDir;
@@ -372,4 +376,62 @@ class TrendPointDto {
           runtimeType == other.runtimeType &&
           date == other.date &&
           value == other.value;
+}
+
+/// 训练列表用的精简字段，屏幕之外的字段留给内核的单条详情查询。
+class WorkoutSummaryDto {
+  final String workoutId;
+
+  /// 展示用类型：用户修正优先，其次是归一化结果。
+  final String workoutType;
+
+  /// 用户给自定义类型起的名字，只有未知编号才会有。
+  final String? customLabel;
+  final PlatformInt64 startTimeMs;
+  final PlatformInt64 durationSeconds;
+  final double? distanceMeters;
+
+  /// 按总时长与距离估算；没有距离的记录为 `None`。
+  final double? avgPaceSecPerKm;
+  final int? avgHr;
+  final double? trainingLoad;
+
+  const WorkoutSummaryDto({
+    required this.workoutId,
+    required this.workoutType,
+    this.customLabel,
+    required this.startTimeMs,
+    required this.durationSeconds,
+    this.distanceMeters,
+    this.avgPaceSecPerKm,
+    this.avgHr,
+    this.trainingLoad,
+  });
+
+  @override
+  int get hashCode =>
+      workoutId.hashCode ^
+      workoutType.hashCode ^
+      customLabel.hashCode ^
+      startTimeMs.hashCode ^
+      durationSeconds.hashCode ^
+      distanceMeters.hashCode ^
+      avgPaceSecPerKm.hashCode ^
+      avgHr.hashCode ^
+      trainingLoad.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WorkoutSummaryDto &&
+          runtimeType == other.runtimeType &&
+          workoutId == other.workoutId &&
+          workoutType == other.workoutType &&
+          customLabel == other.customLabel &&
+          startTimeMs == other.startTimeMs &&
+          durationSeconds == other.durationSeconds &&
+          distanceMeters == other.distanceMeters &&
+          avgPaceSecPerKm == other.avgPaceSecPerKm &&
+          avgHr == other.avgHr &&
+          trainingLoad == other.trainingLoad;
 }

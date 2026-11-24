@@ -8,7 +8,7 @@ use std::sync::OnceLock;
 use anyhow::{anyhow, Result};
 use zeppbridge_app::{
     AppCore, AuthPoll, AuthStart, AuthStatus, LoadDay, MetricSummary, RecoveryDay,
-    SyncReportSummary, TrendPoint,
+    SyncReportSummary, TrendPoint, Workout,
 };
 
 static CORE: OnceLock<AppCore> = OnceLock::new();
@@ -117,6 +117,17 @@ pub fn recovery_days(window_days: i64) -> Result<Vec<RecoveryDayDto>> {
         .map_err(to_anyhow)?
         .into_iter()
         .map(RecoveryDayDto::from)
+        .collect())
+}
+
+/// 最近 `limit` 条训练，开始时间倒序。
+#[flutter_rust_bridge::frb(sync)]
+pub fn recent_workouts(limit: i64) -> Result<Vec<WorkoutSummaryDto>> {
+    Ok(core()?
+        .recent_workouts(limit)
+        .map_err(to_anyhow)?
+        .into_iter()
+        .map(WorkoutSummaryDto::from)
         .collect())
 }
 
@@ -333,6 +344,44 @@ impl From<RecoveryDay> for RecoveryDayDto {
     }
 }
 
+/// 训练列表用的精简字段，屏幕之外的字段留给内核的单条详情查询。
+#[derive(Debug, Clone)]
+pub struct WorkoutSummaryDto {
+    pub workout_id: String,
+    /// 展示用类型：用户修正优先，其次是归一化结果。
+    pub workout_type: String,
+    /// 用户给自定义类型起的名字，只有未知编号才会有。
+    pub custom_label: Option<String>,
+    pub start_time_ms: i64,
+    pub duration_seconds: i64,
+    pub distance_meters: Option<f64>,
+    /// 按总时长与距离估算；没有距离的记录为 `None`。
+    pub avg_pace_sec_per_km: Option<f64>,
+    pub avg_hr: Option<i32>,
+    pub training_load: Option<f64>,
+}
+
+impl From<Workout> for WorkoutSummaryDto {
+    fn from(value: Workout) -> Self {
+        let duration_seconds = (value.end_time - value.start_time).num_seconds().max(0);
+        let avg_pace_sec_per_km = value
+            .distance_meters
+            .filter(|meters| *meters > 0.0)
+            .map(|meters| duration_seconds as f64 * 1000.0 / meters);
+        Self {
+            workout_id: value.workout_id,
+            workout_type: value.effective_type,
+            custom_label: value.custom_label,
+            start_time_ms: value.start_time.timestamp_millis(),
+            duration_seconds,
+            distance_meters: value.distance_meters,
+            avg_pace_sec_per_km,
+            avg_hr: value.avg_hr,
+            training_load: value.training_load,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -365,6 +414,7 @@ mod tests {
         assert!(info().unwrap().analytics_ready);
         assert_eq!(load_distribution(30).unwrap().len(), 30);
         assert_eq!(recovery_days(30).unwrap().len(), 30);
+        assert!(recent_workouts(3).unwrap().is_empty());
 
         let _ = std::fs::remove_dir_all(&dir);
     }

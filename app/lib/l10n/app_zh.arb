@@ -32,5 +32,247 @@
   "settingsPrivacy": "隐私",
   "settingsAbout": "关于",
   "raceEmpty": "还没有赛事计划",
-  "raceAdd": "新增赛事"
+  "raceAdd": "新增赛事",
+  "retry": "重试",
+  "close": "关闭",
+  "cancel": "取消",
+  "confirm": "确认",
+  "save": "保存",
+  "delete": "删除",
+  "edit": "编辑",
+  "last30Days": "最近 30 天",
+  "vsPrevious": "较上期",
+  "powerTrend": "跑力趋势",
+  "viewComparison": "查看对比",
+  "recentTraining": "最近训练",
+  "recentTrainingNote": "最近已同步的训练",
+  "workoutTypeRun": "跑步",
+  "workoutTypeTrailRun": "越野跑",
+  "workoutTypeTreadmill": "跑步机",
+  "workoutTypeWalk": "步行",
+  "workoutTypeRide": "骑行",
+  "workoutTypeSwim": "游泳",
+  "workoutTypeStrength": "力量训练",
+  "workoutTypeHike": "徒步",
+  "workoutsCount": "{count} 次训练",
+  "@workoutsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "privacyTitle": "数据只保存在本机",
+  "privacyBody": "训练数据保存在你的设备上。只有你主动点同步时，应用才从 Zepp 官方接口读取增量数据，不会在后台采集，也不会上传原始健康数据。",
+  "privacyOk": "知道了",
+  "privacySectionTitle": "隐私",
+  "privacySectionBody": "训练数据保存在本机。只有你主动同步时，应用才从 Zepp 官方接口读取增量数据，不会在后台上传。",
+  "syncNotAuthorized": "连接 Zepp 账号后才能同步",
+  "syncWindowFirst": "首次同步最近 365 天",
+  "syncWindowLater": "同步最近 180 天",
+  "syncWindow180Short": "最近 180 天",
+  "lastSyncAt": "上次同步：{time}",
+  "@lastSyncAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "neverSynced": "还没有同步过",
+  "metricPower": "跑力",
+  "metricDistance": "累计跑量",
+  "metricPace": "平均配速",
+  "metricLoad": "训练负荷",
+  "metricRecovery": "恢复状态",
+  "metricPowerInfo": "根据配速与坡度估算的即时跑力，越高表示单位时间输出能力越强。",
+  "metricDistanceInfo": "所选周期内跑步（含越野、跑步机）的距离总和。",
+  "metricPaceInfo": "按运动时间与距离计算的加权平均配速，越低越好。",
+  "metricLoadInfo": "由心率与运动时长计算的 TRIMP 累加，周均映射到 0–1000 分。",
+  "metricRecoveryInfo": "所选周期内当天恢复分达到充分恢复的占比。",
+  "metricInfoAction": "指标说明",
+  "thisPeriod": "本期",
+  "previousPeriod": "上期",
+  "deltaUp": "提升 {value}",
+  "@deltaUp": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "deltaDown": "下降 {value}",
+  "@deltaDown": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "deltaMore": "多 {value}",
+  "@deltaMore": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "deltaLess": "少 {value}",
+  "@deltaLess": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "deltaFaster": "快 {value} 秒",
+  "@deltaFaster": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "deltaSlower": "慢 {value} 秒",
+  "@deltaSlower": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "deltaFlat": "持平",
+  "deltaUnknown": "暂无可比数据",
+  "insightTitle": "智能解读",
+  "insightPower": "跑力 {value}，较上期{change}。",
+  "@insightPower": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "insightDistance": "跑量 {value} km，较上期{change}。",
+  "@insightDistance": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "insightPace": "平均配速 {value}/km，较上期{change}。",
+  "@insightPace": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "insightRace": "距离「{name}」还有 {days} 天，目标配速 {pace}/km。",
+  "@insightRace": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      },
+      "pace": {
+        "type": "String"
+      }
+    }
+  },
+  "insightNoRace": "还没有未完成的赛事计划；添加赛事后，这里会给出备赛建议。",
+  "insightEmpty": "同步训练数据后，这里会给出本期与上期的对比解读。",
+  "expand": "展开",
+  "collapse": "收起",
+  "dataIncomplete": "数据不完整",
+  "calibratedUnits": "不同来源的数据已统一单位后再对比。",
+  "weeklyAverage": "周均",
+  "fullyRecovered": "充分恢复",
+  "loadEasy": "轻松",
+  "loadModerate": "适中",
+  "loadHard": "困难",
+  "raceName": "赛事名称",
+  "raceDate": "赛事日期",
+  "raceDistance": "赛事距离",
+  "raceTargetPace": "目标配速",
+  "raceNameHint": "例如：城市马拉松",
+  "raceDistanceHint": "例如：42.195",
+  "racePaceHint": "例如：4:30",
+  "raceNewTitle": "新增赛事计划",
+  "raceEditTitle": "编辑赛事计划",
+  "raceSaved": "赛事计划已保存",
+  "raceDeleted": "赛事计划已删除",
+  "raceDeleteTitle": "删除这个赛事计划？",
+  "raceDeleteBody": "删除后不可恢复。",
+  "raceEnded": "已结束",
+  "raceToday": "今天",
+  "raceDaysLeft": "还有 {days} 天",
+  "@raceDaysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "raceReview": "复盘",
+  "raceReviewTitle": "赛事复盘",
+  "raceReviewTargetPace": "目标配速",
+  "raceReviewActualPace": "比赛日配速",
+  "raceReviewActualDistance": "比赛日距离",
+  "raceReviewNoRecord": "没有找到比赛当天的训练记录。",
+  "raceReviewFaster": "比目标快 {value} 秒",
+  "@raceReviewFaster": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "raceReviewSlower": "比目标慢 {value} 秒",
+  "@raceReviewSlower": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "raceReviewEven": "与目标持平",
+  "raceNameInvalid": "请填写 1-30 字的赛事名称。",
+  "raceDateInvalid": "赛事日期不能早于今天。",
+  "raceDistanceInvalid": "距离需在 0.1-100 km 之间。",
+  "racePaceInvalid": "配速格式应为 X:XX，如 4:30。",
+  "accountConnectedAs": "已连接：{name}",
+  "@accountConnectedAs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "accountNeedsReauth": "授权已过期，请重新连接",
+  "accountDisconnect": "断开连接",
+  "accountDisconnected": "已断开连接",
+  "authStartFailed": "无法开始授权，请重试。",
+  "accountDisconnectTitle": "断开 Zepp 账号？",
+  "accountDisconnectBody": "断开后将无法同步训练数据，已有数据仍保存在本机。",
+  "authWaiting": "等待浏览器授权…",
+  "authHint": "已在浏览器打开授权页，完成后回到应用即可。",
+  "authOpenFailed": "无法打开浏览器，请复制链接手动打开。",
+  "authCopyLink": "复制链接",
+  "authLinkCopied": "链接已复制",
+  "authSuccess": "账号已连接",
+  "authDenied": "授权被拒绝",
+  "authExpired": "授权已过期，请重试",
+  "authFailed": "授权失败，请重试"
 }
